@@ -70,7 +70,7 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="h-screen flex bg-background overflow-hidden">
       {/* Left Side: Branding & Image */}
         <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary">
           <img 
@@ -80,39 +80,39 @@ export const Login: React.FC = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/40 to-transparent" />
           
-          <div className="relative z-10 flex flex-col justify-between p-24 w-full">
-            <div className="flex flex-col items-center gap-6 group">
-              <div className="bg-white p-4 rounded-[40px] border border-white/20 animate-float shadow-2xl overflow-hidden">
-                <img src="/logo_fazenda.png" alt="Logo" className="w-48 h-48 object-contain" />
+          <div className="relative z-10 flex flex-col justify-center gap-4 xl:gap-6 p-8 xl:p-12 w-full h-full overflow-hidden">
+            <div className="flex flex-col items-center gap-4 group">
+              <div className="bg-white p-3 xl:p-4 rounded-[32px] border border-white/20 animate-float shadow-xl overflow-hidden">
+                <img src="/logo_fazenda.png" alt="Logo" className="w-32 h-32 xl:w-40 xl:h-40 object-contain" />
               </div>
             </div>
 
-            <div className="space-y-8 max-w-2xl">
-              <h2 className="text-7xl xl:text-8xl font-black text-white leading-[0.85] tracking-tighter">
+            <div className="space-y-3 max-w-2xl text-center lg:text-left">
+              <h2 className="text-2xl xl:text-3xl font-light text-white leading-tight tracking-tight uppercase opacity-90">
                 EXCELÊNCIA <br />
-                <span className="text-accent italic font-serif">DO GRÃO</span> <br />
+                <span className="text-accent italic font-serif font-normal lowercase tracking-normal">do grão</span> <br />
                 À XÍCARA.
               </h2>
-              <div className="w-24 h-1.5 bg-accent rounded-full shadow-lg shadow-accent/20" />
-              <p className="text-xl text-white/80 max-w-md font-medium leading-relaxed">
+              <div className="w-10 h-0.5 bg-accent rounded-full shadow-lg shadow-accent/20 mx-auto lg:mx-0" />
+              <p className="text-sm xl:text-base text-white/70 max-w-[280px] xl:max-w-sm font-medium leading-relaxed mx-auto lg:mx-0">
                 Gestão inteligente de colheita para quem valoriza a qualidade e o trabalho no campo.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-white/40 text-sm font-bold tracking-widest uppercase">
-            <Leaf className="w-5 h-5" />
+          <div className="absolute bottom-6 left-12 flex items-center gap-4 text-white/40 text-[10px] font-bold tracking-widest uppercase">
+            <Leaf className="w-4 h-4" />
             <span>Sustentabilidade • Tradição • Tecnologia</span>
           </div>
         </div>
 
         {/* Right Side: Auth Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16 relative bg-background">
-        <div className="w-full max-w-[480px] space-y-10 animate-in fade-in slide-in-from-right-4 duration-700">
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 relative bg-background overflow-hidden">
+        <div className="w-full max-w-[380px] space-y-4 animate-in fade-in slide-in-from-right-4 duration-700">
           {/* Mobile Logo */}
           <div className="lg:hidden flex flex-col items-center mb-8">
-              <div className="bg-white p-4 rounded-3xl shadow-xl mb-4 overflow-hidden border border-slate-100">
-                <img src="/logo_fazenda.png" alt="Logo" className="w-32 h-32 object-contain" />
+              <div className="bg-white p-6 rounded-3xl shadow-xl mb-4 overflow-hidden border border-slate-100">
+                <img src="/logo_fazenda.png" alt="Logo" className="w-40 h-40 object-contain" />
               </div>
           </div>
 
@@ -222,15 +222,16 @@ export const Login: React.FC = () => {
             </button>
           </form>
 
-          <div className="pt-6 text-center">
+          <div className="pt-4 border-t border-slate-100 mt-4 text-center">
+            <p className="text-secondary/40 text-[10px] font-bold uppercase tracking-widest mb-2">
+              {isSignUp ? 'Já tem acesso?' : 'Primeiro acesso?'}
+            </p>
             <button
               onClick={() => setIsSignUp(!isSignUp)}
-              className="group text-secondary font-bold hover:text-primary transition-all flex items-center justify-center gap-2 mx-auto"
+              className="w-full border-2 border-primary/20 hover:border-primary/40 text-primary font-black uppercase tracking-widest text-[10px] py-3 rounded-xl transition-all hover:bg-primary/5 active:scale-95 flex items-center justify-center gap-2"
             >
-              <span className="border-b-2 border-transparent group-hover:border-primary transition-all">
-                {isSignUp ? 'Já possui uma conta? Entre aqui' : 'Ainda não tem conta? Cadastre-se'}
-              </span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>{isSignUp ? 'Fazer Login' : 'Criar Nova Conta'}</span>
+              <UserPlus className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
