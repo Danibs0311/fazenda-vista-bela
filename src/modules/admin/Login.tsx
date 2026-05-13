@@ -70,42 +70,41 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="h-screen flex bg-background overflow-hidden">
+    <div className="h-screen w-full flex bg-background overflow-hidden selection:bg-primary/10">
       {/* Left Side: Branding & Image */}
-        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-primary">
+        <div className="hidden lg:flex lg:w-1/2 relative bg-primary overflow-hidden">
           <img 
             src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&q=80&w=2078" 
             alt="Coffee Farm" 
-            className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay scale-105 hover:scale-100 transition-transform duration-[10000ms]"
+            className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/40 to-primary/95" />
           
-          <div className="relative z-10 flex flex-col justify-center gap-4 xl:gap-6 p-8 xl:p-12 w-full h-full overflow-hidden">
-            <div className="flex flex-col items-center gap-6 group">
-              <div className="bg-white p-4 xl:p-6 rounded-[40px] border border-white/20 animate-float shadow-2xl overflow-hidden">
-                <img src="/logo_fazenda.png" alt="Logo" className="w-32 h-32 xl:w-48 xl:h-48 object-contain" />
+          <div className="relative z-10 flex flex-col items-center justify-center w-full h-full p-12 gap-10">
+            <div className="flex flex-col items-center group">
+              <div className="bg-white p-6 rounded-[48px] shadow-2xl border border-white/20 transform hover:rotate-3 transition-transform duration-500">
+                <img src="/logo_fazenda.png" alt="Logo" className="w-40 h-40 xl:w-56 xl:h-56 object-contain" />
               </div>
             </div>
 
-            <div className="space-y-6 w-full text-center flex flex-col items-center">
-              <h2 className="text-4xl xl:text-6xl font-black text-white leading-[1] tracking-tighter uppercase max-w-[90%]">
+            <div className="space-y-6 text-center max-w-xl">
+              <h2 className="text-5xl xl:text-7xl font-black text-white leading-[0.95] tracking-tighter uppercase drop-shadow-2xl">
                 EXCELÊNCIA <br />
-                <span className="text-accent italic font-serif font-normal lowercase tracking-normal block -mt-2">do grão</span>
+                <span className="text-accent italic font-serif font-normal lowercase tracking-normal block">do grão</span>
                 À XÍCARA.
               </h2>
-              <div className="w-20 h-1.5 bg-accent rounded-full shadow-lg shadow-accent/20" />
-              <p className="text-base xl:text-lg text-white/90 max-w-[400px] font-medium leading-relaxed">
+              <div className="w-24 h-1.5 bg-accent rounded-full mx-auto shadow-lg shadow-accent/40" />
+              <p className="text-lg xl:text-xl text-white/90 font-medium leading-relaxed max-w-md mx-auto">
                 Gestão inteligente de colheita para quem valoriza a qualidade e o trabalho no campo.
               </p>
             </div>
           </div>
-
-
         </div>
 
         {/* Right Side: Auth Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 relative bg-background overflow-hidden">
-        <div className="w-full max-w-[420px] space-y-6 animate-in fade-in slide-in-from-right-4 duration-700">
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 relative bg-background overflow-y-auto no-scrollbar">
+        <div className="w-full max-w-[440px] py-12 flex flex-col justify-center min-h-full space-y-8 animate-in fade-in zoom-in-95 duration-700">
+
           {/* Mobile Logo */}
           <div className="lg:hidden flex flex-col items-center mb-8">
               <div className="bg-white p-6 rounded-3xl shadow-xl mb-4 overflow-hidden border border-slate-100">
