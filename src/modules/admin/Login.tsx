@@ -100,10 +100,7 @@ export const Login: React.FC = () => {
             </div>
           </div>
 
-          <div className="absolute bottom-6 left-12 flex items-center gap-4 text-white/40 text-[10px] font-bold tracking-widest uppercase">
-            <Leaf className="w-4 h-4" />
-            <span>Sustentabilidade • Tradição • Tecnologia</span>
-          </div>
+
         </div>
 
         {/* Right Side: Auth Form */}
@@ -235,10 +232,10 @@ export const Login: React.FC = () => {
             </button>
           </div>
 
-          {/* Footer info moved inside the column to avoid overlap */}
-          <div className="pt-8 text-center">
-            <p className="text-[10px] font-black tracking-[0.4em] text-secondary/30 uppercase">
-              Fazenda Vista Bela © 2024
+          <div className="pt-10 text-center">
+            <p className="text-[9px] font-black tracking-[0.2em] text-secondary/30 uppercase">
+              Desenvolvido por <br />
+              <span className="text-primary/60">DGTECH SOLUÇOES TECNOLOGICAS</span>
             </p>
           </div>
         </div>
