@@ -81,20 +81,20 @@ export const Login: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/40 to-transparent" />
           
           <div className="relative z-10 flex flex-col justify-center gap-4 xl:gap-6 p-8 xl:p-12 w-full h-full overflow-hidden">
-            <div className="flex flex-col items-center gap-4 group">
-              <div className="bg-white p-3 xl:p-4 rounded-[32px] border border-white/20 animate-float shadow-xl overflow-hidden">
-                <img src="/logo_fazenda.png" alt="Logo" className="w-32 h-32 xl:w-40 xl:h-40 object-contain" />
+            <div className="flex flex-col items-center gap-6 group">
+              <div className="bg-white p-4 xl:p-6 rounded-[40px] border border-white/20 animate-float shadow-2xl overflow-hidden">
+                <img src="/logo_fazenda.png" alt="Logo" className="w-32 h-32 xl:w-48 xl:h-48 object-contain" />
               </div>
             </div>
 
-            <div className="space-y-4 max-w-2xl text-center lg:text-left">
-              <h2 className="text-4xl xl:text-7xl font-black text-white leading-[0.9] tracking-tighter uppercase">
+            <div className="space-y-6 w-full text-center flex flex-col items-center">
+              <h2 className="text-4xl xl:text-6xl font-black text-white leading-[1] tracking-tighter uppercase max-w-[90%]">
                 EXCELÊNCIA <br />
-                <span className="text-accent italic font-serif font-normal lowercase tracking-normal">do grão</span> <br />
+                <span className="text-accent italic font-serif font-normal lowercase tracking-normal block -mt-2">do grão</span>
                 À XÍCARA.
               </h2>
-              <div className="w-16 h-1 bg-accent rounded-full shadow-lg shadow-accent/20 mx-auto lg:mx-0" />
-              <p className="text-base xl:text-xl text-white/80 max-w-[320px] xl:max-w-md font-medium leading-relaxed mx-auto lg:mx-0">
+              <div className="w-20 h-1.5 bg-accent rounded-full shadow-lg shadow-accent/20" />
+              <p className="text-base xl:text-lg text-white/90 max-w-[400px] font-medium leading-relaxed">
                 Gestão inteligente de colheita para quem valoriza a qualidade e o trabalho no campo.
               </p>
             </div>
@@ -209,13 +209,13 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading || (isSignUp && !isPasswordValid)}
-              className="w-full bg-primary hover:bg-[#1a3a32] disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-[28px] py-6 font-black uppercase tracking-[0.1em] text-sm flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-2xl shadow-primary/20 group relative overflow-hidden"
+              className="w-full bg-primary hover:brightness-110 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-[28px] py-6 font-black uppercase tracking-[0.15em] text-base flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-xl shadow-primary/20 group relative overflow-hidden"
             >
               {loading ? (
                 <Loader2 className="w-6 h-6 animate-spin" />
               ) : (
                 <>
-                  <span className="text-base">{isSignUp ? 'Criar minha conta' : 'Entrar no Sistema'}</span>
+                  <span>{isSignUp ? 'Criar minha conta' : 'Entrar no Sistema'}</span>
                   {isSignUp ? <UserPlus className="w-5 h-5" /> : <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
                 </>
               )}
@@ -223,7 +223,7 @@ export const Login: React.FC = () => {
           </form>
 
           <div className="pt-6 border-t border-slate-100 flex items-center justify-center gap-4">
-            <p className="text-secondary/40 text-[11px] font-black uppercase tracking-[0.15em] whitespace-nowrap">
+            <p className="text-secondary font-black uppercase tracking-[0.1em] text-[10px] whitespace-nowrap">
               {isSignUp ? 'Já tem acesso?' : 'Primeiro acesso?'}
             </p>
             <button
@@ -234,11 +234,13 @@ export const Login: React.FC = () => {
               <UserPlus className="w-3.5 h-3.5" />
             </button>
           </div>
-        </div>
 
-        {/* Footer info for desktop */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-black tracking-[0.4em] text-secondary/20 uppercase hidden lg:block">
-          Fazenda Vista Bela © 2024
+          {/* Footer info moved inside the column to avoid overlap */}
+          <div className="pt-8 text-center">
+            <p className="text-[10px] font-black tracking-[0.4em] text-secondary/30 uppercase">
+              Fazenda Vista Bela © 2024
+            </p>
+          </div>
         </div>
       </div>
     </div>
