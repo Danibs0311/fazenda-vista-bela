@@ -206,21 +206,21 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading || (isSignUp && !isPasswordValid)}
-              className="w-full bg-primary hover:brightness-110 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-[28px] py-6 font-black uppercase tracking-[0.15em] text-base flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-xl shadow-primary/20 group relative overflow-hidden"
+              className="w-full bg-[#2F5D50] hover:bg-[#1a3a32] disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-[28px] py-6 font-black uppercase tracking-[0.2em] text-lg flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-2xl shadow-primary/30 group relative overflow-hidden"
             >
               {loading ? (
                 <Loader2 className="w-6 h-6 animate-spin" />
               ) : (
                 <>
-                  <span>{isSignUp ? 'Criar minha conta' : 'Entrar no Sistema'}</span>
-                  {isSignUp ? <UserPlus className="w-5 h-5" /> : <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
+                  <span className="relative z-10">{isSignUp ? 'Criar minha conta' : 'Entrar no Sistema'}</span>
+                  {isSignUp ? <UserPlus className="w-5 h-5 relative z-10" /> : <LogIn className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />}
                 </>
               )}
             </button>
           </form>
 
           <div className="pt-6 border-t border-slate-100 flex items-center justify-center gap-4">
-            <p className="text-secondary font-black uppercase tracking-[0.1em] text-[10px] whitespace-nowrap">
+            <p className="text-primary font-black uppercase tracking-[0.1em] text-[10px] whitespace-nowrap">
               {isSignUp ? 'Já tem acesso?' : 'Primeiro acesso?'}
             </p>
             <button
