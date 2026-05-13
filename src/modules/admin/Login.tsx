@@ -79,10 +79,10 @@ export const Login: React.FC = () => {
             className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-overlay"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/40 to-primary/95" />
-               <div className="relative z-10 flex flex-col items-center justify-center w-full h-full p-2 gap-3">
+               <div className="relative z-10 flex flex-col items-center justify-start w-full h-full pt-[10%] p-4 gap-4">
             <div className="flex flex-col items-center group">
-              <div className="bg-white p-2 rounded-2xl shadow-2xl border border-white/20">
-                <img src="/logo_fazenda.png" alt="Logo" className="w-20 h-20 xl:w-28 xl:h-28 object-contain" />
+              <div className="bg-white p-2 rounded-xl shadow-2xl border border-white/20">
+                <img src="/logo_fazenda.png" alt="Logo" className="w-16 h-16 xl:w-24 xl:h-24 object-contain" />
               </div>
             </div>
 
@@ -101,16 +101,16 @@ export const Login: React.FC = () => {
         </div>
 
         {/* Right Side: Auth Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-2 relative bg-background overflow-hidden">
-        <div className="w-full max-w-[340px] flex flex-col justify-center space-y-3 animate-in fade-in zoom-in-95 duration-700">
+        <div className="w-full lg:w-1/2 flex flex-col items-center justify-start pt-[10%] p-4 relative bg-background overflow-hidden">
+        <div className="w-full max-w-[310px] flex flex-col animate-in fade-in zoom-in-95 duration-700">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex flex-col items-center mb-1">
-              <div className="bg-white p-2 rounded-xl shadow-lg mb-1 overflow-hidden border border-slate-100">
-                <img src="/logo_fazenda.png" alt="Logo" className="w-16 h-16 object-contain" />
+          <div className="lg:hidden flex flex-col items-center mb-2">
+              <div className="bg-white p-2 rounded-xl shadow-lg overflow-hidden border border-slate-100">
+                <img src="/logo_fazenda.png" alt="Logo" className="w-12 h-12 object-contain" />
               </div>
           </div>
 
-          <div className="space-y-0.5 text-center lg:text-left">
+          <div className="space-y-0.5 text-center lg:text-left mt-4 mb-4">
             <h3 className="text-xl xl:text-2xl font-black text-dark tracking-tight leading-none italic">
               {isSignUp ? 'Criar Nova' : 'Seja'} <span className="text-primary not-italic">{isSignUp ? 'Conta' : 'Bem-vindo'}</span>
             </h3>
@@ -119,7 +119,7 @@ export const Login: React.FC = () => {
             </p>
           </div>
 
-          <form onSubmit={handleAuth} className="space-y-2.5">
+          <form onSubmit={handleAuth} className="space-y-2">
             <div className="space-y-0.5 group">
               <label className="text-[8px] font-black uppercase tracking-[0.2em] text-secondary/40 px-1 group-focus-within:text-primary transition-colors">E-mail</label>
               <div className="relative">
@@ -131,7 +131,7 @@ export const Login: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full bg-white border-2 border-primary/20 focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-xl py-2.5 pl-10 pr-4 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-xs"
+                  className="w-full bg-white border-2 border-primary/20 focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-lg py-2 pl-10 pr-4 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-xs"
                   placeholder="exemplo@vistabela.com"
                 />
               </div>
@@ -155,7 +155,7 @@ export const Login: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full bg-white border-2 border-primary/20 focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-xl py-2.5 pl-10 pr-10 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-xs"
+                  className="w-full bg-white border-2 border-primary/20 focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-lg py-2 pl-10 pr-10 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-xs"
                   placeholder="••••••••"
                 />
                 <button
@@ -191,7 +191,7 @@ export const Login: React.FC = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    className="w-full bg-white border-2 border-primary/20 focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-xl py-2.5 pl-10 pr-4 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-xs"
+                    className="w-full bg-white border-2 border-primary/20 focus:border-primary focus:ring-2 focus:ring-primary/10 rounded-lg py-2 pl-10 pr-4 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-xs"
                     placeholder="••••••••"
                   />
                 </div>
@@ -201,7 +201,7 @@ export const Login: React.FC = () => {
             <button
               type="submit"
               disabled={loading || (isSignUp && !isPasswordValid)}
-              className="w-full bg-[#2F5D50] hover:bg-[#1a3a32] disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-xl py-3.5 font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-primary/20 group relative overflow-hidden"
+              className="w-full bg-[#2F5D50] hover:bg-[#1a3a32] disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg py-3 font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-primary/20 group relative overflow-hidden"
             >
               {loading ? (
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -214,17 +214,16 @@ export const Login: React.FC = () => {
             </button>
           </form>
 
-          <div className="pt-2 border-t border-slate-100 flex items-center justify-center gap-2">
-            <p className="text-primary font-black uppercase tracking-[0.1em] text-[8px] whitespace-nowrap">
-              {isSignUp ? 'Já tem acesso?' : 'Primeiro acesso?'}
+          <div className="pt-4 border-t border-slate-100 text-center">
+            <p className="text-[9px] font-bold text-secondary/60">
+              {isSignUp ? 'Já possui acesso?' : 'Ainda não tem uma conta?'} <br />
+              <button
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="mt-1 text-primary font-black uppercase tracking-widest hover:text-accent transition-all text-[10px]"
+              >
+                {isSignUp ? 'Fazer Login agora' : 'Criar minha conta agora'}
+              </button>
             </p>
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="flex-1 border-2 border-primary/10 hover:border-primary/40 hover:bg-primary/5 text-primary font-black uppercase tracking-widest text-[7px] py-2 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-1.5"
-            >
-              <span>{isSignUp ? 'Fazer Login' : 'Criar Nova Conta'}</span>
-              <UserPlus className="w-2 h-2" />
-            </button>
           </div>
 
           <div className="pt-1.5 text-center">
