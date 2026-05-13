@@ -149,7 +149,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           <div className="mt-2 pt-2 border-t border-slate-100/50">
             <p className="text-[9px] font-black tracking-[0.2em] text-secondary/20 uppercase text-center">
               Criado por <br />
-              <span className="text-secondary/40">DGTECH SOLUÇOES TECNOLOGICAS</span>
+              <span className="text-secondary/40">DGTECH SOLUÇÕES TECNOLÓGICAS</span>
             </p>
           </div>
         </div>

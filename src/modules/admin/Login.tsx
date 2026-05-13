@@ -231,7 +231,7 @@ export const Login: React.FC = () => {
           <div className="pt-4 text-center">
             <p className="text-[8px] font-black tracking-[0.2em] text-secondary/30 uppercase">
               Desenvolvido por <br />
-              <span className="text-primary/60">DGTECH SOLUÇOES TECNOLOGICAS</span>
+              <span className="text-primary/60">DGTECH SOLUÇÕES TECNOLÓGICAS</span>
             </p>
           </div>
         </div>
