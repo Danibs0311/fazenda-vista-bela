@@ -237,8 +237,6 @@ export const Login: React.FC = () => {
     </div>
   );
 };
-  );
-};
 
 const Requirement: React.FC<{ label: string, met: boolean }> = ({ label, met }) => (
   <div className={`flex items-center gap-1.5 transition-colors ${met ? 'text-success' : 'text-slate-300'}`}>
