@@ -155,7 +155,7 @@ export const WeekManagement: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-700 overflow-hidden">
+    <div className="h-auto min-h-full md:h-full flex flex-col space-y-6 animate-in fade-in duration-700 overflow-visible md:overflow-hidden pb-10 md:pb-0">
       {/* Header Section - Standardized */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 flex-shrink-0">
         <div className="space-y-0">
@@ -265,7 +265,7 @@ export const WeekManagement: React.FC = () => {
       {/* Conference Modal - 9:16 Centered Format (Dynamic Height) */}
       {isModalOpen && selectedWeekForModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark/80 backdrop-blur-md animate-in fade-in zoom-in duration-300">
-          <div className="bg-white w-[380px] h-fit max-h-[85vh] rounded-[48px] shadow-2xl flex flex-col overflow-hidden border border-white/20 relative">
+          <div className="bg-white w-full max-w-[380px] mx-auto h-fit max-h-[85vh] rounded-[48px] shadow-2xl flex flex-col overflow-hidden border border-white/20 relative">
             {/* Modal Header - Extra Compact */}
             <div className="p-5 flex flex-col items-center text-center bg-slate-50/50">
               <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 mb-2">

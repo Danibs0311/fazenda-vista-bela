@@ -113,7 +113,7 @@ export const Dashboard: React.FC = () => {
   }, [harvests, currentWeek]);
 
   return (
-    <div className="h-full flex flex-col space-y-3 page-transition overflow-hidden">
+    <div className="h-auto min-h-full md:h-full flex flex-col space-y-3 page-transition overflow-visible md:overflow-hidden">
       {/* Header - Standardized height and style */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 flex-shrink-0">
         <div className="space-y-0">
@@ -125,9 +125,9 @@ export const Dashboard: React.FC = () => {
           <p className="text-secondary/60 font-medium text-[10px]">Bem-vindo, {user?.email?.split('@')[0] || 'Gestor'}</p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
           {/* Cycle Selector - Standardized & Centralized */}
-          <div className="bg-primary px-4 py-2 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-between border border-white/5 h-[52px] w-[240px]">
+          <div className="bg-primary px-4 py-2 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-between border border-white/5 h-[52px] w-full sm:w-[240px] flex-1 sm:flex-none">
             <button 
               onClick={() => setWeekOffset(prev => prev - 1)}
               className="p-1.5 hover:bg-white/10 rounded-lg text-white hover:scale-110 transition-all active:scale-90 flex-shrink-0"
@@ -152,7 +152,7 @@ export const Dashboard: React.FC = () => {
           {/* Seed Data Button - Standardized & Centralized */}
           <button 
             onClick={handleSeedData}
-            className="!bg-primary text-white px-5 py-2 rounded-xl shadow-lg shadow-primary/20 flex flex-col items-center justify-center hover:bg-dark transition-all group border border-white/5 h-[52px] w-[240px] relative overflow-hidden"
+            className="!bg-primary text-white px-5 py-2 rounded-xl shadow-lg shadow-primary/20 flex flex-col items-center justify-center hover:bg-dark transition-all group border border-white/5 h-[52px] w-full sm:w-[240px] flex-1 sm:flex-none relative overflow-hidden"
           >
             <div className="flex flex-col items-center">
               <span className="text-[10px] font-black uppercase tracking-widest text-white/50 leading-none">Dados de</span>
@@ -161,7 +161,7 @@ export const Dashboard: React.FC = () => {
           </button>
 
           {/* Today Card - Standardized & Centralized */}
-          <div className="bg-primary text-white px-5 py-2 rounded-xl shadow-lg shadow-primary/20 flex flex-col items-center justify-center border border-white/5 h-[52px] w-[240px]">
+          <div className="bg-primary text-white px-5 py-2 rounded-xl shadow-lg shadow-primary/20 flex flex-col items-center justify-center border border-white/5 h-[52px] w-full sm:w-[240px] flex-1 sm:flex-none">
             <div className="flex flex-col items-center">
               <span className="text-[10px] font-black uppercase tracking-widest text-white/50 leading-none">Hoje</span>
               <span className="text-[13px] font-black text-white mt-0.5 uppercase whitespace-nowrap tracking-wide">

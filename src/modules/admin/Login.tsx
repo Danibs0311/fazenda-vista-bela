@@ -70,7 +70,7 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-full flex bg-background overflow-hidden selection:bg-primary/10">
+    <div className="min-h-screen lg:h-screen w-full flex bg-background overflow-y-auto lg:overflow-hidden selection:bg-primary/10">
       {/* Left Side: Branding & Image */}
         <div className="hidden lg:flex lg:w-1/2 relative bg-primary overflow-hidden">
           <img 

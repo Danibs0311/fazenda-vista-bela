@@ -141,7 +141,7 @@ export const Collaborators: React.FC = () => {
   }, [collaborators, searchTerm]);
 
   return (
-    <div className="h-full flex flex-col space-y-4 animate-in fade-in duration-700 overflow-hidden">
+    <div className="h-auto min-h-full md:h-full flex flex-col space-y-4 animate-in fade-in duration-700 overflow-visible md:overflow-hidden pb-10 md:pb-0">
       {/* Header Section - Otimizado para bater com Lançar Colheita */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 flex-shrink-0">
         <div className="space-y-0">
@@ -383,7 +383,7 @@ export const Collaborators: React.FC = () => {
               </button>
             </div>
 
-            <div className="p-5 pt-4">
+            <div className="p-5 pt-4 max-h-[calc(100vh-140px)] overflow-y-auto no-scrollbar">
                <form onSubmit={handleSave} className="space-y-4">
                 {error && (
                   <div className="flex items-center gap-3 bg-danger/5 text-danger p-3 rounded-xl border border-danger/10 text-[9px] font-black uppercase tracking-tight">

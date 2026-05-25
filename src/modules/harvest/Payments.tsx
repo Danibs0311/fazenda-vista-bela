@@ -260,7 +260,7 @@ export const Payments: React.FC = () => {
   const currentTotal = filteredData.reduce((s, d) => s + d.total, 0);
 
   return (
-    <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-700 overflow-hidden">
+    <div className="h-auto min-h-full md:h-full flex flex-col space-y-6 animate-in fade-in duration-700 overflow-visible md:overflow-hidden pb-10 md:pb-0">
       {/* Header Section - Standardized */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 flex-shrink-0">
         <div className="space-y-0">
@@ -415,8 +415,8 @@ export const Payments: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto no-scrollbar">
-            <table className="w-full text-left border-separate border-spacing-0">
+          <div className="flex-1 overflow-y-auto overflow-x-auto no-scrollbar w-full">
+            <table className="w-full min-w-[750px] text-left border-separate border-spacing-0">
               <thead className="sticky top-0 z-10 bg-white">
                 <tr className="bg-slate-50/50 border-b border-slate-200 text-[9px] font-black uppercase tracking-[0.2em] text-secondary/70">
                   <th className="px-8 py-2 border-b border-slate-100">Beneficiário</th>

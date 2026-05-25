@@ -164,9 +164,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-h-0 overflow-hidden bg-background">
+      <main className="flex-1 flex flex-col min-h-0 overflow-y-auto md:overflow-hidden bg-background">
         <div className="flex-1 p-4 md:p-8 animate-in slide-in-from-bottom-4 duration-700 min-h-0">
-          <div className="max-w-screen-2xl mx-auto h-full min-h-0">
+          <div className="max-w-screen-2xl mx-auto min-h-full md:h-full">
             {children}
           </div>
         </div>

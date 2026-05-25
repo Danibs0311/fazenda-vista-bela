@@ -191,7 +191,7 @@ export const HarvestEntry: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-4 page-transition overflow-hidden bg-background p-6">
+    <div className="h-auto min-h-full md:h-full flex flex-col space-y-4 page-transition overflow-visible md:overflow-hidden bg-background p-6 pb-10 md:pb-6">
       {/* Header - Fixed */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 flex-shrink-0">
         <div className="space-y-0">
@@ -220,11 +220,11 @@ export const HarvestEntry: React.FC = () => {
       </div>
 
       {/* Content Area - Fixed and Constrained */}
-      <div className="flex-1 overflow-hidden min-h-0 relative">
+      <div className="flex-1 overflow-y-auto lg:overflow-hidden min-h-0 relative no-scrollbar">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 h-full">
           {/* Form Column */}
           <div className="lg:col-span-6 h-full">
-            <form onSubmit={handleSave} className="bg-white p-4 rounded-2xl border border-slate-100/50 shadow-premium space-y-3 relative group h-full flex flex-col overflow-hidden">
+            <form onSubmit={handleSave} className="bg-white p-4 rounded-2xl border border-slate-100/50 shadow-premium space-y-3 relative group h-full flex flex-col overflow-visible lg:overflow-hidden">
               {/* Decoration */}
               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:rotate-12 transition-transform duration-[2000ms]">
                  <Pickaxe className="w-12 h-12" />
@@ -548,7 +548,7 @@ export const HarvestEntry: React.FC = () => {
               </button>
             </div>
 
-            <div className="overflow-y-auto pr-2">
+            <div className="overflow-y-auto pr-2 max-h-[calc(100vh-140px)] no-scrollbar">
                <form onSubmit={handleQuickRegister} className="p-6 pt-2 pb-6 space-y-3 relative z-10">
               {regError && (
                 <div className="flex items-center gap-3 bg-danger/5 text-danger p-4 rounded-2xl border border-danger/10 text-[10px] font-black uppercase tracking-tight">
@@ -673,7 +673,7 @@ export const HarvestEntry: React.FC = () => {
               </button>
             </div>
 
-            <div className="overflow-y-auto pr-2">
+            <div className="overflow-y-auto pr-2 max-h-[calc(100vh-140px)] no-scrollbar">
                <form onSubmit={handleUpdateHarvest} className="p-6 pt-2 pb-6 space-y-3 relative z-10">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1">

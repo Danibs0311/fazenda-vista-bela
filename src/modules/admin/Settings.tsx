@@ -139,7 +139,7 @@ export const Settings: React.FC = () => {
   };
 
   return (
-    <div className="h-full flex flex-col space-y-2 animate-in fade-in duration-700 overflow-hidden pb-2 outline-none" tabIndex={0}>
+    <div className="h-auto min-h-full md:h-full flex flex-col space-y-2 animate-in fade-in duration-700 overflow-visible md:overflow-hidden pb-10 md:pb-2 outline-none" tabIndex={0}>
       {/* Header Section - ULTRA COMPACT */}
       <div className="flex items-center justify-between gap-2 flex-shrink-0 bg-white p-3 rounded-[24px] border border-slate-100 shadow-sm">
         <div className="flex items-center gap-4">
@@ -171,10 +171,10 @@ export const Settings: React.FC = () => {
       </div>
 
       {/* Content Area - SMART RESPONSIVE GRID */}
-      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-2 overflow-y-auto lg:overflow-hidden no-scrollbar pr-1">
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-2 overflow-visible lg:overflow-hidden no-scrollbar pr-1">
         
         {/* LEFT COLUMN: Price Config + History */}
-        <div className="lg:col-span-7 flex flex-col gap-2 min-h-0 overflow-hidden">
+        <div className="lg:col-span-7 flex flex-col gap-2 min-h-0 overflow-visible lg:overflow-hidden">
           {/* Price Config - HIGH DENSITY */}
           <div className="bg-white p-4 rounded-[24px] border border-slate-100 shadow-sm space-y-3 relative overflow-hidden flex-shrink-0">
             <div className="flex items-center justify-between">
@@ -186,7 +186,7 @@ export const Settings: React.FC = () => {
             </div>
 
             <form onSubmit={handleSavePrice} className="grid grid-cols-12 gap-2 items-end">
-              <div className="col-span-4 space-y-0.5">
+              <div className="col-span-12 sm:col-span-4 space-y-0.5">
                 <label className="text-[8px] font-black uppercase tracking-widest text-secondary/40 px-1">Valor p/ Lata (R$)</label>
                 <input 
                   type="number" 
@@ -198,7 +198,7 @@ export const Settings: React.FC = () => {
                   className="w-full bg-slate-50 border-2 border-transparent focus:border-primary/20 rounded-lg py-2 px-3 text-xl font-black text-primary outline-none transition-all shadow-inner"
                 />
               </div>
-              <div className="col-span-4 space-y-0.5">
+              <div className="col-span-12 sm:col-span-4 space-y-0.5">
                 <label className="text-[8px] font-black uppercase tracking-widest text-secondary/40 px-1">Data de Início</label>
                 <input 
                   type="date" 
@@ -208,7 +208,7 @@ export const Settings: React.FC = () => {
                   className="w-full bg-slate-50 border-2 border-transparent focus:border-primary/20 rounded-lg py-2 px-2 text-primary outline-none transition-all font-black text-[10px] shadow-inner h-[42px]"
                 />
               </div>
-              <div className="col-span-4">
+              <div className="col-span-12 sm:col-span-4">
                 <button 
                   type="submit"
                   className="w-full bg-primary text-white h-[42px] rounded-lg font-black uppercase tracking-widest text-[9px] hover:bg-dark transition-all flex items-center justify-center gap-2 shadow-md shadow-primary/20"
@@ -275,8 +275,8 @@ export const Settings: React.FC = () => {
         </div>
 
         {/* RIGHT COLUMN: Banks */}
-        <div className="lg:col-span-5 flex flex-col gap-2 min-h-0 overflow-hidden">
-          <div className="flex-1 bg-white p-4 rounded-[24px] border border-slate-100 shadow-sm flex flex-col space-y-3 overflow-hidden min-h-0">
+        <div className="lg:col-span-5 flex flex-col gap-2 min-h-0 overflow-visible lg:overflow-hidden">
+          <div className="flex-1 bg-white p-4 rounded-[24px] border border-slate-100 shadow-sm flex flex-col space-y-3 overflow-visible lg:overflow-hidden min-h-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Landmark className="w-4 h-4 text-accent" />

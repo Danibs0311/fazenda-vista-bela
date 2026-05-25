@@ -152,7 +152,7 @@ export const Reports: React.FC = () => {
     }, [filteredHistory]);
 
     return (
-        <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-700 overflow-hidden">
+        <div className="h-auto min-h-full md:h-full flex flex-col space-y-6 animate-in fade-in duration-700 overflow-visible md:overflow-hidden pb-10 md:pb-0">
             {/* Unified Header - CLEANER */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
@@ -170,7 +170,7 @@ export const Reports: React.FC = () => {
             </div>
 
             <div className="flex-1 min-h-0">
-                <div className="h-full grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
+                <div className="h-auto min-h-full md:h-full grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-visible md:overflow-hidden">
                     {/* Sidebar Filters - History (WIDER) */}
                     <div className="lg:col-span-4 bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex flex-col gap-1 overflow-hidden">
                         <div className="flex flex-col gap-3 mb-0 px-1">
@@ -269,7 +269,7 @@ export const Reports: React.FC = () => {
                         </div>
 
                         {/* Green Index Header - MAXIMUM COHESION */}
-                        <div className="bg-primary py-2.5 px-3 rounded-xl grid grid-cols-12 gap-0.5 mb-2 shadow-md shadow-primary/20 border-b-2 border-primary-dark/20 relative z-10 mr-[6px]">
+                        <div className="hidden lg:grid bg-primary py-2.5 px-3 rounded-xl grid-cols-12 gap-0.5 mb-2 shadow-md shadow-primary/20 border-b-2 border-primary-dark/20 relative z-10 mr-[6px]">
                             <div className="col-span-2 text-xs font-black text-white uppercase tracking-tighter flex items-center">Data</div>
                             <div className="col-span-1 text-xs font-black text-white uppercase tracking-tighter flex items-center">ID</div>
                             <div className="col-span-5 text-xs font-black text-white uppercase tracking-widest flex items-center pl-1">Colaborador</div>
@@ -279,7 +279,7 @@ export const Reports: React.FC = () => {
                         
                         <div 
                             ref={scrollContainerRef}
-                            className="flex-1 overflow-y-auto no-scrollbar space-y-1 pr-1" 
+                            className="flex-1 overflow-y-auto no-scrollbar space-y-1.5 pr-1" 
                             style={{ scrollbarGutter: 'stable' }}
                         >
                             {filteredHistory.length > 0 ? (
@@ -287,52 +287,79 @@ export const Reports: React.FC = () => {
                                     const collaborator = collaborators.find(c => c.id === harvest.colaborador_id);
                                     const isSelected = idx === selectedIndex;
                                     return (
-                                        <div 
-                                            key={harvest.id}
-                                            onClick={() => setSelectedIndex(idx)}
-                                            className={`grid grid-cols-12 gap-0.5 px-3 py-2 rounded-xl transition-all border-2 items-center group relative overflow-hidden cursor-pointer ${
-                                                isSelected 
-                                                    ? 'bg-primary/5 border-primary shadow-lg shadow-primary/10 scale-[1.01] z-20' 
-                                                    : idx % 2 === 0 
-                                                        ? 'bg-slate-50/50 hover:bg-white border-transparent' 
-                                                        : 'bg-white hover:bg-slate-50 border-transparent'
-                                            } hover:shadow-md hover:z-10`}
-                                        >
-                                            {/* Data (Left) */}
-                                            <div className="col-span-2 text-xs font-black text-dark/60 italic leading-none whitespace-nowrap">
-                                                {formatDate(harvest.data_colheita)}
-                                            </div>
-                                            
-                                            {/* ID (Left) */}
-                                            <div className="col-span-1 flex items-center">
-                                                <span className="text-xs font-black text-primary tracking-wide whitespace-nowrap">
-                                                    ID:{harvest.colaborador_id}
-                                                </span>
+                                        <React.Fragment key={harvest.id}>
+                                            {/* Desktop Row */}
+                                            <div 
+                                                onClick={() => setSelectedIndex(idx)}
+                                                className={`hidden lg:grid grid-cols-12 gap-0.5 px-3 py-2 rounded-xl transition-all border-2 items-center group relative overflow-hidden cursor-pointer ${
+                                                    isSelected 
+                                                        ? 'bg-primary/5 border-primary shadow-lg shadow-primary/10 scale-[1.01] z-20' 
+                                                        : idx % 2 === 0 
+                                                            ? 'bg-slate-50/50 hover:bg-white border-transparent' 
+                                                            : 'bg-white hover:bg-slate-50 border-transparent'
+                                                } hover:shadow-md hover:z-10`}
+                                            >
+                                                {/* Data (Left) */}
+                                                <div className="col-span-2 text-xs font-black text-dark/60 italic leading-none whitespace-nowrap">
+                                                    {formatDate(harvest.data_colheita)}
+                                                </div>
+                                                
+                                                {/* ID (Left) */}
+                                                <div className="col-span-1 flex items-center">
+                                                    <span className="text-xs font-black text-primary tracking-wide whitespace-nowrap">
+                                                        ID:{harvest.colaborador_id}
+                                                    </span>
+                                                </div>
+
+                                                {/* Name (MAX SPACE) */}
+                                                <div className="col-span-5 flex flex-col min-w-0 pl-1">
+                                                    <span className="text-xs font-black text-dark group-hover:text-primary transition-colors truncate uppercase leading-tight">
+                                                        {collaborator?.nome || 'N/A'}
+                                                    </span>
+                                                    <span className="text-[9px] font-black text-secondary/30 uppercase tracking-[0.1em] truncate">
+                                                        {collaborator?.banco || 'SEM BANCO'}
+                                                    </span>
+                                                </div>
+
+                                                {/* Volume (Right grouped) */}
+                                                <div className="col-span-2 flex justify-end items-center gap-1 pr-1">
+                                                    <span className="text-xs font-black text-dark">{harvest.quantidade_latas}</span>
+                                                    <span className="text-[10px] font-bold text-secondary/40 uppercase tracking-tighter">latas</span>
+                                                </div>
+
+                                                {/* Total (Right grouped) */}
+                                                <div className="col-span-2 text-right">
+                                                    <span className="text-xs font-black text-success tracking-tighter">
+                                                        {formatCurrency(harvest.valor_total_dia)}
+                                                    </span>
+                                                </div>
                                             </div>
 
-                                            {/* Name (MAX SPACE) */}
-                                            <div className="col-span-5 flex flex-col min-w-0 pl-1">
-                                                <span className="text-xs font-black text-dark group-hover:text-primary transition-colors truncate uppercase leading-tight">
-                                                    {collaborator?.nome || 'N/A'}
-                                                </span>
-                                                <span className="text-[9px] font-black text-secondary/30 uppercase tracking-[0.1em] truncate">
-                                                    {collaborator?.banco || 'SEM BANCO'}
-                                                </span>
+                                            {/* Mobile Card */}
+                                            <div 
+                                                onClick={() => setSelectedIndex(idx)}
+                                                className={`lg:hidden flex flex-col p-3 rounded-xl border-2 transition-all gap-2 relative overflow-hidden cursor-pointer ${
+                                                    isSelected 
+                                                        ? 'bg-primary/5 border-primary shadow-lg shadow-primary/10 scale-[1.01] z-20' 
+                                                        : 'bg-white border-slate-100 hover:border-primary/20 shadow-sm'
+                                                }`}
+                                            >
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-[10px] font-black text-dark/60 italic">{formatDate(harvest.data_colheita)}</span>
+                                                    <span className="text-[9px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded">ID: {harvest.colaborador_id}</span>
+                                                </div>
+                                                <div className="flex justify-between items-end gap-2">
+                                                    <div className="flex-1 min-w-0 pr-2">
+                                                        <p className="text-xs font-black text-dark uppercase tracking-tight truncate">{collaborator?.nome || 'N/A'}</p>
+                                                        <p className="text-[9px] text-secondary/30 font-black uppercase tracking-[0.1em] mt-0.5 truncate">{collaborator?.banco || 'SEM BANCO'}</p>
+                                                    </div>
+                                                    <div className="text-right shrink-0">
+                                                        <p className="text-xs font-black text-primary whitespace-nowrap">{harvest.quantidade_latas} lats</p>
+                                                        <p className="text-sm font-black text-success mt-0.5 whitespace-nowrap">{formatCurrency(harvest.valor_total_dia)}</p>
+                                                    </div>
+                                                </div>
                                             </div>
-
-                                            {/* Volume (Right grouped) */}
-                                            <div className="col-span-2 flex justify-end items-center gap-1 pr-1">
-                                                <span className="text-xs font-black text-dark">{harvest.quantidade_latas}</span>
-                                                <span className="text-[10px] font-bold text-secondary/40 uppercase tracking-tighter">latas</span>
-                                            </div>
-
-                                            {/* Total (Right grouped) */}
-                                            <div className="col-span-2 text-right">
-                                                <span className="text-xs font-black text-success tracking-tighter">
-                                                    {formatCurrency(harvest.valor_total_dia)}
-                                                </span>
-                                            </div>
-                                        </div>
+                                        </React.Fragment>
                                     );
                                 })
                             ) : (
