@@ -67,13 +67,31 @@ export const storage = {
   },
 
   savePrice: async (price: CanPriceConfig) => {
-    // Se o ID não for um UUID válido, removemos para que o Supabase gere automaticamente
-    const { id, ...data } = price;
-    const isUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
-    const payload = isUUID ? { id, ...data } : data;
+    // Check if a price config with the exact same date already exists in the database
+    const { data: existing } = await supabase
+      .from('pricing_config')
+      .select('id')
+      .eq('data_inicio_vigencia', price.data_inicio_vigencia)
+      .limit(1);
 
-    const { error } = await supabase.from('pricing_config').insert(payload);
-    if (error) throw new Error('Erro ao salvar preço: ' + error.message);
+    if (existing && existing.length > 0) {
+      // Overwrite the existing record with the new price value
+      const { error } = await supabase
+        .from('pricing_config')
+        .update({ valor_lata: price.valor_lata })
+        .eq('id', existing[0].id);
+
+      if (error) throw new Error('Erro ao atualizar preço existente: ' + error.message);
+    } else {
+      // Se o ID não for um UUID válido, removemos para que o Supabase gere automaticamente
+      const { id, ...data } = price;
+      const isUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+      const payload = isUUID ? { id, ...data } : data;
+
+      const { error } = await supabase.from('pricing_config').insert(payload);
+      if (error) throw new Error('Erro ao salvar preço: ' + error.message);
+    }
+    
     cache.lastFetch.prices = 0; // Invalidate cache
   },
 
