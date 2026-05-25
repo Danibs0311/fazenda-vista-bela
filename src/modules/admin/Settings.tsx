@@ -222,7 +222,7 @@ export const Settings: React.FC = () => {
               <div className="col-span-12 sm:col-span-4">
                 <button 
                   type="submit"
-                  className="w-full bg-primary md:bg-primary max-md:bg-gradient-to-r max-md:from-primary max-md:to-accent hover:bg-dark max-md:hover:from-primary/90 max-md:hover:to-accent/90 text-white h-[42px] rounded-lg font-black uppercase tracking-widest text-[9px] hover:bg-dark transition-all flex items-center justify-center gap-2 shadow-md max-md:shadow-accent/20 shadow-primary/20 hover:scale-[1.02] active:scale-95 duration-200"
+                  className="w-full bg-primary text-white h-[42px] rounded-lg font-black uppercase tracking-widest text-[9px] hover:bg-dark transition-all flex items-center justify-center gap-2 shadow-md shadow-primary/20 hover:scale-[1.02] active:scale-95 duration-200"
                 >
                   <Save className="w-3 h-3" />
                   Atualizar
@@ -330,7 +330,7 @@ export const Settings: React.FC = () => {
               <div className="w-full md:col-span-2">
                 <button 
                   type="submit"
-                  className="w-full h-[42px] md:h-full bg-primary md:bg-primary max-md:bg-gradient-to-r max-md:from-primary max-md:to-accent hover:bg-dark max-md:hover:from-primary/90 max-md:hover:to-accent/90 text-white rounded-lg font-black flex items-center justify-center gap-2 hover:scale-[1.02] md:hover:scale-100 active:scale-95 duration-200 transition-all shadow-sm text-[10px] uppercase tracking-widest"
+                  className="w-full h-[42px] md:h-full bg-primary text-white rounded-lg font-black flex items-center justify-center gap-2 hover:bg-dark hover:scale-[1.02] md:hover:scale-100 active:scale-95 duration-200 transition-all shadow-sm text-[10px] uppercase tracking-widest"
                 >
                   <Plus className="w-4 h-4" />
                   <span className="md:hidden">Salvar Novo Banco</span>
