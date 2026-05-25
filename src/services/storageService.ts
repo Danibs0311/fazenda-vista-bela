@@ -67,8 +67,19 @@ export const storage = {
   },
 
   savePrice: async (price: CanPriceConfig) => {
-    const { error } = await supabase.from('pricing_config').insert(price);
+    // Se o ID não for um UUID válido, removemos para que o Supabase gere automaticamente
+    const { id, ...data } = price;
+    const isUUID = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+    const payload = isUUID ? { id, ...data } : data;
+
+    const { error } = await supabase.from('pricing_config').insert(payload);
     if (error) throw new Error('Erro ao salvar preço: ' + error.message);
+    cache.lastFetch.prices = 0; // Invalidate cache
+  },
+
+  deletePrice: async (id: string) => {
+    const { error } = await supabase.from('pricing_config').delete().eq('id', id);
+    if (error) throw new Error('Erro ao excluir preço: ' + error.message);
     cache.lastFetch.prices = 0; // Invalidate cache
   },
 

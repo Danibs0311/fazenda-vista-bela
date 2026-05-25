@@ -122,6 +122,17 @@ export const Settings: React.FC = () => {
     }
   };
 
+  const handleDeletePrice = async (id: string) => {
+    if (!confirm('Excluir esta configuração de preço permanentemente?')) return;
+    try {
+      await storage.deletePrice(id);
+      await loadData();
+      showToast('Configuração de preço removida com sucesso.', 'success');
+    } catch (error) {
+      showToast('Erro ao remover preço.', 'error');
+    }
+  };
+
   const handleBackup = async () => {
     setIsBackingUp(true);
     try {
@@ -239,12 +250,13 @@ export const Settings: React.FC = () => {
                     <th className="px-5 py-2">Início Vigência</th>
                     <th className="px-5 py-2 text-right">Valor por Lata</th>
                     <th className="px-5 py-2 text-right">Status</th>
+                    <th className="px-5 py-2 text-right w-16">Ações</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {prices.length === 0 ? (
                     <tr>
-                      <td colSpan={3} className="py-12 text-center text-[9px] font-black text-secondary/20 uppercase tracking-widest italic">
+                      <td colSpan={4} className="py-12 text-center text-[9px] font-black text-secondary/20 uppercase tracking-widest italic">
                         Nenhum registro encontrado
                       </td>
                     </tr>
@@ -265,6 +277,16 @@ export const Settings: React.FC = () => {
                         <span className={`text-[7px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${idx === 0 ? 'bg-success/10 text-success' : 'bg-secondary/5 text-secondary/30'}`}>
                           {idx === 0 ? 'Vigente' : 'Antigo'}
                         </span>
+                      </td>
+                      <td className="px-5 py-2 text-right">
+                        {idx !== 0 && (
+                          <button 
+                            onClick={() => handleDeletePrice(p.id)}
+                            className="p-1 text-secondary/20 hover:text-danger hover:bg-danger/5 rounded-md transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
