@@ -222,10 +222,10 @@ export const Settings: React.FC = () => {
               <div className="col-span-12 sm:col-span-4">
                 <button 
                   type="submit"
-                  className="w-full !bg-primary !text-white h-[42px] rounded-lg font-black uppercase tracking-widest text-[9px] hover:!bg-dark transition-all flex items-center justify-center gap-2 shadow-md shadow-primary/20"
+                  className="w-full bg-primary text-white h-[42px] rounded-lg font-black uppercase tracking-widest text-[9px] hover:bg-dark transition-all flex items-center justify-center gap-2 shadow-md shadow-primary/20"
                 >
-                  <Save className="w-3 h-3 !text-white" />
-                  <span className="!text-white">Atualizar</span>
+                  <Save className="w-3 h-3" />
+                  Atualizar
                 </button>
               </div>
             </form>
@@ -330,9 +330,9 @@ export const Settings: React.FC = () => {
               <div className="col-span-2">
                 <button 
                   type="submit"
-                  className="w-full h-full !bg-primary !text-white rounded-lg font-black flex items-center justify-center hover:!bg-dark transition-all active:scale-90 shadow-sm"
+                  className="w-full h-full bg-primary text-white rounded-lg font-black flex items-center justify-center hover:bg-dark transition-all active:scale-90 shadow-sm"
                 >
-                  <Plus className="w-4 h-4 !text-white" />
+                  <Plus className="w-4 h-4" />
                 </button>
               </div>
             </form>

@@ -41,14 +41,37 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      const [h, c] = await Promise.all([
-        storage.getHarvests(),
-        storage.getCollaborators()
-      ]);
-      setHarvests(h);
-      setCollaborators(c);
+      try {
+        const [h, c] = await Promise.all([
+          storage.getHarvests(),
+          storage.getCollaborators(true) // Force fresh fetch to bypass memory cache
+        ]);
+        setHarvests(h);
+        setCollaborators(c);
+      } catch (error) {
+        console.error("Erro ao carregar dados do painel:", error);
+      }
     };
+    
+    // Initial load
     load();
+
+    // Auto-refresh every 5 seconds
+    const interval = setInterval(load, 5000);
+
+    // Event listener for tab active/focus (unlock mobile, switch tab, etc.)
+    const handleFocus = () => {
+      load();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+    };
   }, []);
 
   const handleSeedData = async () => {
