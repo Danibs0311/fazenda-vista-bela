@@ -20,10 +20,17 @@ export const getWeekRange = (dateStr?: string, weekOffset: number = 0) => {
   const endDate = new Date(startDate);
   endDate.setDate(startDate.getDate() + 6); // Ends on Thursday
 
+  const toLocalDateString = (d: Date) => {
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
   return {
-    start: startDate.toISOString().split('T')[0],
-    end: endDate.toISOString().split('T')[0],
-    id: startDate.toISOString().split('T')[0]
+    start: toLocalDateString(startDate),
+    end: toLocalDateString(endDate),
+    id: toLocalDateString(startDate)
   };
 };
 
