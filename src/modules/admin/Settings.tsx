@@ -150,7 +150,18 @@ export const Settings: React.FC = () => {
       reader.onload = async (event) => {
         try {
           const content = event.target?.result as string;
-          const result = await backupService.importDataJSON(content);
+          let result = await backupService.importDataJSON(content);
+          
+          if (!result.success && result.error === 'PASSWORD_REQUIRED') {
+            const password = prompt('Este arquivo de backup está protegido por senha de segurança. Por favor, insira a senha para restaurá-lo:');
+            if (password === null) {
+              setIsRestoring(false);
+              e.target.value = '';
+              return;
+            }
+            result = await backupService.importDataJSON(content, password);
+          }
+
           if (result.success) {
             showToast('Backup restaurado e dados atualizados com sucesso!', 'success');
             await loadData();
@@ -175,7 +186,19 @@ export const Settings: React.FC = () => {
   const handleBackup = async () => {
     setIsBackingUp(true);
     try {
-      const result = await backupService.exportDataJSON();
+      const encrypt = confirm('Deseja proteger o arquivo de backup com uma senha de segurança (Altamente recomendado para proteger CPFs e dados bancários)?');
+      let password = undefined;
+      
+      if (encrypt) {
+        password = prompt('Defina uma senha forte para encriptar este backup (guarde bem esta senha!):');
+        if (!password) {
+          showToast('Backup cancelado. A senha é obrigatória para gerar arquivos protegidos.', 'warning');
+          setIsBackingUp(false);
+          return;
+        }
+      }
+
+      const result = await backupService.exportDataJSON(password);
       if (result.success) {
         showToast('Backup gerado e baixado com sucesso!', 'success');
       } else {
