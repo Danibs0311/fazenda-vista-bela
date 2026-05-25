@@ -49,6 +49,16 @@ html, body {
   overflow: hidden;
 }
 
+@media (max-width: 767px) {
+  html, body {
+    height: auto;
+    min-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: auto;
+  }
+}
+
 body {
   background-color: var(--background);
   color: var(--dark);
