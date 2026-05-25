@@ -222,7 +222,7 @@ export const Settings: React.FC = () => {
               <div className="col-span-12 sm:col-span-4">
                 <button 
                   type="submit"
-                  className="w-full bg-primary text-white h-[42px] rounded-lg font-black uppercase tracking-widest text-[9px] hover:bg-dark transition-all flex items-center justify-center gap-2 shadow-md shadow-primary/20"
+                  className="w-full bg-primary md:bg-primary max-md:bg-gradient-to-r max-md:from-primary max-md:to-accent hover:bg-dark max-md:hover:from-primary/90 max-md:hover:to-accent/90 text-white h-[42px] rounded-lg font-black uppercase tracking-widest text-[9px] hover:bg-dark transition-all flex items-center justify-center gap-2 shadow-md max-md:shadow-accent/20 shadow-primary/20 hover:scale-[1.02] active:scale-95 duration-200"
                 >
                   <Save className="w-3 h-3" />
                   Atualizar
@@ -307,32 +307,33 @@ export const Settings: React.FC = () => {
               <p className="text-[7px] font-black text-secondary/30 uppercase tracking-widest italic">Alt + Setas</p>
             </div>
 
-            <form onSubmit={handleAddBank} className="grid grid-cols-12 gap-1.5 p-2 bg-slate-50 rounded-xl border border-slate-100">
-              <div className="col-span-7">
+            <form onSubmit={handleAddBank} className="flex flex-col md:grid md:grid-cols-12 gap-2 p-2 bg-slate-50 rounded-xl border border-slate-100">
+              <div className="w-full md:col-span-7">
                 <input 
                   type="text" 
                   required
                   value={newBankName}
                   onChange={(e) => setNewBankName(e.target.value)}
                   placeholder="Nome do Banco"
-                  className="w-full bg-white border-2 border-transparent focus:border-primary/20 rounded-lg py-2 px-3 text-[10px] font-black text-primary outline-none transition-all shadow-sm"
+                  className="w-full bg-white border-2 border-transparent focus:border-primary/20 rounded-lg py-2 px-3 text-[10px] font-black text-primary outline-none transition-all shadow-sm h-[42px] md:h-auto"
                 />
               </div>
-              <div className="col-span-3">
+              <div className="w-full md:col-span-3">
                 <input 
                   type="text" 
                   value={newBankCode}
                   onChange={(e) => setNewBankCode(e.target.value)}
                   placeholder="Cód"
-                  className="w-full bg-white border-2 border-transparent focus:border-primary/20 rounded-lg py-2 px-2 text-[10px] font-black text-primary outline-none transition-all shadow-sm text-center"
+                  className="w-full bg-white border-2 border-transparent focus:border-primary/20 rounded-lg py-2 px-2 text-[10px] font-black text-primary outline-none transition-all shadow-sm text-center h-[42px] md:h-auto"
                 />
               </div>
-              <div className="col-span-2">
+              <div className="w-full md:col-span-2">
                 <button 
                   type="submit"
-                  className="w-full h-full bg-primary text-white rounded-lg font-black flex items-center justify-center hover:bg-dark transition-all active:scale-90 shadow-sm"
+                  className="w-full h-[42px] md:h-full bg-primary md:bg-primary max-md:bg-gradient-to-r max-md:from-primary max-md:to-accent hover:bg-dark max-md:hover:from-primary/90 max-md:hover:to-accent/90 text-white rounded-lg font-black flex items-center justify-center gap-2 hover:scale-[1.02] md:hover:scale-100 active:scale-95 duration-200 transition-all shadow-sm text-[10px] uppercase tracking-widest"
                 >
                   <Plus className="w-4 h-4" />
+                  <span className="md:hidden">Salvar Novo Banco</span>
                 </button>
               </div>
             </form>
