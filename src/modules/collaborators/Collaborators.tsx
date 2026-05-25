@@ -167,7 +167,7 @@ export const Collaborators: React.FC = () => {
       </div>
 
       {/* Main Table Container - Occupies remaining space */}
-      <div className="flex-1 bg-white rounded-[32px] border border-slate-100/50 shadow-premium overflow-hidden group flex flex-col min-h-0 lg:overflow-hidden">
+      <div className="flex-1 bg-white rounded-[32px] border border-slate-100/50 shadow-premium overflow-visible md:overflow-hidden group flex flex-col min-h-0 lg:overflow-hidden">
         {/* Search Bar - Fixed part of the table container */}
         <div className="p-4 border-b border-slate-50 flex items-center gap-4 bg-background/30 flex-shrink-0">
           <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-100 text-secondary/30">
@@ -250,7 +250,7 @@ export const Collaborators: React.FC = () => {
 
         {/* List - Scrollable area */}
         <div 
-          className="flex-1 overflow-y-auto overscroll-contain no-scrollbar min-h-0 p-3 space-y-2 bg-slate-50/30"
+          className="flex-1 overflow-visible md:overflow-y-auto overscroll-contain no-scrollbar min-h-0 p-3 space-y-2 bg-slate-50/30"
           onWheel={(e) => {
             if (filtered.length > 0) {
               e.preventDefault();

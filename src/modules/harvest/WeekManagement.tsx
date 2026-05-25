@@ -170,7 +170,7 @@ export const WeekManagement: React.FC = () => {
       {/* Content Area - Fixed Scroll Behavior */}
       <div 
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto pr-2 min-h-0 overscroll-contain focus:outline-none scroll-smooth"
+        className="flex-1 overflow-visible md:overflow-y-auto pr-2 min-h-0 overscroll-contain focus:outline-none scroll-smooth"
         tabIndex={0}
       >
         <div className="grid grid-cols-1 gap-4 pb-6">
