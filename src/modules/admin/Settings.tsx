@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { CanPriceConfig, Bank } from '../../types';
 import { formatDate, formatCurrency } from '../../utils/dateUtils';
-import { Save, History, TrendingUp, AlertTriangle, Download, LogOut, Database, Building2, Plus, Trash2, Landmark } from 'lucide-react';
+import { Save, History, TrendingUp, AlertTriangle, Download, LogOut, Database, Building2, Plus, Trash2, Landmark, Upload } from 'lucide-react';
 
 export const Settings: React.FC = () => {
   const [prices, setPrices] = useState<CanPriceConfig[]>([]);
@@ -16,6 +16,8 @@ export const Settings: React.FC = () => {
   const [newBankName, setNewBankName] = useState('');
   const [newBankCode, setNewBankCode] = useState('');
   const [isBackingUp, setIsBackingUp] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const { signOut } = useAuth();
   const { showToast } = useToast();
@@ -133,6 +135,43 @@ export const Settings: React.FC = () => {
     }
   };
 
+  const handleRestore = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!confirm('ATENÇÃO: Restaurar o backup irá sobrescrever dados com o mesmo ID no banco de dados. Deseja continuar?')) {
+      e.target.value = '';
+      return;
+    }
+
+    setIsRestoring(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const content = event.target?.result as string;
+          const result = await backupService.importDataJSON(content);
+          if (result.success) {
+            showToast('Backup restaurado e dados atualizados com sucesso!', 'success');
+            await loadData();
+          } else {
+            throw new Error(result.error);
+          }
+        } catch (err: any) {
+          showToast('Erro ao importar arquivo: ' + err.message, 'error');
+        } finally {
+          setIsRestoring(false);
+          e.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    } catch (error: any) {
+      showToast('Falha na leitura do arquivo.', 'error');
+      setIsRestoring(false);
+      e.target.value = '';
+    }
+  };
+
   const handleBackup = async () => {
     setIsBackingUp(true);
     try {
@@ -165,12 +204,29 @@ export const Settings: React.FC = () => {
         <div className="flex items-center gap-2">
           <button 
             onClick={handleBackup}
-            disabled={isBackingUp}
+            disabled={isBackingUp || isRestoring}
             className="flex items-center gap-2 px-4 py-2 bg-primary/5 text-primary rounded-xl font-black uppercase tracking-widest text-[8px] hover:bg-primary hover:text-white transition-all disabled:opacity-50 border border-primary/10 group shadow-sm"
           >
             <Download className={`${isBackingUp ? "animate-bounce" : "group-hover:-translate-y-0.5"} w-3 h-3 transition-transform`} />
             {isBackingUp ? 'Processando...' : 'Backup'}
           </button>
+          
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isBackingUp || isRestoring}
+            className="flex items-center gap-2 px-4 py-2 bg-accent/5 text-accent rounded-xl font-black uppercase tracking-widest text-[8px] hover:bg-accent hover:text-white transition-all disabled:opacity-50 border border-accent/10 group shadow-sm"
+          >
+            <Upload className={`${isRestoring ? "animate-bounce" : "group-hover:-translate-y-0.5"} w-3 h-3 transition-transform`} />
+            {isRestoring ? 'Processando...' : 'Restaurar'}
+          </button>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleRestore} 
+            accept=".json" 
+            className="hidden" 
+          />
+
           <button 
             onClick={() => signOut()}
             className="flex items-center gap-2 px-4 py-2 bg-danger/5 text-danger rounded-xl font-black uppercase tracking-widest text-[8px] hover:bg-danger hover:text-white transition-all border border-danger/10 shadow-sm"
