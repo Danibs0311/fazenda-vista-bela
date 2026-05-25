@@ -1,0 +1,686 @@
+%PDF-1.3
+%ºß¬à
+3 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 1009
+>>
+stream
+0.5670000000000001 w
+0 G
+0.18 0.36 0.31 rg
+0. 841.8899999999999864 595.2755905511811534 -841.8897637795276978 re
+f
+BT
+/F2 28 Tf
+32.1999999999999957 TL
+1. g
+56.6929133858267775 586.7718897637794271 Td
+(ROADMAP ESTRATÉGICO) Tj
+ET
+BT
+/F2 28 Tf
+32.1999999999999957 TL
+1. g
+56.6929133858267775 552.7561417322833677 Td
+(DE ARQUITETURA & PRODUTO) Tj
+ET
+0.75 0.55 0.36 rg
+56.6929133858267775 524.4096850393700606 481.8897637795275841 -8.5039370078740166 re
+f
+BT
+/F1 14 Tf
+16.0999999999999979 TL
+1. g
+56.6929133858267775 487.559291338582625 Td
+(O Estado da Arte em Tecnologias Agrícolas \(Agrotech\)) Tj
+ET
+BT
+/F1 14 Tf
+16.0999999999999979 TL
+1. g
+56.6929133858267775 467.716771653543276 Td
+(Para a Gestão de Colheita de Alta Performance) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0.745 0.824 0.784 rg
+56.6929133858267775 133.2285826771652637 Td
+(DGTECH SOLUÇÕES TECNOLÓGICAS) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0.745 0.824 0.784 rg
+56.6929133858267775 116.220708661417234 Td
+(Documento de Auditoria e Planejamento Técnico — Maio/2026) Tj
+ET
+endstream
+endobj
+5 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 6 0 R
+>>
+endobj
+6 0 obj
+<<
+/Length 2344
+>>
+stream
+0.5670000000000001 w
+0 G
+0.18 0.36 0.31 rg
+0. 841.8899999999999864 595.2755905511811534 -42.5196850393700814 re
+f
+BT
+/F2 10 Tf
+11.5 TL
+1. g
+28.3464566929133888 813.5435433070865656 Td
+(FAZENDA VISTA BELA — ROADMAP ESTRATÉGICO AGROTECH) Tj
+ET
+BT
+/F2 16 Tf
+18.3999999999999986 TL
+0.184 0.365 0.314 rg
+42.5196850393700814 742.6774015748030706 Td
+(1. Introdução e Visão Geral) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0.122 0.141 0.129 rg
+42.5196850393700814 720.0002362204724022 Td
+(Este documento apresenta as recomendações arquiteturais e de produto para elevar o aplicativo Fazenda Vista) Tj
+T* (Bela - Gestão de Colheita ao nível das soluções agrotecnológicas mais modernas e competitivas do mercado) Tj
+T* (global \(como Agrivi, Solinftec e Climate Fieldview\).) Tj
+T* () Tj
+T* (Como sistemas agrícolas operam em ambientes desafiadores \(como áreas rurais remotas sob sol, umidade e) Tj
+T* (poeira\), a inovação técnica no nível de usabilidade, offline e conectividade de campo é o fator chave de sucesso.) Tj
+ET
+BT
+/F2 13 Tf
+14.9499999999999993 TL
+0.184 0.365 0.314 rg
+42.5196850393700814 620.7876377952754865 Td
+(Recomendação 1: Arquitetura Offline-First \(Resiliência de Campo\)) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0.122 0.141 0.129 rg
+42.5196850393700814 603.7797637795274568 Td
+(A colheita ocorre em áreas rurais profundas frequentemente sem sinal de internet \(3G/4G/Wi-Fi\). Na arquitetura) Tj
+T* (Offline-First, o aplicativo salva todos os lançamentos localmente no navegador \(usando IndexedDB via RxDB ou) Tj
+T* (PouchDB\) com latência zero. Ao detectar internet móvel, o sistema sincroniza os registros em lote em segundo) Tj
+T* (plano com o banco de dados Supabase de forma totalmente invisível ao usuário.) Tj
+ET
+BT
+/F2 13 Tf
+14.9499999999999993 TL
+0.184 0.365 0.314 rg
+42.5196850393700814 532.9136220472440755 Td
+(Recomendação 2: Identificação por QR Code nos Crachás) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0.122 0.141 0.129 rg
+42.5196850393700814 515.9057480314959321 Td
+(Para acelerar as pesagens no campo e eliminar erros humanos, cada colhedor recebe um pequeno cartão) Tj
+T* (laminado com um QR Code impresso. O administrador do campo aponta a câmera do celular no próprio aplicativo,) Tj
+T* (e o leitor integrado de QR Code preenche a identificação do colaborador em segundos, abrindo diretamente o) Tj
+T* (campo para a inserção das latas colhidas.) Tj
+ET
+endstream
+endobj
+7 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 8 0 R
+>>
+endobj
+8 0 obj
+<<
+/Length 2269
+>>
+stream
+0.5670000000000001 w
+0 G
+0.18 0.36 0.31 rg
+0. 841.8899999999999864 595.2755905511811534 -42.5196850393700814 re
+f
+BT
+/F2 10 Tf
+11.5 TL
+1. g
+28.3464566929133888 813.5435433070865656 Td
+(FAZENDA VISTA BELA — ROADMAP ESTRATÉGICO AGROTECH) Tj
+ET
+BT
+/F2 13 Tf
+14.9499999999999993 TL
+0.184 0.365 0.314 rg
+42.5196850393700814 742.6774015748030706 Td
+(Recomendação 3: Interface Quiosque e Lançamento em Grade) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0.122 0.141 0.129 rg
+42.5196850393700814 725.6695275590550409 Td
+(Reestruturar a tela de lançamento diário de colheitas para exibir blocos/cartões com fotos ou iniciais de todos os) Tj
+T* (colhedores. O administrador toca no colaborador e seleciona botões grandes de atalho rápido \(+1, +2, +5, +10) Tj
+T* (latas\) e confirma. É um modelo de tela otimizado ergonomicamente para uso ágil com apenas uma mão sob forte) Tj
+T* (luz solar de campo.) Tj
+ET
+BT
+/F2 13 Tf
+14.9499999999999993 TL
+0.184 0.365 0.314 rg
+42.5196850393700814 654.8033858267716596 Td
+(Recomendação 4: Envio Automático de Comprovantes via WhatsApp) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0.122 0.141 0.129 rg
+42.5196850393700814 637.7955118110235162 Td
+(Integrar o sistema com APIs de mensagens \(ex: WhatsApp Business API\). Ao final do dia de pesagem, o sistema) Tj
+T* (dispara um extrato automático direto no WhatsApp do colhedor: "Olá, João! Hoje registramos 12 latas colhidas.) Tj
+T* (Ótimo trabalho!". Ao fechar e pagar a semana, a folha de pagamento em PDF também é enviada de forma) Tj
+T* (totalmente automatizada no celular do trabalhador, promovendo transparência e confiança organizativa.) Tj
+ET
+BT
+/F2 13 Tf
+14.9499999999999993 TL
+0.184 0.365 0.314 rg
+42.5196850393700814 566.9293700787401349 Td
+(Recomendação 5: Previsão do Tempo Agrícola e Clima Preditivo) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0.122 0.141 0.129 rg
+42.5196850393700814 549.9214960629921052 Td
+(Conectar o painel com APIs meteorológicas de precisão de campo \(ex: OpenWeather\). O Dashboard exibirá) Tj
+T* (alertas sobre chuvas nas próximas horas para a localidade da fazenda. Cruzando os dados de chuvas com o) Tj
+T* (histórico de colheita, o sistema gera previsões de produtividade de caixas de colheita para os próximos ciclos,) Tj
+T* (permitindo um planejamento financeiro e operacional muito mais seguro.) Tj
+ET
+endstream
+endobj
+9 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 10 0 R
+>>
+endobj
+10 0 obj
+<<
+/Length 4576
+>>
+stream
+0.5670000000000001 w
+0 G
+0.18 0.36 0.31 rg
+0. 841.8899999999999864 595.2755905511811534 -42.5196850393700814 re
+f
+BT
+/F2 10 Tf
+11.5 TL
+1. g
+28.3464566929133888 813.5435433070865656 Td
+(FAZENDA VISTA BELA — ROADMAP ESTRATÉGICO AGROTECH) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0.184 0.365 0.314 rg
+42.5196850393700814 742.6774015748030706 Td
+(3. Matriz de Viabilidade e Priorização) Tj
+ET
+0.18 0.36 0.31 rg
+42.5196850393700814 720.0002362204724022 510.2362204724410049 -22.677165354330711 re
+f
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+1. g
+51.0236220472441033 704.4096850393700606 Td
+(Melhoria) Tj
+ET
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+1. g
+212.5984251968504282 704.4096850393700606 Td
+(Complexidade) Tj
+ET
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+1. g
+340.157480314960651 704.4096850393700606 Td
+(Impacto) Tj
+ET
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+1. g
+453.5433070866142202 704.4096850393700606 Td
+(Prioridade) Tj
+ET
+1. g
+42.5196850393700814 697.3230708661417339 510.2362204724410049 -22.677165354330711 re
+f
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+51.0236220472441033 681.7325196850392786 Td
+(1. Offline-First) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+212.5984251968504282 681.7325196850392786 Td
+(Alta) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+340.157480314960651 681.7325196850392786 Td
+(Altíssimo) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+453.5433070866142202 681.7325196850392786 Td
+(1. Crítica) Tj
+ET
+0.96 0.95 0.92 rg
+42.5196850393700814 674.6459055118109518 510.2362204724410049 -22.677165354330711 re
+f
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+51.0236220472441033 659.0553543307086102 Td
+(2. Scanner QR Code) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+212.5984251968504282 659.0553543307086102 Td
+(Baixa) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+340.157480314960651 659.0553543307086102 Td
+(Alto) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+453.5433070866142202 659.0553543307086102 Td
+(2. Alta) Tj
+ET
+1. g
+42.5196850393700814 651.9687401574802834 510.2362204724410049 -22.677165354330711 re
+f
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+51.0236220472441033 636.3781889763779418 Td
+(3. Modo Grade/Quiosque) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+212.5984251968504282 636.3781889763779418 Td
+(Média) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+340.157480314960651 636.3781889763779418 Td
+(Alto) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+453.5433070866142202 636.3781889763779418 Td
+(3. Alta) Tj
+ET
+0.96 0.95 0.92 rg
+42.5196850393700814 629.291574803149615 510.2362204724410049 -22.677165354330711 re
+f
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+51.0236220472441033 613.7010236220471597 Td
+(4. Extrato WhatsApp) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+212.5984251968504282 613.7010236220471597 Td
+(Média) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+340.157480314960651 613.7010236220471597 Td
+(Altíssimo) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+453.5433070866142202 613.7010236220471597 Td
+(4. Média) Tj
+ET
+1. g
+42.5196850393700814 606.614409448818833 510.2362204724410049 -22.677165354330711 re
+f
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+51.0236220472441033 591.0238582677164914 Td
+(5. Previsão & Clima) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+212.5984251968504282 591.0238582677164914 Td
+(Média) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+340.157480314960651 591.0238582677164914 Td
+(Médio) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.141 0.129 rg
+453.5433070866142202 591.0238582677164914 Td
+(5. Baixa) Tj
+ET
+BT
+/F2 14 Tf
+16.0999999999999979 TL
+0.184 0.365 0.314 rg
+42.5196850393700814 555.5907874015747439 Td
+(4. Próximos Passos) Tj
+ET
+BT
+/F1 10 Tf
+11.5 TL
+0.122 0.141 0.129 rg
+42.5196850393700814 538.5829133858267141 Td
+(A evolução modular da Fazenda Vista Bela garante que a inovação aconteça sem interromper o fluxo diário) Tj
+T* (operacional. Recomendamos seguir em três etapas sucessivas:) Tj
+T* () Tj
+T* (Fase I \(Foco Operacional\): Inserir o leitor de QR Code para colhedores e os teclados rápidos na roça \(Pesagem) Tj
+T* (ergonomicamente otimizada\).) Tj
+T* (Fase II \(Foco na Robustez\): Implementar o banco local cacheado para habilitar o modo 100% Offline-First.) Tj
+T* (Fase III \(Foco em Relacionamento\): Conectar as notificações por WhatsApp e os recursos de análise e) Tj
+T* (climatologia.) Tj
+ET
+endstream
+endobj
+1 0 obj
+<</Type /Pages
+/Kids [3 0 R 5 0 R 7 0 R 9 0 R ]
+/Count 4
+>>
+endobj
+11 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+12 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+13 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+14 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+15 0 obj
+<<
+/Type /Font
+/BaseFont /Courier
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+16 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+17 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+18 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+19 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Roman
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+20 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+21 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Italic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+22 0 obj
+<<
+/Type /Font
+/BaseFont /Times-BoldItalic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+23 0 obj
+<<
+/Type /Font
+/BaseFont /ZapfDingbats
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+24 0 obj
+<<
+/Type /Font
+/BaseFont /Symbol
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+2 0 obj
+<<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+/Font <<
+/F1 11 0 R
+/F2 12 0 R
+/F3 13 0 R
+/F4 14 0 R
+/F5 15 0 R
+/F6 16 0 R
+/F7 17 0 R
+/F8 18 0 R
+/F9 19 0 R
+/F10 20 0 R
+/F11 21 0 R
+/F12 22 0 R
+/F13 23 0 R
+/F14 24 0 R
+>>
+/XObject <<
+>>
+>>
+endobj
+25 0 obj
+<<
+/Producer (jsPDF 4.2.1)
+/CreationDate (D:20260524235844-03'00')
+>>
+endobj
+26 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/OpenAction [3 0 R /FitH null]
+/PageLayout /OneColumn
+>>
+endobj
+xref
+0 27
+0000000000 65535 f 
+0000010971 00000 n 
+0000012811 00000 n 
+0000000015 00000 n 
+0000000152 00000 n 
+0000001213 00000 n 
+0000001350 00000 n 
+0000003746 00000 n 
+0000003883 00000 n 
+0000006204 00000 n 
+0000006342 00000 n 
+0000011046 00000 n 
+0000011172 00000 n 
+0000011303 00000 n 
+0000011437 00000 n 
+0000011575 00000 n 
+0000011699 00000 n 
+0000011828 00000 n 
+0000011960 00000 n 
+0000012096 00000 n 
+0000012224 00000 n 
+0000012351 00000 n 
+0000012480 00000 n 
+0000012613 00000 n 
+0000012715 00000 n 
+0000013064 00000 n 
+0000013150 00000 n 
+trailer
+<<
+/Size 27
+/Root 26 0 R
+/Info 25 0 R
+/ID [ <3A4C860A6CBF7422E36B0A5BDBC022D3> <3A4C860A6CBF7422E36B0A5BDBC022D3> ]
+>>
+startxref
+13254
+%%EOF
