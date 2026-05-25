@@ -158,9 +158,13 @@ export const HarvestEntry: React.FC = () => {
     e.preventDefault();
     if (!editingHarvest) return;
 
-    const formData = new FormData(e.currentTarget);
-    const newQuantity = parseFloat(formData.get('quantidade') as string);
-    const newDate = formData.get('data') as string;
+    const newQuantity = editingHarvest.quantidade_latas;
+    const newDate = editingHarvest.data_colheita;
+
+    if (isNaN(newQuantity) || newQuantity <= 0) {
+      showToast('A quantidade de latas deve ser maior que zero', 'error');
+      return;
+    }
 
     try {
       const price = await storage.getCurrentPrice(newDate);
@@ -184,9 +188,13 @@ export const HarvestEntry: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     if (confirm('Deseja excluir este lançamento?')) {
-      await storage.deleteHarvest(id);
-      await loadData();
-      showToast('Lançamento excluído', 'success');
+      try {
+        await storage.deleteHarvest(id);
+        await loadData();
+        showToast('Lançamento excluído com sucesso!', 'success');
+      } catch (err: any) {
+        showToast(err.message || 'Erro ao excluir lançamento', 'error');
+      }
     }
   };
 
@@ -478,7 +486,12 @@ export const HarvestEntry: React.FC = () => {
                   <div 
                     key={h.id} 
                     id={`collab-row-recent-${index}`}
-                    onClick={() => { setActiveIndexRecent(index); searchInputRef.current?.focus(); }}
+                    onClick={(e) => { 
+                      const target = e.target as HTMLElement;
+                      if (target.closest('button')) return;
+                      setActiveIndexRecent(index); 
+                      searchInputRef.current?.focus(); 
+                    }}
                     className={`p-1.5 rounded-xl border flex items-center gap-3 transition-all relative overflow-hidden cursor-pointer ${
                       activeIndexRecent === index 
                       ? 'border-primary bg-white shadow-lg shadow-primary/5 z-10 scale-[1.01]' 
