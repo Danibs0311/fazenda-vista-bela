@@ -3,9 +3,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { storage } from '../../services/storageService';
 import { Collaborator, HarvestLog, CollaboratorStatus, Bank } from '../../types';
 import { getWeekRange, formatCurrency, formatDate } from '../../utils/dateUtils';
-import { Search, Save, History, Trash2, Calendar, UserPlus, Pickaxe, ChevronRight, X, ArrowUpRight, Plus, Landmark, User, AlertCircle, Edit2 } from 'lucide-react';
+import { Search, Save, History, Trash2, Calendar, UserPlus, Pickaxe, ChevronRight, X, ArrowUpRight, Plus, Landmark, User, AlertCircle, Edit2, Download } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { Link } from 'react-router-dom';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export const HarvestEntry: React.FC = () => {
   const { showToast } = useToast();
@@ -25,6 +27,8 @@ export const HarvestEntry: React.FC = () => {
   const [regError, setRegError] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeIndexRecent, setActiveIndexRecent] = useState<number | null>(null);
+  const [productionReportDate, setProductionReportDate] = useState(new Date().toISOString().split('T')[0]);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -198,6 +202,100 @@ export const HarvestEntry: React.FC = () => {
     }
   };
 
+  const handleGeneratePdf = async () => {
+    setIsPdfModalOpen(false);
+    showToast('Buscando lançamentos...', 'success');
+    
+    try {
+      const allHarvests = await storage.getHarvests();
+      const logsForDate = allHarvests.filter(h => h.data_colheita === productionReportDate);
+      
+      if (logsForDate.length === 0) {
+        showToast(`Nenhum lançamento encontrado para o dia ${formatDate(productionReportDate)}.`, 'error');
+        return;
+      }
+
+      showToast('Gerando arquivo PDF...', 'success');
+      
+      const doc = new jsPDF('p', 'mm', 'a4'); // Portrait A4
+      
+      // Main Header
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0); // Solid Black
+      doc.setFont('helvetica', 'bold');
+      doc.text('FAZENDA VISTA BELA - JOÃO CORDEIRO NEVES', 14, 18);
+      
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.text('RELATÓRIO DE PRODUÇÃO DIÁRIA DE COLHEITA DE CAFÉ', 14, 24);
+      
+      doc.setDrawColor(0, 0, 0); // Solid Black
+      doc.line(14, 30, 196, 30); // Portrait A4 width (210 - 28)
+      
+      // Info
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(10);
+      doc.text(`LOCALIDADE: UTINGA - BONITO / BA`, 14, 38);
+      doc.text(`DATA DA PRODUÇÃO: ${formatDate(productionReportDate)}`, 14, 44);
+      
+      const tableData = logsForDate.map((h, idx) => {
+        const collab = collaborators.find(c => c.id === h.colaborador_id);
+        return [
+          (idx + 1).toString(), // Seq Num
+          collab?.id || '---',  // Registration ID
+          (collab?.nome || 'EXCLUÍDO').toUpperCase(),
+          (collab?.cpf || '---'),
+          h.quantidade_latas.toString(),
+          formatCurrency(h.valor_por_lata),
+          formatCurrency(h.valor_total_dia)
+        ];
+      });
+      
+      autoTable(doc, {
+        startY: 52,
+        head: [['ITEM', 'Nº CADASTRO', 'COLHEDOR', 'CPF', 'LATS COLHIDAS', 'PREÇO / LATA', 'VALOR DO DIA']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { 
+          fillColor: [0, 0, 0], // Solid Black Header
+          textColor: [255, 255, 255],
+          fontSize: 8,
+          halign: 'center'
+        },
+        styles: { 
+          fontSize: 8,
+          cellPadding: 2,
+          textColor: [0, 0, 0]
+        },
+        columnStyles: {
+          0: { cellWidth: 12, halign: 'center' }, // Item
+          1: { cellWidth: 22, halign: 'center' }, // Nº Cadastro
+          2: { cellWidth: 58 },                    // Colhedor
+          3: { cellWidth: 28, halign: 'center' }, // CPF
+          4: { cellWidth: 22, halign: 'center' }, // Latas
+          5: { cellWidth: 20, halign: 'right' },  // Preço/Lata
+          6: { cellWidth: 20, halign: 'right', fontStyle: 'bold' } // Valor do Dia
+        }
+      });
+      
+      const finalY = (doc as any).lastAutoTable.finalY || 62;
+      const totalLatas = logsForDate.reduce((sum, h) => sum + h.quantidade_latas, 0);
+      const totalGeral = logsForDate.reduce((sum, h) => sum + h.valor_total_dia, 0);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`TOTAL DE LATAS: ${totalLatas} LATS`, 14, finalY + 10);
+      doc.text(`VALOR TOTAL GERAL: ${formatCurrency(totalGeral)}`, 196, finalY + 10, { align: 'right' });
+      
+      // Save PDF
+      doc.save(`Producao_${productionReportDate.replace(/-/g, '_')}.pdf`);
+      showToast('Download concluído!', 'success');
+    } catch (error) {
+      console.error('Erro ao gerar PDF de produção:', error);
+      showToast('Erro técnico ao gerar o arquivo.', 'error');
+    }
+  };
+
   return (
     <div className="h-auto min-h-full md:h-full flex flex-col space-y-4 page-transition overflow-visible md:overflow-hidden bg-background p-6 pb-10 md:pb-6">
       {/* Header - Fixed */}
@@ -217,12 +315,27 @@ export const HarvestEntry: React.FC = () => {
              <span className="text-[13px] font-black text-white leading-none mt-0.5 whitespace-nowrap uppercase tracking-tighter">Ref: {formatDate(weekInfo.start)}</span>
           </div>
 
-          {/* Today Card - Standardized & Centralized */}
-          <div className="bg-primary text-white px-5 py-2 rounded-xl shadow-lg shadow-primary/20 flex flex-col items-center justify-center border border-white/5 h-[52px] w-[240px]">
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/50 leading-none">Hoje</span>
-              <span className="text-[13px] font-black text-white mt-0.5 uppercase whitespace-nowrap tracking-wide">
-                {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+          {/* Produção do Dia Card/Button - Standardized & Centralized */}
+          <div className="bg-primary text-white px-3 py-2 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-between border border-white/5 h-[52px] w-[240px]">
+            <div className="flex flex-col items-start justify-center flex-1 h-full select-none pr-2 border-r border-white/10">
+              <span className="text-[8px] font-black uppercase tracking-widest text-white/50 leading-none">Produção do Dia</span>
+              <input
+                type="date"
+                value={productionReportDate}
+                onChange={(e) => setProductionReportDate(e.target.value)}
+                className="bg-transparent text-white font-black text-[12px] outline-none border-none cursor-pointer mt-0.5 w-full uppercase tracking-wide hover:text-accent transition-colors"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsPdfModalOpen(true)}
+              className="pl-3 pr-2 h-full flex flex-col items-center justify-center hover:bg-dark rounded-r-lg transition-colors shrink-0 group"
+            >
+              <span className="text-[8px] font-black uppercase tracking-widest text-white/50 leading-none">Baixar</span>
+              <span className="text-[11px] font-black text-white mt-0.5 uppercase tracking-wide flex items-center gap-1 group-hover:scale-105 transition-transform">
+                PDF
               </span>
+            </button>
           </div>
         </div>
       </div>
@@ -785,6 +898,47 @@ export const HarvestEntry: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
+
+      {/* PDF Confirmation Modal */}
+      {isPdfModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-dark/60 backdrop-blur-xl animate-in fade-in">
+          <div className="bg-white rounded-[32px] w-full max-w-md shadow-2xl relative animate-in zoom-in-95 border border-white/20 my-auto p-6 space-y-4">
+            <div className="space-y-1">
+              <h2 className="text-xl font-black text-dark tracking-tight leading-none uppercase italic">
+                Gerar <span className="text-primary not-italic">Relatório PDF</span>
+              </h2>
+              <p className="text-[10px] font-bold text-secondary/40 uppercase tracking-widest">Confirmação de Exportação</p>
+            </div>
+
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
+              <p className="text-[12px] font-black text-dark/70 uppercase tracking-tight">
+                Deseja gerar o relatório de produção diária para o dia:
+              </p>
+              <p className="text-lg font-black text-primary uppercase tracking-wide">
+                {formatDate(productionReportDate)}
+              </p>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setIsPdfModalOpen(false)}
+                className="flex-1 bg-slate-100 hover:bg-slate-200 text-secondary/70 px-4 py-3 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all shadow-sm active:scale-95"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleGeneratePdf}
+                className="flex-1 !bg-primary !text-white px-4 py-3 rounded-2xl font-black uppercase tracking-widest text-[11px] border border-primary hover:!bg-dark transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+              >
+                <Download className="w-4 h-4 !text-white" />
+                <span className="!text-white">Gerar PDF</span>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
