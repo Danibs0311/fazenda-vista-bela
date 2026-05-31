@@ -32,8 +32,8 @@ BEGIN
     RAISE EXCEPTION 'A senha deve conter pelo menos 6 caracteres.';
   END IF;
 
-  -- Encrypt password using pgcrypto crypt
-  v_encrypted_pw := crypt(p_password, gen_salt('bf', 10));
+  -- Encrypt password using pgcrypto crypt (prefixed with extensions schema for Supabase)
+  v_encrypted_pw := extensions.crypt(p_password, extensions.gen_salt('bf', 10));
 
   -- Insert into auth.users
   INSERT INTO auth.users (
