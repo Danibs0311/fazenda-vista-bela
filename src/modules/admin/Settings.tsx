@@ -6,7 +6,7 @@ import { useToast } from '../../context/ToastContext';
 import { CanPriceConfig, Bank } from '../../types';
 import { formatDate, formatCurrency } from '../../utils/dateUtils';
 import { Save, History, TrendingUp, AlertTriangle, Download, LogOut, Database, Building2, Plus, Trash2, Landmark, Upload, Users, UserPlus, Shield, Eye, Edit3, CheckCircle2, XCircle } from 'lucide-react';
-import { supabaseAdmin } from '../../services/supabaseAdmin';
+import { getSupabaseAdmin } from '../../services/supabaseAdmin';
 import { supabase } from '../../services/supabase';
 
 export const Settings: React.FC = () => {
@@ -105,6 +105,21 @@ export const Settings: React.FC = () => {
         .select('*');
       
       if (pErr) throw pErr;
+
+      const supabaseAdmin = getSupabaseAdmin();
+      if (!supabaseAdmin) {
+        // Fallback when admin client isn't available
+        const merged = (profiles || []).map((p: any) => ({
+          id: p.id,
+          nome: p.nome,
+          role: p.role,
+          status: p.status,
+          email: 'Indisponível (Sem Admin)',
+          cpf: 'Indisponível (Sem Admin)'
+        }));
+        setUsers(merged);
+        return;
+      }
 
       // 2. Fetch auth users using service role client
       const { data: { users: authUsers }, error: aErr } = await supabaseAdmin.auth.admin.listUsers();
@@ -217,6 +232,12 @@ export const Settings: React.FC = () => {
     const generatedEmail = `${firstName}@fvb.com`;
     const generatedPassword = cleanCpf; // Password is set to their clean CPF
 
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) {
+      showToast('Não foi possível conectar ao serviço de administração. A chave do Supabase Admin não está configurada.', 'error');
+      return;
+    }
+
     try {
       // Check if email already exists
       const emailExists = users.some(u => u.email === generatedEmail);
@@ -279,6 +300,12 @@ export const Settings: React.FC = () => {
 
     if (!confirm(msg)) return;
 
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) {
+      showToast('Não foi possível conectar ao serviço de administração. A chave do Supabase Admin não está configurada.', 'error');
+      return;
+    }
+
     try {
       const { error } = await supabaseAdmin
         .from('profiles')
@@ -298,6 +325,12 @@ export const Settings: React.FC = () => {
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingUser || !editingUserName.trim()) return;
+
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) {
+      showToast('Não foi possível conectar ao serviço de administração. A chave do Supabase Admin não está configurada.', 'error');
+      return;
+    }
 
     try {
       showToast('Salvando alterações...', 'success');
@@ -324,6 +357,12 @@ export const Settings: React.FC = () => {
   // Delete user permanently
   const handleDeleteUser = async (userId: string) => {
     if (!confirm('ATENÇÃO: Deseja realmente EXCLUIR permanentemente este usuário? Isso apagará seu login e perfil permanentemente.')) return;
+
+    const supabaseAdmin = getSupabaseAdmin();
+    if (!supabaseAdmin) {
+      showToast('Não foi possível conectar ao serviço de administração. A chave do Supabase Admin não está configurada.', 'error');
+      return;
+    }
 
     try {
       showToast('Excluindo usuário...', 'success');
