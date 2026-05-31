@@ -44,6 +44,18 @@ export const Settings: React.FC = () => {
   const historyScrollRef = useRef<HTMLDivElement>(null);
   const bankScrollRef = useRef<HTMLDivElement>(null);
 
+  const getPreviewEmail = () => {
+    if (!newUserName.trim()) return '[primeironome]-[5-digitos-cpf]@fvb.com';
+    const cleanCpf = newUserCpf.replace(/\D/g, '');
+    const cpfPrefix = cleanCpf.substring(0, 5) || '#####';
+    const firstName = newUserName.trim().split(' ')[0]
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '');
+    return `${firstName}-${cpfPrefix}@fvb.com`;
+  };
+
   useEffect(() => {
     loadData();
     loadUsers();
@@ -98,16 +110,31 @@ export const Settings: React.FC = () => {
   const loadUsers = async () => {
     setIsLoadingUsers(true);
     try {
-      // Fetch users from database using the secure admin_list_users RPC function
-      const { data: merged, error: err } = await supabase
-        .rpc('admin_list_users');
-      
-      if (err) throw err;
+      if (navigator.onLine) {
+        // Fetch users from database using the secure admin_list_users RPC function
+        const { data: merged, error: err } = await supabase
+          .rpc('admin_list_users');
+        
+        if (err) throw err;
 
-      setUsers(merged || []);
+        setUsers(merged || []);
+        localStorage.setItem('fvb_users', JSON.stringify(merged || []));
+      } else {
+        const saved = localStorage.getItem('fvb_users');
+        if (saved) {
+          setUsers(JSON.parse(saved));
+        } else {
+          setUsers([]);
+        }
+      }
     } catch (err: any) {
       console.error('Error loading users:', err.message);
-      showToast('Erro ao carregar lista de usuários da equipe.', 'error');
+      const saved = localStorage.getItem('fvb_users');
+      if (saved) {
+        setUsers(JSON.parse(saved));
+      } else {
+        showToast('Erro ao carregar lista de usuários da equipe.', 'error');
+      }
     } finally {
       setIsLoadingUsers(false);
     }
@@ -701,7 +728,7 @@ export const Settings: React.FC = () => {
                   </p>
                   <p className="text-[9.5px] font-bold text-amber-900/60 leading-normal">
                     Ao salvar, o e-mail será gerado como: <strong className="text-amber-900">
-                      {newUserName ? `${newUserName.trim().split(' ')[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '')}@fvb.com` : '[primeironome]@fvb.com'}
+                      {getPreviewEmail()}
                     </strong>. A senha inicial será composta apenas pelos dígitos do CPF.
                   </p>
                 </div>

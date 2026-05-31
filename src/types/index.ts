@@ -33,6 +33,7 @@ export interface HarvestLog {
   semana_id: string;
   criado_por_id?: string;
   criado_por_nome?: string;
+  created_at?: string;
 }
 
 export interface CanPriceConfig {

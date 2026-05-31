@@ -158,7 +158,8 @@ export const HarvestEntry: React.FC = () => {
         valor_total_dia: quantity * currentPrice,
         semana_id: weekInfo.id,
         criado_por_id: profile?.id,
-        criado_por_nome: profile?.nome
+        criado_por_nome: profile?.nome,
+        created_at: new Date().toISOString()
       };
 
       await storage.saveHarvest(harvest);
@@ -255,10 +256,11 @@ export const HarvestEntry: React.FC = () => {
     
     try {
       const price = await storage.getCurrentPrice(h.data_colheita);
+      const finalPrice = price > 0 ? price : (h.valor_por_lata || 0);
       setEditingHarvest({
         ...h,
-        valor_por_lata: price,
-        valor_total_dia: h.quantidade_latas * price
+        valor_por_lata: finalPrice,
+        valor_total_dia: h.quantidade_latas * finalPrice
       });
     } catch (err) {
       console.error('Erro ao atualizar preço vigente no modal:', err);
