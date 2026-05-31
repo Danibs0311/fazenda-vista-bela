@@ -187,7 +187,7 @@ export const Settings: React.FC = () => {
       return;
     }
 
-    // Generate email automatically: first name in lowercase followed by @fvb.com
+    // Generate email automatically: first name in lowercase followed by hyphen and the first 5 digits of the CPF, followed by @fvb.com
     const nameParts = newUserName.trim().split(' ');
     const firstName = nameParts[0]
       .toLowerCase()
@@ -195,7 +195,8 @@ export const Settings: React.FC = () => {
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]/g, '');
 
-    const generatedEmail = `${firstName}@fvb.com`;
+    const cpfPrefix = cleanCpf.substring(0, 5);
+    const generatedEmail = `${firstName}-${cpfPrefix}@fvb.com`;
     const generatedPassword = cleanCpf; // Password is set to their clean CPF
 
     try {
