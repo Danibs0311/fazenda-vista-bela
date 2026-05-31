@@ -48,6 +48,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await Promise.race([profilePromise, timeoutPromise]) as any;
 
       if (error) {
+        // PGRST116 means no rows were returned for .single()
+        if (error.code === 'PGRST116' && authUser) {
+          console.log('Profile not found for user. Creating on-the-fly...');
+          const isCaboEmail = authUser.email?.toLowerCase().endsWith('@fvb.com');
+          const determinedRole = authUser.user_metadata?.role || (isCaboEmail ? 'cabo' : 'admin');
+          const newProfile: UserProfile = {
+            id: userId,
+            nome: authUser.user_metadata?.nome || authUser.email?.split('@')[0].toUpperCase() || 'COLABORADOR',
+            role: determinedRole as any,
+            status: 'active'
+          };
+          
+          // Try inserting on the fly, but ignore errors if it fails (e.g. offline)
+          try {
+            await supabase.from('profiles').insert(newProfile);
+          } catch (insertErr) {
+            console.warn('Failed to insert on-the-fly profile (possibly offline):', insertErr);
+          }
+          
+          setProfile(newProfile);
+          return;
+        }
         console.error('Error fetching profile:', error.message);
         throw error;
       }
@@ -72,10 +94,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Fallback: Reconstruct profile from the cached Auth User metadata
       const fallbackUser = authUser || user;
       if (fallbackUser) {
+        const isCaboEmail = fallbackUser.email?.toLowerCase().endsWith('@fvb.com');
+        const defaultRole = isCaboEmail ? 'cabo' : 'admin';
         const fallbackProfile: UserProfile = {
           id: fallbackUser.id,
           nome: fallbackUser.user_metadata?.nome || fallbackUser.email?.split('@')[0].toUpperCase() || 'COLABORADOR',
-          role: (fallbackUser.user_metadata?.role as any) || 'cabo',
+          role: (fallbackUser.user_metadata?.role as any) || defaultRole,
           status: 'active'
         };
         console.log('Successfully reconstructed fallback profile:', fallbackProfile);
