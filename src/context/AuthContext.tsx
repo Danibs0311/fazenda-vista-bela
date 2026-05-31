@@ -31,19 +31,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const lastActivityRef = useRef<number>(Date.now());
 
-  // Function to load profile from the public.profiles table
-  const fetchProfile = async (userId: string) => {
+  // Function to load profile from the public.profiles table with timeout and offline fallbacks
+  const fetchProfile = async (userId: string, authUser?: User | null) => {
     try {
-      const { data, error } = await supabase
+      // Wrap the database query in a promise with a 3-second timeout to prevent hanging forever
+      const profilePromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Profile fetch timed out')), 3000)
+      );
+
+      const { data, error } = await Promise.race([profilePromise, timeoutPromise]) as any;
+
       if (error) {
         console.error('Error fetching profile:', error.message);
-        setProfile(null);
-        return;
+        throw error;
       }
 
       if (data) {
@@ -62,14 +68,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile(null);
       }
     } catch (err) {
-      console.error('Exception fetching profile:', err);
-      setProfile(null);
+      console.error('Exception fetching profile (falling back to offline metadata):', err);
+      // Fallback: Reconstruct profile from the cached Auth User metadata
+      const fallbackUser = authUser || user;
+      if (fallbackUser) {
+        const fallbackProfile: UserProfile = {
+          id: fallbackUser.id,
+          nome: fallbackUser.user_metadata?.nome || fallbackUser.email?.split('@')[0].toUpperCase() || 'COLABORADOR',
+          role: (fallbackUser.user_metadata?.role as any) || 'cabo',
+          status: 'active'
+        };
+        console.log('Successfully reconstructed fallback profile:', fallbackProfile);
+        setProfile(fallbackProfile);
+      } else {
+        setProfile(null);
+      }
     }
   };
 
   const refreshProfile = async () => {
     if (user) {
-      await fetchProfile(user.id);
+      await fetchProfile(user.id, user);
     }
   };
 
@@ -122,21 +141,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
+    // Ultimate safety net: guarantee the loading screen is dismissed after 4 seconds under any circumstance
+    const safetyTimeout = setTimeout(() => {
+      setLoading(prev => {
+        if (prev) {
+          console.warn('Authentication loading timed out. Forcing UI to load.');
+          return false;
+        }
+        return prev;
+      });
+    }, 4000);
+
     // Get initial session with robust error handling for offline/network failure
     supabase.auth.getSession()
       .then(({ data: { session } }) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          fetchProfile(session.user.id)
+          fetchProfile(session.user.id, session.user)
             .catch(err => console.error('Failed to load profile in getSession:', err))
-            .finally(() => setLoading(false));
+            .finally(() => {
+              clearTimeout(safetyTimeout);
+              setLoading(false);
+            });
         } else {
+          clearTimeout(safetyTimeout);
           setLoading(false);
         }
       })
       .catch(err => {
         console.error('Failed to get initial session on mount (offline fallback active):', err);
+        clearTimeout(safetyTimeout);
         setLoading(false);
       });
 
@@ -146,18 +181,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          await fetchProfile(session.user.id, session.user);
         } else {
           setProfile(null);
         }
       } catch (err) {
         console.error('Failed to process auth state change:', err);
       } finally {
+        clearTimeout(safetyTimeout);
         setLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(safetyTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
