@@ -308,15 +308,15 @@ export const HarvestEntry: React.FC = () => {
           <p className="text-secondary/60 font-medium text-[11px]">Registro de entrada</p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
           {/* Operational Cycle - Standardized & Centralized */}
-          <div className="bg-primary px-5 py-2 rounded-xl shadow-lg shadow-primary/20 flex flex-col items-center justify-center border border-white/5 h-[52px] w-[240px]">
+          <div className="bg-primary px-5 py-2 rounded-xl shadow-lg shadow-primary/20 flex flex-col items-center justify-center border border-white/5 h-[52px] w-full sm:w-[240px]">
              <span className="text-[10px] font-black uppercase tracking-widest text-white/50 leading-none">Ciclo Operacional</span>
              <span className="text-[13px] font-black text-white leading-none mt-0.5 whitespace-nowrap uppercase tracking-tighter">Ref: {formatDate(weekInfo.start)}</span>
           </div>
 
           {/* Produção do Dia Card/Button - Standardized & Centralized */}
-          <div className="bg-primary text-white px-3 py-2 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-between border border-white/5 h-[52px] w-[240px]">
+          <div className="bg-primary text-white px-3 py-2 rounded-xl shadow-lg shadow-primary/20 flex items-center justify-between border border-white/5 h-[52px] w-full sm:w-[240px]">
             <div className="flex flex-col items-start justify-center flex-1 h-full select-none pr-2 border-r border-white/10">
               <span className="text-[8px] font-black uppercase tracking-widest text-white/50 leading-none">Produção do Dia</span>
               <input
