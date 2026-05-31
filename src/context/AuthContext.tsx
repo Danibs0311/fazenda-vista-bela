@@ -122,27 +122,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id).finally(() => setLoading(false));
-      } else {
+    // Get initial session with robust error handling for offline/network failure
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchProfile(session.user.id)
+            .catch(err => console.error('Failed to load profile in getSession:', err))
+            .finally(() => setLoading(false));
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to get initial session on mount (offline fallback active):', err);
+        setLoading(false);
+      });
+
+    // Listen for auth state changes with robust error handling
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      try {
+        setSession(session);
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          await fetchProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
+      } catch (err) {
+        console.error('Failed to process auth state change:', err);
+      } finally {
         setLoading(false);
       }
-    });
-
-    // Listen for changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
-      }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
