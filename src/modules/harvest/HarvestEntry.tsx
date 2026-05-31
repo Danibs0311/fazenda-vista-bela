@@ -223,7 +223,7 @@ export const HarvestEntry: React.FC = () => {
       doc.setFontSize(14);
       doc.setTextColor(0, 0, 0); // Solid Black
       doc.setFont('helvetica', 'bold');
-      doc.text('FAZENDA VISTA BELA - JOÃO CORDEIRO NEVES', 14, 18);
+      doc.text('FAZENDA VISTA BELA - CARMEM RIBEIRO DE CARVALHO', 14, 18);
       
       doc.setFontSize(11);
       doc.setFont('helvetica', 'normal');

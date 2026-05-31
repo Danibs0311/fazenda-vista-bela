@@ -122,7 +122,7 @@ export const Payments: React.FC = () => {
       doc.setFontSize(16);
       doc.setTextColor(0, 0, 0); // Solid Black
       doc.setFont('helvetica', 'bold');
-      doc.text('FAZENDA VISTA BELA - JOÃO CORDEIRO NEVES', 14, 18);
+      doc.text('FAZENDA VISTA BELA - CARMEM RIBEIRO DE CARVALHO', 14, 18);
       
       doc.setFontSize(12);
       doc.setFont('helvetica', 'normal');
