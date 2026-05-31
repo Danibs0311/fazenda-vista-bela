@@ -25,6 +25,12 @@ export const WeekManagement: React.FC = () => {
   useEffect(() => {
     loadData();
     
+    const handleStatusChange = () => {
+      loadData();
+    };
+
+    window.addEventListener('cycle-status-change', handleStatusChange);
+    
     const handleKeyDown = (e: KeyboardEvent) => {
       // If modal is open, scroll the modal list
       if (isModalOpen && modalScrollRef.current) {
@@ -41,7 +47,10 @@ export const WeekManagement: React.FC = () => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('cycle-status-change', handleStatusChange);
+    };
   }, [isModalOpen]);
 
   const loadData = async () => {

@@ -36,6 +36,16 @@ export const HarvestEntry: React.FC = () => {
   }, [date]);
 
   useEffect(() => {
+    const handleStatusChange = () => {
+      loadData();
+    };
+    window.addEventListener('cycle-status-change', handleStatusChange);
+    return () => {
+      window.removeEventListener('cycle-status-change', handleStatusChange);
+    };
+  }, []);
+
+  useEffect(() => {
     if (activeIndexRecent !== null) {
       const container = document.getElementById('recent-harvests-container');
       const activeRow = document.getElementById(`collab-row-recent-${activeIndexRecent}`);

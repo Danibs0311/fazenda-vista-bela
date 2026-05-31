@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Dashboard } from './modules/admin/Dashboard';
@@ -14,9 +14,22 @@ import { Toast, ToastType } from './components/Toast';
 import { ToastContext } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { checkAndManageCycles } from './services/cycleManager';
 
 const App: React.FC = () => {
   const [toast, setToast] = useState<{ msg: string, type: ToastType } | null>(null);
+
+  useEffect(() => {
+    // Run immediately on load
+    checkAndManageCycles();
+
+    // Setup periodic polling every 5 seconds (5000ms)
+    const interval = setInterval(() => {
+      checkAndManageCycles();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const showToast = useCallback((msg: string, type: ToastType) => {
     setToast({ msg, type });
