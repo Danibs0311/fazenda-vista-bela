@@ -6,7 +6,6 @@ import { useToast } from '../../context/ToastContext';
 import { CanPriceConfig, Bank } from '../../types';
 import { formatDate, formatCurrency } from '../../utils/dateUtils';
 import { Save, History, TrendingUp, AlertTriangle, Download, LogOut, Database, Building2, Plus, Trash2, Landmark, Upload, Users, UserPlus, Shield, Eye, Edit3, CheckCircle2, XCircle } from 'lucide-react';
-import { getSupabaseAdmin } from '../../services/supabaseAdmin';
 import { supabase } from '../../services/supabase';
 
 export const Settings: React.FC = () => {
@@ -99,46 +98,13 @@ export const Settings: React.FC = () => {
   const loadUsers = async () => {
     setIsLoadingUsers(true);
     try {
-      // 1. Fetch profiles from database
-      const { data: profiles, error: pErr } = await supabase
-        .from('profiles')
-        .select('*');
+      // Fetch users from database using the secure admin_list_users RPC function
+      const { data: merged, error: err } = await supabase
+        .rpc('admin_list_users');
       
-      if (pErr) throw pErr;
+      if (err) throw err;
 
-      const supabaseAdmin = getSupabaseAdmin();
-      if (!supabaseAdmin) {
-        // Fallback when admin client isn't available
-        const merged = (profiles || []).map((p: any) => ({
-          id: p.id,
-          nome: p.nome,
-          role: p.role,
-          status: p.status,
-          email: 'Indisponível (Sem Admin)',
-          cpf: 'Indisponível (Sem Admin)'
-        }));
-        setUsers(merged);
-        return;
-      }
-
-      // 2. Fetch auth users using service role client
-      const { data: { users: authUsers }, error: aErr } = await supabaseAdmin.auth.admin.listUsers();
-      if (aErr) throw aErr;
-
-      // Merge data
-      const merged = (profiles || []).map((p: any) => {
-        const auth = authUsers.find((u: any) => u.id === p.id);
-        return {
-          id: p.id,
-          nome: p.nome,
-          role: p.role,
-          status: p.status,
-          email: auth?.email || '---',
-          cpf: auth?.user_metadata?.cpf || '---'
-        };
-      });
-
-      setUsers(merged);
+      setUsers(merged || []);
     } catch (err: any) {
       console.error('Error loading users:', err.message);
       showToast('Erro ao carregar lista de usuários da equipe.', 'error');
@@ -232,12 +198,6 @@ export const Settings: React.FC = () => {
     const generatedEmail = `${firstName}@fvb.com`;
     const generatedPassword = cleanCpf; // Password is set to their clean CPF
 
-    const supabaseAdmin = getSupabaseAdmin();
-    if (!supabaseAdmin) {
-      showToast('Não foi possível conectar ao serviço de administração. A chave do Supabase Admin não está configurada.', 'error');
-      return;
-    }
-
     try {
       // Check if email already exists
       const emailExists = users.some(u => u.email === generatedEmail);
@@ -248,43 +208,24 @@ export const Settings: React.FC = () => {
 
       showToast('Criando conta do colaborador...', 'success');
 
-      // 1. Create the user in Supabase Auth
-      const { data: authUser, error: authErr } = await supabaseAdmin.auth.admin.createUser({
-        email: generatedEmail,
-        password: generatedPassword,
-        email_confirm: true,
-        user_metadata: {
-          nome: newUserName.trim().toUpperCase(),
-          cpf: cleanCpf,
-          role: newUserRole
-        }
+      // Call secure RPC to create user and profile in the database safely
+      const { error } = await supabase.rpc('admin_create_user', {
+        p_email: generatedEmail,
+        p_password: generatedPassword,
+        p_nome: newUserName.trim().toUpperCase(),
+        p_cpf: cleanCpf,
+        p_role: newUserRole
       });
 
-      if (authErr) throw authErr;
+      if (error) throw error;
 
-      if (authUser?.user) {
-        // 2. Insert profile record in database
-        const { error: profileErr } = await supabaseAdmin.from('profiles').insert({
-          id: authUser.user.id,
-          nome: newUserName.trim().toUpperCase(),
-          role: newUserRole,
-          status: 'active'
-        });
-
-        if (profileErr) {
-          // Cleanup auth user on profile insertion failure
-          await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
-          throw profileErr;
-        }
-
-        showToast(`Colaborador cadastrado!\nLogin: ${generatedEmail}\nSenha: ${cleanCpf}`, 'success');
-        
-        // Reset form
-        setNewUserName('');
-        setNewUserCpf('');
-        setNewUserRole('cabo');
-        await loadUsers();
-      }
+      showToast(`Colaborador cadastrado!\nLogin: ${generatedEmail}\nSenha: ${cleanCpf}`, 'success');
+      
+      // Reset form
+      setNewUserName('');
+      setNewUserCpf('');
+      setNewUserRole('cabo');
+      await loadUsers();
     } catch (err: any) {
       console.error('Error creating user account:', err.message);
       showToast(`Erro ao criar conta de usuário: ${err.message}`, 'error');
@@ -300,17 +241,11 @@ export const Settings: React.FC = () => {
 
     if (!confirm(msg)) return;
 
-    const supabaseAdmin = getSupabaseAdmin();
-    if (!supabaseAdmin) {
-      showToast('Não foi possível conectar ao serviço de administração. A chave do Supabase Admin não está configurada.', 'error');
-      return;
-    }
-
     try {
-      const { error } = await supabaseAdmin
-        .from('profiles')
-        .update({ status: newStatus })
-        .eq('id', userId);
+      const { error } = await supabase.rpc('admin_toggle_user_status', {
+        p_user_id: userId,
+        p_status: newStatus
+      });
 
       if (error) throw error;
 
@@ -326,22 +261,14 @@ export const Settings: React.FC = () => {
     e.preventDefault();
     if (!editingUser || !editingUserName.trim()) return;
 
-    const supabaseAdmin = getSupabaseAdmin();
-    if (!supabaseAdmin) {
-      showToast('Não foi possível conectar ao serviço de administração. A chave do Supabase Admin não está configurada.', 'error');
-      return;
-    }
-
     try {
       showToast('Salvando alterações...', 'success');
       
-      const { error } = await supabaseAdmin
-        .from('profiles')
-        .update({
-          nome: editingUserName.trim().toUpperCase(),
-          role: editingUserRole
-        })
-        .eq('id', editingUser.id);
+      const { error } = await supabase.rpc('admin_update_user', {
+        p_user_id: editingUser.id,
+        p_nome: editingUserName.trim().toUpperCase(),
+        p_role: editingUserRole
+      });
 
       if (error) throw error;
 
@@ -358,15 +285,11 @@ export const Settings: React.FC = () => {
   const handleDeleteUser = async (userId: string) => {
     if (!confirm('ATENÇÃO: Deseja realmente EXCLUIR permanentemente este usuário? Isso apagará seu login e perfil permanentemente.')) return;
 
-    const supabaseAdmin = getSupabaseAdmin();
-    if (!supabaseAdmin) {
-      showToast('Não foi possível conectar ao serviço de administração. A chave do Supabase Admin não está configurada.', 'error');
-      return;
-    }
-
     try {
       showToast('Excluindo usuário...', 'success');
-      const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
+      const { error } = await supabase.rpc('admin_delete_user', {
+        p_user_id: userId
+      });
       if (error) throw error;
 
       showToast('Usuário excluído permanentemente do sistema.', 'success');
