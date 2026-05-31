@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  # 1. Database: PostgreSQL with Supabase extensions (Fully ARM64 compatible)
+  oci-db:
+    image: supabase/postgres:15.1.1.78
+    container_name: oci-db
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-VistaBela2026SecurePass}
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      JWT_SECRET: ${JWT_SECRET:-SuperSecureFarmJWTSecretKey2026}
+    volumes:
+      - oci_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - oci-network
+
+  # 2. Database API: PostgREST (translates SQL to REST API instantly)
+  oci-rest:
+    image: postgrest/postgrest:v11.1.0
+    container_name: oci-rest
+    restart: always
+    environment:
+      PGRST_DB_URI: postgres://postgres:${POSTGRES_PASSWORD:-VistaBela2026SecurePass}@oci-db:5432/postgres
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET:-SuperSecureFarmJWTSecretKey2026}
+      PGRST_PORT: 3000
+    depends_on:
+      - oci-db
+    networks:
+      - oci-network
+
+  # 3. Auth API: GoTrue (Supabase Authentication Engine)
+  oci-auth:
+    image: supabase/gotrue:v2.133.0
+    container_name: oci-auth
+    restart: always
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:-VistaBela2026SecurePass}@oci-db:5432/postgres?sslmode=disable
+      GOTRUE_JWT_SECRET: ${JWT_SECRET:-SuperSecureFarmJWTSecretKey2026}
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_SITE_URL: http://localhost:80
+      GOTRUE_DISABLE_SIGNUP: "false" # Set to true once admin account is created
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "false" # Using password/simple login
+      API_EXTERNAL_URL: http://localhost:80
+    depends_on:
+      - oci-db
+    networks:
+      - oci-network
+
+  # 4. Web Server & Proxy: Nginx (serves static React build + routes api calls)
+  oci-nginx:
+    image: nginx:alpine
+    container_name: oci-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - oci-rest
+      - oci-auth
+      - oci-n8n
+    networks:
+      - oci-network
+
+  # 5. Workflow Automation: n8n (Self-hosted Open Source automation)
+  oci-n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    container_name: oci-n8n
+    restart: always
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=http://localhost/n8n/
+      - N8N_PATH=/n8n/
+    volumes:
+      - oci_n8n_data:/home/node/.n8n
+    depends_on:
+      - oci-db
+    networks:
+      - oci-network
+
+volumes:
+  oci_postgres_data:
+    driver: local
+  oci_n8n_data:
+    driver: local
+
+networks:
+  oci-network:
+    driver: bridge
