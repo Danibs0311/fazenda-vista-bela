@@ -248,6 +248,23 @@ export const HarvestEntry: React.FC = () => {
     }
   };
 
+  const handleOpenEdit = async (h: HarvestLog) => {
+    setIsHarvestReadOnly(false);
+    setEditModalOpen(true);
+    setEditingHarvest(h);
+    
+    try {
+      const price = await storage.getCurrentPrice(h.data_colheita);
+      setEditingHarvest({
+        ...h,
+        valor_por_lata: price,
+        valor_total_dia: h.quantidade_latas * price
+      });
+    } catch (err) {
+      console.error('Erro ao atualizar preço vigente no modal:', err);
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (confirm('Deseja excluir este lançamento?')) {
       try {
@@ -736,7 +753,7 @@ export const HarvestEntry: React.FC = () => {
                     </div>
                     <div className="flex flex-col gap-1 shrink-0 ml-auto">
                       <button
-                        onClick={(e) => { e.stopPropagation(); setEditingHarvest(h); setIsHarvestReadOnly(false); setEditModalOpen(true); }}
+                        onClick={(e) => { e.stopPropagation(); handleOpenEdit(h); }}
                         className="flex items-center justify-center gap-1 px-2 py-1 !bg-primary !text-white rounded-md hover:!bg-dark transition-all shadow-sm shadow-primary/20"
                       >
                         <Edit2 className="w-2.5 h-2.5 !text-white" />

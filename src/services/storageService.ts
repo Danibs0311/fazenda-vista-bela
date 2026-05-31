@@ -68,13 +68,29 @@ export const storage = {
   },
 
   getPrices: async (forceRefresh = false): Promise<CanPriceConfig[]> => {
-    if (!forceRefresh && !shouldFetch('prices')) return cache.prices!;
+    if (!forceRefresh && !shouldFetch('prices') && cache.prices) return cache.prices;
 
-    const { data } = await supabase.from('pricing_config').select('*').order('data_inicio_vigencia', { ascending: false });
-    
-    cache.prices = data || [];
-    cache.lastFetch.prices = Date.now();
-    return cache.prices;
+    try {
+      const { data, error } = await supabase
+        .from('pricing_config')
+        .select('*')
+        .order('data_inicio_vigencia', { ascending: false });
+      
+      if (error) throw error;
+      
+      cache.prices = data || [];
+      cache.lastFetch.prices = Date.now();
+      localStorage.setItem('fvb_prices', JSON.stringify(cache.prices));
+      return cache.prices;
+    } catch (err) {
+      console.warn('Failed to fetch prices, loading from localStorage fallback:', err);
+      const saved = localStorage.getItem('fvb_prices');
+      if (saved) {
+        cache.prices = JSON.parse(saved);
+        return cache.prices!;
+      }
+      return cache.prices || [];
+    }
   },
 
   savePrice: async (price: CanPriceConfig) => {
@@ -113,22 +129,60 @@ export const storage = {
   },
 
   getCurrentPrice: async (date: string): Promise<number> => {
-    // If we have cached prices, we can calculate this locally for speed
-    if (cache.prices && !shouldFetch('prices')) {
-      const match = cache.prices
+    // 1. Try to read from memory cache or load from localStorage fallback
+    let prices = cache.prices;
+    if (!prices) {
+      const saved = localStorage.getItem('fvb_prices');
+      if (saved) {
+        try {
+          prices = JSON.parse(saved);
+          cache.prices = prices;
+        } catch (e) {
+          console.error('Failed to parse cached prices:', e);
+        }
+      }
+    }
+
+    // 2. If online and cache has expired, try fetching from network in background
+    if (navigator.onLine && shouldFetch('prices')) {
+      try {
+        const { data, error } = await supabase
+          .from('pricing_config')
+          .select('*')
+          .order('data_inicio_vigencia', { ascending: false });
+
+        if (!error && data) {
+          prices = data;
+          cache.prices = data;
+          cache.lastFetch.prices = Date.now();
+          localStorage.setItem('fvb_prices', JSON.stringify(data));
+        }
+      } catch (err) {
+        console.warn('Network pricing fetch failed inside getCurrentPrice, using cache:', err);
+      }
+    }
+
+    // 3. Re-evaluate from our local prices array
+    if (prices && prices.length > 0) {
+      const match = prices
         .filter(p => p.data_inicio_vigencia <= date)
         .sort((a, b) => b.data_inicio_vigencia.localeCompare(a.data_inicio_vigencia))[0];
       if (match) return match.valor_lata;
     }
 
-    const { data } = await supabase
-      .from('pricing_config')
-      .select('*')
-      .lte('data_inicio_vigencia', date)
-      .order('data_inicio_vigencia', { ascending: false })
-      .limit(1);
+    // 4. Ultimate fallback query if everything else was empty
+    try {
+      const { data } = await supabase
+        .from('pricing_config')
+        .select('*')
+        .lte('data_inicio_vigencia', date)
+        .order('data_inicio_vigencia', { ascending: false })
+        .limit(1);
 
-    return data?.[0]?.valor_lata || 0;
+      return data?.[0]?.valor_lata || 0;
+    } catch (err) {
+      return 0;
+    }
   },
 
   getHarvests: async (limit = 100): Promise<OfflineHarvestLog[]> => {

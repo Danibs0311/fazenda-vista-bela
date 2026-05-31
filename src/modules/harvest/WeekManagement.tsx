@@ -128,6 +128,23 @@ export const WeekManagement: React.FC = () => {
     }
   };
 
+  const handleOpenEdit = async (log: HarvestLog) => {
+    setIsHarvestReadOnly(false);
+    setEditModalOpen(true);
+    setEditingHarvest(log);
+    
+    try {
+      const price = await storage.getCurrentPrice(log.data_colheita);
+      setEditingHarvest({
+        ...log,
+        valor_por_lata: price,
+        valor_total_dia: log.quantidade_latas * price
+      });
+    } catch (err) {
+      console.error('Erro ao atualizar preço vigente no modal:', err);
+    }
+  };
+
   const handleDeleteHarvest = async (id: string) => {
     if (confirm('Deseja excluir este lançamento?')) {
       await storage.deleteHarvest(id);
@@ -320,11 +337,7 @@ export const WeekManagement: React.FC = () => {
                         <span className="text-[7px] font-bold text-primary/60 uppercase tracking-widest">lats</span>
                       </div>
                       <button 
-                        onClick={() => {
-                          setEditingHarvest(log);
-                          setIsHarvestReadOnly(false);
-                          setEditModalOpen(true);
-                        }}
+                        onClick={() => handleOpenEdit(log)}
                         className="p-2.5 bg-background hover:bg-primary/10 rounded-xl transition-all group"
                       >
                         <Edit2 className="w-3.5 h-3.5 text-primary" />
