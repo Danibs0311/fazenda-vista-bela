@@ -49,7 +49,15 @@ BEGIN
     is_super_admin,
     created_at,
     updated_at,
-    is_sso_user
+    is_sso_user,
+    confirmation_token,
+    recovery_token,
+    email_change_token_new,
+    email_change,
+    phone_change,
+    phone_change_token,
+    email_change_token_current,
+    reauthentication_token
   ) VALUES (
     gen_random_uuid(),
     '00000000-0000-0000-0000-000000000000',
@@ -63,7 +71,15 @@ BEGIN
     FALSE,
     now(),
     now(),
-    FALSE
+    FALSE,
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    '',
+    ''
   )
   RETURNING id INTO v_user_id;
 
