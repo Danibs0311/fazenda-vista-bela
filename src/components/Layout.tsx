@@ -112,9 +112,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}
         h-full flex flex-col ${isMenuFocused ? 'ring-1 ring-inset ring-primary/5 bg-slate-50/10' : ''}
       `}>
-        <div className="p-4 hidden md:flex flex-col items-center justify-center gap-2 mb-0">
-          <div className="bg-white p-2 rounded-[24px] shadow-2xl shadow-primary/10 border border-slate-50 overflow-hidden transform hover:scale-110 transition-transform duration-500">
-            <img src="/logo_fazenda.png" alt="Logo" className="w-32 h-32 object-contain" />
+        <div className="pt-3 pb-1 hidden md:flex flex-col items-center justify-center gap-2 mb-0">
+          <div className="bg-white p-1.5 rounded-[20px] shadow-lg shadow-primary/5 border border-slate-50 overflow-hidden transform hover:scale-105 transition-transform duration-500">
+            <img src="/logo_fazenda.png" alt="Logo" className="w-20 h-20 object-contain" />
           </div>
         </div>
 
@@ -131,23 +131,23 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-slate-50 bg-slate-50/50 flex flex-col gap-2">
+        <div className="p-3 border-t border-slate-50 bg-slate-50/50 flex flex-col gap-1.5">
           {user?.email && (
-            <div className="px-5 py-1">
-              <p className="text-[9px] font-black text-secondary/30 uppercase tracking-widest leading-none mb-1 text-center">Usuário Autenticado</p>
-              <p className="text-[10px] font-black text-primary truncate text-center">{user.email}</p>
+            <div className="px-4 py-0.5">
+              <p className="text-[8px] font-black text-secondary/30 uppercase tracking-widest leading-none mb-0.5 text-center">Usuário Autenticado</p>
+              <p className="text-[9px] font-black text-primary truncate text-center">{user.email}</p>
             </div>
           )}
           <button 
             onClick={() => signOut()}
-            className="w-full flex items-center gap-3 px-5 py-2.5 text-danger hover:bg-danger/5 rounded-xl transition-all font-bold group text-sm"
+            className="w-full flex items-center gap-3 px-4 py-2 text-danger hover:bg-danger/5 rounded-xl transition-all font-bold group text-sm"
           >
             <LogOut className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             <span>Sair do Sistema</span>
           </button>
           
-          <div className="mt-2 pt-2 border-t border-slate-100/50">
-            <p className="text-[9px] font-black tracking-[0.2em] text-secondary/20 uppercase text-center">
+          <div className="mt-1 pt-1 border-t border-slate-100/50">
+            <p className="text-[8px] font-black tracking-[0.2em] text-secondary/20 uppercase text-center">
               Criado por <br />
               <span className="text-secondary/40">DGTECH SOLUÇÕES TECNOLÓGICAS</span>
             </p>
