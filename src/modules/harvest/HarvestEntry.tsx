@@ -323,7 +323,7 @@ export const HarvestEntry: React.FC = () => {
                 type="date"
                 value={productionReportDate}
                 onChange={(e) => setProductionReportDate(e.target.value)}
-                className="bg-transparent text-white font-black text-[12px] outline-none border-none cursor-pointer mt-0.5 w-full uppercase tracking-wide hover:text-accent transition-colors [&::-webkit-calendar-picker-indicator]:invert"
+                className="bg-transparent text-white font-black text-[12px] outline-none border-none cursor-pointer mt-0.5 w-full uppercase tracking-wide hover:text-accent transition-colors white-datepicker"
               />
             </div>
             <button

@@ -144,3 +144,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   filter: invert(0.2);
 }
+
+.white-datepicker::-webkit-calendar-picker-indicator {
+  filter: invert(1) !important;
+}
