@@ -218,3 +218,10 @@ BEGIN
   JOIN auth.users u ON p.id = u.id;
 END;
 $$;
+
+-- Explicitly grant execute permission on the secure RPC functions to the authenticated role
+GRANT EXECUTE ON FUNCTION public.admin_list_users() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_create_user(text, text, text, text, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_toggle_user_status(uuid, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_update_user(uuid, text, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_delete_user(uuid) TO authenticated;
