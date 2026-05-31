@@ -43,8 +43,15 @@ export const HarvestEntry: React.FC = () => {
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      storage.syncOfflineLogs().then(() => loadData());
       showToast('Conexão estabelecida! Sincronizando dados salvos localmente...', 'success');
+      setTimeout(async () => {
+        try {
+          await storage.syncOfflineLogs();
+          await loadData();
+        } catch (err: any) {
+          console.warn('Background online transition sync failed:', err.message);
+        }
+      }, 1500);
     };
     const handleOffline = () => {
       setIsOnline(false);
@@ -112,6 +119,14 @@ export const HarvestEntry: React.FC = () => {
   }, [activeIndexRecent]);
 
   const loadData = async () => {
+    if (navigator.onLine) {
+      try {
+        await storage.syncOfflineLogs();
+      } catch (err: any) {
+        console.warn('Background mount sync failed:', err.message);
+      }
+    }
+
     const [collabs, recent, price, bankData] = await Promise.all([
        storage.getCollaborators(),
       storage.getHarvests(),
