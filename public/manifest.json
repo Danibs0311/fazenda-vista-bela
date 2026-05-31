@@ -1,0 +1,24 @@
+{
+  "name": "Fazenda Vista Bela - Gestão de Colheita",
+  "short_name": "Vista Bela",
+  "description": "Sistema de Gestão de Colheita da Fazenda Vista Bela",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDFCFB",
+  "theme_color": "#78350f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/logo_fazenda.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo_fazenda.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
