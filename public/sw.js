@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vista-bela-v1';
+const CACHE_NAME = 'vista-bela-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

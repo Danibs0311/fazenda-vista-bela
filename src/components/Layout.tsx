@@ -112,9 +112,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         ${isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}
         h-full flex flex-col ${isMenuFocused ? 'ring-1 ring-inset ring-primary/5 bg-slate-50/10' : ''}
       `}>
-        <div className="pt-8 pb-4 hidden md:flex flex-col items-center justify-center gap-2 mb-0">
-          <div className="bg-white p-2 rounded-[24px] shadow-xl shadow-primary/5 border border-slate-50 overflow-hidden transform hover:scale-105 transition-transform duration-500">
-            <img src="/logo_fazenda.png" alt="Logo" className="w-28 h-28 object-contain" />
+        <div className="pt-4 pb-2 md:pt-8 md:pb-4 flex flex-col items-center justify-center gap-2 mb-0">
+          <div className="bg-white p-1.5 md:p-2 rounded-[20px] md:rounded-[24px] shadow-xl shadow-primary/5 border border-slate-50 overflow-hidden transform hover:scale-105 transition-transform duration-500">
+            <img src="/logo_fazenda.png" alt="Logo" className="w-20 h-20 md:w-28 md:h-28 object-contain" />
           </div>
         </div>
 
