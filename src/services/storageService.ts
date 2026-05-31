@@ -48,9 +48,19 @@ export const storage = {
   },
 
   saveCollaborator: async (col: Collaborator) => {
+    const uppercaseCol = {
+      ...col,
+      nome: col.nome?.toUpperCase(),
+      cpf: col.cpf?.toUpperCase(),
+      banco: col.banco?.toUpperCase(),
+      agencia: col.agencia?.toUpperCase(),
+      conta: col.conta?.toUpperCase(),
+      tipo_conta: col.tipo_conta?.toUpperCase()
+    };
+
     const { error } = await supabase
       .from('collaborators')
-      .upsert(col);
+      .upsert(uppercaseCol);
 
     if (error) throw new Error('Erro ao salvar colaborador: ' + error.message);
     cache.lastFetch.collaborators = 0; // Invalidate cache
