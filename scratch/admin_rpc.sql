@@ -35,7 +35,7 @@ BEGIN
   -- Encrypt password using pgcrypto crypt (prefixed with extensions schema for Supabase)
   v_encrypted_pw := extensions.crypt(p_password, extensions.gen_salt('bf', 10));
 
-  -- Insert into auth.users
+  -- Insert into auth.users (omitting generated column confirmed_at)
   INSERT INTO auth.users (
     id,
     instance_id,
@@ -44,7 +44,6 @@ BEGIN
     email,
     encrypted_password,
     email_confirmed_at,
-    confirmed_at,
     raw_app_meta_data,
     raw_user_meta_data,
     is_super_admin,
@@ -58,7 +57,6 @@ BEGIN
     'authenticated',
     p_email,
     v_encrypted_pw,
-    now(),
     now(),
     '{"provider":"email","providers":["email"]}'::jsonb,
     jsonb_build_object('nome', p_nome, 'cpf', p_cpf, 'role', p_role),
