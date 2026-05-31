@@ -4,7 +4,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -20,6 +20,11 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
 
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Se o usuário for Cabo de Turma, ele SÓ pode acessar a tela de colheita (/colheita)
+  if (profile?.role === 'cabo' && location.pathname !== '/colheita') {
+    return <Navigate to="/colheita" replace />;
   }
 
   return <>{children}</>;

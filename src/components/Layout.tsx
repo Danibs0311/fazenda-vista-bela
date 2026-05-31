@@ -52,11 +52,14 @@ const NavItem: React.FC<{ to: string, icon: React.ReactNode, label: string, onCl
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isMenuFocused, setIsMenuFocused] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const routes = ['/', '/colhedores', '/colheita', '/semanas', '/pagamentos', '/relatorios', '/configuracoes'];
+  const isCabo = profile?.role === 'cabo';
+  const routes = isCabo 
+    ? ['/colheita']
+    : ['/', '/colhedores', '/colheita', '/semanas', '/pagamentos', '/relatorios', '/configuracoes'];
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -64,6 +67,8 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       if (!isMenuFocused) return;
 
       const currentIndex = routes.indexOf(location.pathname);
+      if (currentIndex === -1) return;
+      
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         const nextIndex = (currentIndex + 1) % routes.length;
@@ -79,7 +84,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [location.pathname, navigate, isMenuFocused]);
+  }, [location.pathname, navigate, isMenuFocused, routes]);
 
   return (
     <div 
@@ -120,22 +125,33 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
         <nav className="flex-1 px-4 py-2 space-y-0.5 overflow-y-auto no-scrollbar">
           <LayoutGroup>
-            <NavItem to="/" icon={<LayoutDashboard className="w-5 h-5" />} label="DASHBOARD" onClick={() => setSidebarOpen(false)} />
-            <NavItem to="/colhedores" icon={<Users className="w-5 h-5" />} label="COLABORADORES" onClick={() => setSidebarOpen(false)} />
+            {!isCabo && (
+              <>
+                <NavItem to="/" icon={<LayoutDashboard className="w-5 h-5" />} label="DASHBOARD" onClick={() => setSidebarOpen(false)} />
+                <NavItem to="/colhedores" icon={<Users className="w-5 h-5" />} label="COLABORADORES" onClick={() => setSidebarOpen(false)} />
+              </>
+            )}
             <NavItem to="/colheita" icon={<Pickaxe className="w-5 h-5" />} label="COLHEITA" onClick={() => setSidebarOpen(false)} />
-            <NavItem to="/semanas" icon={<CalendarRange className="w-5 h-5" />} label="CICLOS DE COLHEITA" onClick={() => setSidebarOpen(false)} />
-            <NavItem to="/pagamentos" icon={<Wallet className="w-5 h-5" />} label="PAGAMENTO" onClick={() => setSidebarOpen(false)} />
-            <NavItem to="/relatorios" icon={<FileText className="w-5 h-5" />} label="HISTÓRICO" onClick={() => setSidebarOpen(false)} />
-            <NavItem to="/configuracoes" icon={<Settings className="w-5 h-5" />} label="AJUSTES" onClick={() => setSidebarOpen(false)} />
+            {!isCabo && (
+              <>
+                <NavItem to="/semanas" icon={<CalendarRange className="w-5 h-5" />} label="CICLOS DE COLHEITA" onClick={() => setSidebarOpen(false)} />
+                <NavItem to="/pagamentos" icon={<Wallet className="w-5 h-5" />} label="PAGAMENTO" onClick={() => setSidebarOpen(false)} />
+                <NavItem to="/relatorios" icon={<FileText className="w-5 h-5" />} label="HISTÓRICO" onClick={() => setSidebarOpen(false)} />
+                <NavItem to="/configuracoes" icon={<Settings className="w-5 h-5" />} label="AJUSTES" onClick={() => setSidebarOpen(false)} />
+              </>
+            )}
           </LayoutGroup>
         </nav>
 
         {/* Sidebar Footer */}
         <div className="p-3 border-t border-slate-50 bg-slate-50/50 flex flex-col gap-1.5">
-          {user?.email && (
-            <div className="px-4 py-0.5">
-              <p className="text-[8px] font-black text-secondary/30 uppercase tracking-widest leading-none mb-0.5 text-center">Usuário Autenticado</p>
-              <p className="text-[9px] font-black text-primary truncate text-center">{user.email}</p>
+          {profile && (
+            <div className="px-4 py-0.5 text-center">
+              <p className="text-[8px] font-black text-secondary/30 uppercase tracking-widest leading-none mb-0.5">
+                {profile.role === 'admin' ? 'Coordenador Administrador' : 'Cabo de Turma'}
+              </p>
+              <p className="text-[10px] font-black text-primary truncate leading-normal uppercase">{profile.nome}</p>
+              <p className="text-[8px] text-secondary/40 truncate leading-none mt-0.5">{user?.email}</p>
             </div>
           )}
           <button 

@@ -3,20 +3,23 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { storage } from '../../services/storageService';
 import { Collaborator, HarvestLog, CollaboratorStatus, Bank } from '../../types';
 import { getWeekRange, formatCurrency, formatDate } from '../../utils/dateUtils';
-import { Search, Save, History, Trash2, Calendar, UserPlus, Pickaxe, ChevronRight, X, ArrowUpRight, Plus, Landmark, User, AlertCircle, Edit2, Download } from 'lucide-react';
+import { Search, Save, History, Trash2, Calendar, UserPlus, Pickaxe, ChevronRight, X, ArrowUpRight, Plus, Landmark, User, AlertCircle, Edit2, Download, Cloud, CloudOff, Wifi, WifiOff } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { Link } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useAuth } from '../../context/AuthContext';
+import { OfflineHarvestLog } from '../../services/localDb';
 
 export const HarvestEntry: React.FC = () => {
   const { showToast } = useToast();
+  const { profile } = useAuth();
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCollab, setSelectedCollab] = useState<Collaborator | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [recentHarvests, setRecentHarvests] = useState<HarvestLog[]>([]);
+  const [recentHarvests, setRecentHarvests] = useState<OfflineHarvestLog[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [currentPrice, setCurrentPrice] = useState<number>(0);
   const [isRegistrationModalOpen, setRegistrationModalOpen] = useState(false);
@@ -29,11 +32,54 @@ export const HarvestEntry: React.FC = () => {
   const [activeIndexRecent, setActiveIndexRecent] = useState<number | null>(null);
   const [productionReportDate, setProductionReportDate] = useState(new Date().toISOString().split('T')[0]);
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadData();
   }, [date]);
+
+  // Connectivity and Sync listeners
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      storage.syncOfflineLogs().then(() => loadData());
+      showToast('Conexão estabelecida! Sincronizando dados salvos localmente...', 'success');
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      showToast('Modo Offline Ativo. Seus lançamentos estão seguros no dispositivo.', 'info');
+    };
+    const handleSyncError = () => {
+      showToast('Erro ao sincronizar dados: Sessão expirada ou não autorizada.', 'error');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('auth_sync_error', handleSyncError);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('auth_sync_error', handleSyncError);
+    };
+  }, []);
+
+  const handleManualSync = async () => {
+    if (!isOnline) {
+      showToast('Sem conexão de internet no momento. Dados salvos localmente.', 'info');
+      return;
+    }
+    showToast('Sincronizando dados...', 'success');
+    try {
+      await storage.syncOfflineLogs();
+      await loadData();
+      showToast('Todos os dados foram sincronizados com sucesso!', 'success');
+    } catch (err: any) {
+      showToast(`Erro ao sincronizar: ${err.message}`, 'error');
+    }
+  };
+
 
   useEffect(() => {
     const handleStatusChange = () => {
@@ -110,7 +156,9 @@ export const HarvestEntry: React.FC = () => {
         quantidade_latas: quantity,
         valor_por_lata: currentPrice,
         valor_total_dia: quantity * currentPrice,
-        semana_id: weekInfo.id
+        semana_id: weekInfo.id,
+        criado_por_id: profile?.id,
+        criado_por_nome: profile?.nome
       };
 
       await storage.saveHarvest(harvest);
@@ -319,6 +367,35 @@ export const HarvestEntry: React.FC = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+          {/* Dual-Function Connection/Sync Status Button */}
+          <button
+            type="button"
+            onClick={handleManualSync}
+            className={`px-4 py-2 rounded-xl shadow-lg border border-white/5 h-[52px] w-full sm:w-[180px] flex items-center justify-center gap-2.5 transition-all active:scale-95 text-white ${
+              isOnline 
+                ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20 cursor-pointer' 
+                : 'bg-black hover:bg-slate-900 shadow-black/20 cursor-pointer'
+            }`}
+          >
+            {isOnline ? (
+              <>
+                <Wifi className="w-5 h-5 text-white" />
+                <div className="flex flex-col items-start leading-none">
+                  <span className="text-[7px] font-black uppercase tracking-widest text-white/60">ONLINE</span>
+                  <span className="text-[10px] font-black text-white mt-0.5 tracking-tight uppercase">SINCRONIZAR</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <WifiOff className="w-5 h-5 text-white/50" />
+                <div className="flex flex-col items-start leading-none">
+                  <span className="text-[7px] font-black uppercase tracking-widest text-white/40">OFFLINE</span>
+                  <span className="text-[10px] font-black text-white/70 mt-0.5 tracking-tight uppercase">LOCAL SEGURO</span>
+                </div>
+              </>
+            )}
+          </button>
+
           {/* Operational Cycle - Standardized & Centralized */}
           <div className="bg-primary px-5 py-2 rounded-xl shadow-lg shadow-primary/20 flex flex-col items-center justify-center border border-white/5 h-[52px] w-full sm:w-[240px]">
              <span className="text-[10px] font-black uppercase tracking-widest text-white/50 leading-none">Ciclo Operacional</span>
@@ -627,13 +704,29 @@ export const HarvestEntry: React.FC = () => {
                      
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-[10px] font-black text-dark uppercase tracking-widest flex items-center gap-1.5">
-                           {formatDate(h.data_colheita)}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[10px] font-black text-dark uppercase tracking-widest">
+                             {formatDate(h.data_colheita)}
+                          </p>
+                          {h.synced === false ? (
+                            <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-700 rounded text-[7.5px] font-black tracking-widest uppercase flex items-center gap-0.5 animate-pulse">
+                              <CloudOff className="w-2.5 h-2.5 shrink-0" /> Local
+                            </span>
+                          ) : (
+                            <span className="px-1.5 py-0.5 bg-emerald-500/10 text-emerald-700 rounded text-[7.5px] font-black tracking-widest uppercase flex items-center gap-0.5">
+                              <Cloud className="w-2.5 h-2.5 shrink-0" /> Sinc
+                            </span>
+                          )}
+                        </div>
                         <span className="text-[10px] font-black text-dark/60 uppercase tracking-widest">ID: {collab?.id || '---'}</span>
                       </div>
                       <h4 className="font-black text-dark uppercase tracking-tight text-sm truncate leading-tight">{collab?.nome || 'Excluído'}</h4>
-                      <div className="flex items-center gap-2 mt-1">
+                      {h.criado_por_nome && (
+                        <p className="text-[9px] font-black text-secondary/40 uppercase tracking-wider mt-0.5 leading-none">
+                          Lançado por: {h.criado_por_nome}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2 mt-1.5">
                          <div className="flex items-center gap-1 bg-primary/5 px-2 py-1 rounded-full border border-primary/10">
                             <Pickaxe className="w-3 h-3 text-primary" />
                             <span className="text-[11px] font-black text-primary uppercase tracking-tighter">{h.quantidade_latas} lats</span>

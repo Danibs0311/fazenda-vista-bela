@@ -31,6 +31,8 @@ export interface HarvestLog {
   valor_por_lata: number;
   valor_total_dia: number;
   semana_id: string;
+  criado_por_id?: string;
+  criado_por_nome?: string;
 }
 
 export interface CanPriceConfig {

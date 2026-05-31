@@ -9,6 +9,7 @@ import {
 } from '../types';
 import { supabase } from './supabase';
 import { getWeekRange } from '../utils/dateUtils';
+import { localDb, OfflineHarvestLog } from './localDb';
 
 // Simple memory cache to avoid redundant network requests
 const cache = {
@@ -130,14 +131,40 @@ export const storage = {
     return data?.[0]?.valor_lata || 0;
   },
 
-  getHarvests: async (limit = 100): Promise<HarvestLog[]> => {
-    // Fetch limited results for "Recent" views
-    const { data } = await supabase
-      .from('harvest_logs')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit);
-    return data || [];
+  getHarvests: async (limit = 100): Promise<OfflineHarvestLog[]> => {
+    let remoteLogs: HarvestLog[] = [];
+    
+    if (navigator.onLine) {
+      const { data } = await supabase
+        .from('harvest_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+      remoteLogs = data || [];
+    }
+    
+    const localLogs = await localDb.getAllLogs();
+    
+    // Merge remote and local logs, deduping by id. Local unsynced logs take precedence.
+    const mergedMap = new Map<string, OfflineHarvestLog>();
+    
+    remoteLogs.forEach(log => {
+      mergedMap.set(log.id, { ...log, synced: true });
+    });
+    
+    localLogs.forEach(log => {
+      if (!log.synced || !mergedMap.has(log.id)) {
+        mergedMap.set(log.id, log);
+      }
+    });
+    
+    const mergedList = Array.from(mergedMap.values());
+    
+    return mergedList.sort((a, b) => {
+      const dateA = a.created_at || a.data_colheita;
+      const dateB = b.created_at || b.data_colheita;
+      return dateB.localeCompare(dateA);
+    }).slice(0, limit);
   },
 
   getHarvestsByWeek: async (weekId: string): Promise<HarvestLog[]> => {
@@ -170,30 +197,91 @@ export const storage = {
     if (error) throw new Error('Erro ao salvar semana: ' + error.message);
   },
 
-  saveHarvest: async (harvest: HarvestLog) => {
-    // Optimization: avoid double-fetching week/price if we trust client side check 
-    // but keep it for data integrity
-    const week = await storage.getWeek(harvest.semana_id);
+  saveHarvest: async (harvest: OfflineHarvestLog) => {
+    // Save locally first to guarantee data persistence instantly
+    const offlineLog: OfflineHarvestLog = {
+      ...harvest,
+      synced: false
+    };
+    await localDb.saveLog(offlineLog);
 
-    if (week.status !== WeekStatus.OPEN) {
-      throw new Error(`Semana ${week.status}. Operação bloqueada.`);
+    if (navigator.onLine) {
+      try {
+        const week = await storage.getWeek(harvest.semana_id);
+        if (week.status !== WeekStatus.OPEN) {
+          throw new Error(`Semana ${week.status}. Operação bloqueada.`);
+        }
+
+        const { synced, ...payload } = offlineLog;
+        const { error } = await supabase.from('harvest_logs').upsert(payload);
+        
+        if (error) {
+          console.warn('Network error while saving to server, keeping local offline backup:', error.message);
+        } else {
+          await localDb.markAsSynced(harvest.id);
+        }
+      } catch (err: any) {
+        console.warn('Network or database error while saving to server, keeping local offline backup:', err.message);
+      }
     }
-
-    const { error } = await supabase.from('harvest_logs').upsert(harvest);
-    if (error) throw new Error('Erro ao salvar colheita: ' + error.message);
   },
 
   deleteHarvest: async (id: string) => {
-    const { data: harvest } = await supabase.from('harvest_logs').select('*').eq('id', id).single();
+    // Retrieve from local DB or remote
+    let harvest: OfflineHarvestLog | undefined;
+    
+    const localLogs = await localDb.getAllLogs();
+    harvest = localLogs.find(l => l.id === id);
+    
+    if (!harvest && navigator.onLine) {
+      const { data } = await supabase.from('harvest_logs').select('*').eq('id', id).single();
+      if (data) harvest = data;
+    }
+    
     if (!harvest) return;
 
-    const week = await storage.getWeek(harvest.semana_id);
-    if (week.status !== WeekStatus.OPEN) {
-      throw new Error(`Semana ${week.status}. Não é possível excluir lançamentos.`);
+    // Check week status if online
+    if (navigator.onLine) {
+      const week = await storage.getWeek(harvest.semana_id);
+      if (week.status !== WeekStatus.OPEN) {
+        throw new Error(`Semana ${week.status}. Não é possível excluir lançamentos.`);
+      }
     }
 
-    const { error } = await supabase.from('harvest_logs').delete().eq('id', id);
-    if (error) throw new Error('Erro ao excluir: ' + error.message);
+    // Delete locally and remotely
+    await localDb.deleteLog(id);
+
+    if (navigator.onLine) {
+      const { error } = await supabase.from('harvest_logs').delete().eq('id', id);
+      if (error) throw new Error('Erro ao excluir no servidor: ' + error.message);
+    }
+  },
+
+  syncOfflineLogs: async (): Promise<void> => {
+    if (!navigator.onLine) return;
+
+    try {
+      const unsynced = await localDb.getUnsyncedLogs();
+      if (unsynced.length === 0) return;
+
+      console.log(`Syncing ${unsynced.length} offline logs...`);
+
+      for (const log of unsynced) {
+        const { synced, ...payload } = log;
+        const { error } = await supabase.from('harvest_logs').upsert(payload);
+        
+        if (error) {
+          console.error(`Error syncing log ${log.id}:`, error.message);
+          if (error.message.includes('not found') || error.message.includes('unauthorized') || error.message.includes('JWT')) {
+            window.dispatchEvent(new CustomEvent('auth_sync_error', { detail: log }));
+          }
+        } else {
+          await localDb.markAsSynced(log.id);
+        }
+      }
+    } catch (err) {
+      console.error('Error in syncOfflineLogs:', err);
+    }
   },
 
   getWeeks: async (): Promise<HarvestWeek[]> => {
