@@ -38,6 +38,10 @@ input, textarea, select {
   text-transform: uppercase !important;
 }
 
+.no-uppercase, input.no-uppercase, textarea.no-uppercase {
+  text-transform: none !important;
+}
+
 :root {
   --primary: #2F5D50;
   --secondary: #6F4E37;

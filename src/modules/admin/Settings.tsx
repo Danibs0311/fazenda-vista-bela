@@ -234,7 +234,7 @@ export const Settings: React.FC = () => {
         return;
       }
 
-      showToast('Criando conta do colaborador...', 'success');
+      showToast('Criando conta do usuário...', 'success');
 
       // Call secure RPC to create user and profile in the database safely
       const { error } = await supabase.rpc('admin_create_user', {
@@ -247,7 +247,7 @@ export const Settings: React.FC = () => {
 
       if (error) throw error;
 
-      showToast(`Colaborador cadastrado!\nLogin: ${generatedEmail}\nSenha: ${cleanCpf}`, 'success');
+      showToast(`Usuário cadastrado!\nLogin: ${generatedEmail}\nSenha: ${cleanCpf}`, 'success');
       
       // Reset form
       setNewUserName('');
@@ -264,8 +264,8 @@ export const Settings: React.FC = () => {
   const handleToggleUserStatus = async (userId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     const msg = newStatus === 'inactive' 
-      ? 'Deseja realmente INATIVAR este colaborador? Ele será desconectado e impedido de fazer login imediatamente.' 
-      : 'Deseja reativar o acesso deste colaborador?';
+      ? 'Deseja realmente INATIVAR este usuário? Ele será desconectado e impedido de fazer login imediatamente.' 
+      : 'Deseja reativar o acesso deste usuário?';
 
     if (!confirm(msg)) return;
 
@@ -277,7 +277,7 @@ export const Settings: React.FC = () => {
 
       if (error) throw error;
 
-      showToast(`Colaborador ${newStatus === 'inactive' ? 'inativado' : 'reativado'} com sucesso!`, 'success');
+      showToast(`Usuário ${newStatus === 'inactive' ? 'inativado' : 'reativado'} com sucesso!`, 'success');
       await loadUsers();
     } catch (err: any) {
       showToast(`Erro ao alterar status da conta: ${err.message}`, 'error');
@@ -300,7 +300,7 @@ export const Settings: React.FC = () => {
 
       if (error) throw error;
 
-      showToast('Perfil do colaborador atualizado!', 'success');
+      showToast('Perfil do usuário atualizado!', 'success');
       setEditUserModalOpen(false);
       setEditingUser(null);
       await loadUsers();
@@ -680,7 +680,7 @@ export const Settings: React.FC = () => {
               <div className="flex items-center justify-between">
                 <h2 className="text-[11px] font-black flex items-center gap-2 text-dark uppercase italic">
                   <UserPlus className="w-4 h-4 text-primary" />
-                  Cadastrar Colaborador
+                  Cadastrar Usuário
                 </h2>
                 <span className="text-[7px] font-black text-primary bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10 uppercase tracking-tighter italic">Auto Credenciais</span>
               </div>
@@ -738,7 +738,7 @@ export const Settings: React.FC = () => {
                   className="w-full !bg-primary !text-white h-[42px] rounded-lg font-black uppercase tracking-widest text-[9px] md:hover:!bg-dark transition-all flex items-center justify-center gap-2 shadow-md shadow-primary/20 hover:scale-[1.02] active:scale-95 duration-200 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  Criar Colaborador
+                  Criar Usuário
                 </button>
               </form>
             </div>
@@ -764,7 +764,7 @@ export const Settings: React.FC = () => {
                   </div>
                 ) : users.length === 0 ? (
                   <div className="py-12 text-center text-[9px] font-black text-secondary/20 uppercase tracking-widest italic">
-                    Nenhum colaborador registrado na equipe.
+                    Nenhum usuário registrado na equipe.
                   </div>
                 ) : (
                   users.map((u) => (
@@ -849,7 +849,7 @@ export const Settings: React.FC = () => {
                 <h2 className="text-xl font-black text-dark tracking-tight uppercase italic leading-none">
                   Editar <span className="text-primary not-italic">Cadastro</span>
                 </h2>
-                <p className="text-[8px] font-bold text-secondary/40 uppercase tracking-widest mt-1">Colaborador da Equipe</p>
+                <p className="text-[8px] font-bold text-secondary/40 uppercase tracking-widest mt-1">Usuário da Equipe</p>
               </div>
               <button 
                 onClick={() => setEditUserModalOpen(false)}
@@ -870,6 +870,30 @@ export const Settings: React.FC = () => {
                   className="w-full bg-slate-50 border-2 border-transparent focus:border-primary/20 rounded-lg py-2.5 px-4 text-sm font-black text-primary outline-none transition-all uppercase"
                 />
               </div>
+
+              {editingUser.role === 'cabo' ? (
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-secondary/40 px-1">Senha (CPF)</label>
+                  <input 
+                    type="text" 
+                    readOnly
+                    value={editingUser.cpf || ''}
+                    className="w-full bg-slate-100 border-2 border-transparent rounded-lg py-2.5 px-4 text-sm font-black text-secondary/50 outline-none font-mono cursor-not-allowed select-all"
+                    title="A senha de acesso do cabo de turma é o CPF sem pontuação."
+                  />
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-secondary/40 px-1">Senha</label>
+                  <input 
+                    type="text" 
+                    readOnly
+                    value="******** (Acesso Restrito - Protegido)"
+                    className="w-full bg-rose-50/50 border-2 border-rose-100 text-rose-700/60 rounded-lg py-2.5 px-4 text-xs font-black outline-none cursor-not-allowed select-none"
+                    title="Por segurança, administradores são impedidos de visualizar a senha de outros administradores."
+                  />
+                </div>
+              )}
 
               <div className="space-y-1">
                 <label className="text-[9px] font-black uppercase tracking-widest text-secondary/40 px-1">Nível de Acesso</label>

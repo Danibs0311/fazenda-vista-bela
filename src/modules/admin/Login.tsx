@@ -131,7 +131,7 @@ export const Login: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full bg-white border-2 border-primary focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-2xl py-4 pl-14 pr-4 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-sm"
+                  className="w-full bg-white border-2 border-primary focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-2xl py-4 pl-14 pr-4 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-sm no-uppercase"
                   placeholder="exemplo@vistabela.com"
                 />
               </div>
@@ -155,7 +155,7 @@ export const Login: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full bg-white border-2 border-primary focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-2xl py-4 pl-14 pr-12 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-sm"
+                  className="w-full bg-white border-2 border-primary focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-2xl py-4 pl-14 pr-12 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-sm no-uppercase"
                   placeholder="••••••••"
                 />
                 <button
@@ -191,7 +191,7 @@ export const Login: React.FC = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    className="w-full bg-white border-2 border-primary focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-2xl py-4 pl-14 pr-4 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-sm"
+                    className="w-full bg-white border-2 border-primary focus:border-primary focus:ring-4 focus:ring-primary/10 rounded-2xl py-4 pl-14 pr-4 text-primary outline-none transition-all placeholder:text-primary/10 font-bold shadow-sm text-sm no-uppercase"
                     placeholder="••••••••"
                   />
                 </div>
