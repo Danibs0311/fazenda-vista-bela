@@ -642,7 +642,7 @@ export const HarvestEntry: React.FC = () => {
                       <div className="absolute z-[200] w-full left-0 mt-2 bg-white border border-slate-100 rounded-[32px] shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
                         {filteredCollabs.length > 0 ? (
                           <div className="overflow-y-auto max-h-48 p-2 no-scrollbar">
-                            {filteredCollabs.map((c, index) => (
+                            {filteredCollabs.slice(0, 40).map((c, index) => (
                               <button
                                 key={c.id}
                                 type="button"

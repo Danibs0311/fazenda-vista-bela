@@ -76,38 +76,85 @@ export const storage = {
   getCollaborators: async (forceRefresh = false): Promise<Collaborator[]> => {
     if (!forceRefresh && !shouldFetch('collaborators') && cache.collaborators) return cache.collaborators;
 
-    let allCollaborators: Collaborator[] = [];
-    let from = 0;
-    const limit = 1000;
-    let hasMore = true;
-
-    while (hasMore) {
-      const { data, error } = await supabase
+    try {
+      // 1. Get the exact count of rows first with a fast HEAD query
+      const { count, error: countErr } = await supabase
         .from('collaborators')
-        .select('*')
-        .order('nome')
-        .range(from, from + limit - 1);
+        .select('*', { count: 'exact', head: true });
 
-      if (error) {
-        console.error('Error fetching collaborators batch:', error);
-        return cache.collaborators || [];
-      }
+      if (countErr) throw countErr;
 
-      if (data) {
-        allCollaborators = allCollaborators.concat(data);
-        if (data.length < limit) {
-          hasMore = false;
-        } else {
-          from += limit;
+      const totalRows = count || 0;
+      const limit = 1000;
+      const pages = Math.ceil(totalRows / limit);
+
+      // 2. Fetch all pages concurrently in parallel
+      const promises = Array.from({ length: pages }, (_, i) => {
+        const from = i * limit;
+        const to = from + limit - 1;
+        return supabase
+          .from('collaborators')
+          .select('*')
+          .order('nome')
+          .range(from, to);
+      });
+
+      const results = await Promise.all(promises);
+      
+      let allCollaborators: Collaborator[] = [];
+      for (const res of results) {
+        if (res.error) throw res.error;
+        if (res.data) {
+          allCollaborators = allCollaborators.concat(res.data);
         }
-      } else {
-        hasMore = false;
       }
-    }
 
-    cache.collaborators = allCollaborators;
-    cache.lastFetch.collaborators = Date.now();
-    return cache.collaborators;
+      // Fallback: If for some reason parallel list was empty, try simple single page load
+      if (allCollaborators.length === 0) {
+        const { data } = await supabase.from('collaborators').select('*').order('nome').limit(limit);
+        allCollaborators = data || [];
+      }
+
+      cache.collaborators = allCollaborators;
+      cache.lastFetch.collaborators = Date.now();
+      return cache.collaborators;
+    } catch (err) {
+      console.error('Error fetching collaborators concurrently, falling back to sequential batching:', err);
+      
+      // Fallback: Sequential batching
+      let allCollaborators: Collaborator[] = [];
+      let from = 0;
+      const limit = 1000;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('collaborators')
+          .select('*')
+          .order('nome')
+          .range(from, from + limit - 1);
+
+        if (error) {
+          console.error('Error fetching collaborators batch:', error);
+          return cache.collaborators || [];
+        }
+
+        if (data) {
+          allCollaborators = allCollaborators.concat(data);
+          if (data.length < limit) {
+            hasMore = false;
+          } else {
+            from += limit;
+          }
+        } else {
+          hasMore = false;
+        }
+      }
+
+      cache.collaborators = allCollaborators;
+      cache.lastFetch.collaborators = Date.now();
+      return cache.collaborators;
+    }
   },
 
   saveCollaborator: async (col: Collaborator) => {

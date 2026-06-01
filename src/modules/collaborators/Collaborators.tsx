@@ -22,6 +22,11 @@ export const Collaborators: React.FC = () => {
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
   const [cpfValue, setCpfValue] = useState('');
+  const [visibleCount, setVisibleCount] = useState(50);
+
+  useEffect(() => {
+    setVisibleCount(50);
+  }, [searchTerm]);
   
   // Import States
   const [isImportModalOpen, setImportModalOpen] = useState(false);
@@ -713,8 +718,14 @@ export const Collaborators: React.FC = () => {
         {/* List - Scrollable area */}
         <div 
           className="flex-1 overflow-visible md:overflow-y-auto overscroll-contain no-scrollbar min-h-0 p-3 space-y-2 bg-slate-50/30"
+          onScroll={(e) => {
+            const target = e.currentTarget;
+            if (target.scrollHeight - target.scrollTop <= target.clientHeight + 100) {
+              setVisibleCount(prev => Math.min(prev + 50, filtered.length));
+            }
+          }}
         >
-          {filtered.map((c, index) => (
+          {filtered.slice(0, visibleCount).map((c, index) => (
             <div 
               key={c.id} 
               id={`collab-row-${index}`}
