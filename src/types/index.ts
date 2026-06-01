@@ -14,7 +14,7 @@ export enum WeekStatus {
 export interface Collaborator {
   id: string;
   nome: string;
-  cpf: string;
+  cpf: string | null;
   banco: string;
   agencia: string;
   conta: string;

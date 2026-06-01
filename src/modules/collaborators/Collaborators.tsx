@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { storage } from '../../services/storageService';
 import { Collaborator, CollaboratorStatus, Bank, HarvestLog } from '../../types';
 import { getWeekRange } from '../../utils/dateUtils';
-import { Plus, Search, Edit2, AlertCircle, X, User, Fingerprint, Landmark, ChevronDown, Save } from 'lucide-react';
+import { Plus, Search, Edit2, AlertCircle, X, User, Fingerprint, Landmark, ChevronDown, Save, FileSpreadsheet, Loader2, Upload, AlertTriangle } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { supabase } from '../../services/supabase';
+import * as XLSX from 'xlsx';
 
 export const Collaborators: React.FC = () => {
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
@@ -20,9 +22,17 @@ export const Collaborators: React.FC = () => {
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const { showToast } = useToast();
   const [cpfValue, setCpfValue] = useState('');
+  
+  // Import States
+  const [isImportModalOpen, setImportModalOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+  const [importError, setImportError] = useState('');
+  const importFileInputRef = useRef<HTMLInputElement>(null);
 
   const validateCPF = (cpf: string) => {
     const cleanCPF = cpf.replace(/\D/g, '');
+    if (cleanCPF === '00000000000') return true; // Permitir CPF zerado
     if (cleanCPF.length !== 11) return false;
     if (/^(\d)\1{10}$/.test(cleanCPF)) return false;
     
@@ -49,6 +59,171 @@ export const Collaborators: React.FC = () => {
       .replace(/(\d{3})(\d)/, '$1.$2')
       .replace(/(\d{3})(\d{1,2})/, '$1-$2')
       .replace(/(-\d{2})\d+?$/, '$1');
+  };
+
+  const normalizeBank = (bankName: string) => {
+    if (!bankName) return 'Outro';
+    const clean = String(bankName).trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, ' ');
+    if (clean.includes('caixa') || clean.includes('cx') || clean.includes('cef') || clean.includes('economica')) return 'Caixa Econômica';
+    if (clean.includes('bradesco') || clean.includes('brad')) return 'Bradesco';
+    if (clean.includes('brasil') || clean.includes('do brasil') || clean.includes('bb')) return 'Banco do Brasil';
+    if (clean.includes('itau')) return 'Itaú';
+    if (clean.includes('nubank') || clean.includes('nu ')) return 'Nubank';
+    if (clean.includes('inter')) return 'Inter';
+    if (clean.includes('c6')) return 'C6 Bank';
+    if (clean.includes('santander')) return 'Santander';
+    return String(bankName).trim();
+  };
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    setImportProgress(0);
+    setImportError('');
+
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      
+      let sheetName = workbook.SheetNames.find(name => 
+        /colaboradores|cadastros|colaborador|cadastro|membros|equipe/i.test(name)
+      ) || workbook.SheetNames[0];
+
+      const sheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1 });
+
+      if (rows.length < 2) {
+        throw new Error('Planilha vazia ou sem cabeçalhos.');
+      }
+
+      let headerIndex = -1;
+      for (let i = 0; i < Math.min(10, rows.length); i++) {
+        const row = rows[i];
+        if (row && (row.includes('ID') || row.includes('BENEFICIÁRIOS') || row.includes('NOME') || row.includes('Banco'))) {
+          headerIndex = i;
+          break;
+        }
+      }
+
+      if (headerIndex === -1) {
+        headerIndex = 0;
+      }
+
+      const headers = rows[headerIndex].map(h => String(h || '').trim());
+      
+      const idCol = headers.findIndex(h => /^(id|código|codigo|nº|no|cadastro)$/i.test(h));
+      const nameCol = headers.findIndex(h => /^(beneficiários|beneficiario|nome|colaborador|nome completo)$/i.test(h));
+      const cpfCol = headers.findIndex(h => /^(cpf|documento)$/i.test(h));
+      const bankCol = headers.findIndex(h => /^(banco|instituição|instituicao)$/i.test(h));
+      const agCol = headers.findIndex(h => /^(ag\.?|agencia|agência)$/i.test(h));
+      const opCol = headers.findIndex(h => /^(op\.?|operação|operacao)$/i.test(h));
+      const accCol = headers.findIndex(h => /^(nº conta|conta|numero conta|nº da conta)$/i.test(h));
+
+      if (nameCol === -1) {
+        throw new Error('Coluna de "Nome/Beneficiário" não encontrada na planilha.');
+      }
+
+      const parsedCollabs: Collaborator[] = [];
+
+      const { data: existingCollabs } = await supabase.from('collaborators').select('id');
+      const maxExistingId = existingCollabs
+        ? Math.max(...existingCollabs.map(c => parseInt(c.id)).filter(id => !isNaN(id)), 0)
+        : 0;
+
+      let nextAutoId = maxExistingId + 1;
+
+      for (let i = headerIndex + 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || row.length === 0) continue;
+
+        const rawName = row[nameCol];
+        if (!rawName || String(rawName).trim() === '') continue;
+
+        const nome = String(rawName).trim().toUpperCase();
+        
+        let rawId = idCol !== -1 ? String(row[idCol] || '').trim() : '';
+        const id = rawId || String(nextAutoId++);
+
+        // CPF handling: if empty, invalid or wrong length, set to "000.000.000-00" (zerado)
+        let cpf = cpfCol !== -1 && row[cpfCol] ? String(row[cpfCol]).trim().replace(/\D/g, '') : '';
+        let formattedCpf = '000.000.000-00';
+        
+        if (cpf && cpf.length === 11 && validateCPF(cpf)) {
+          formattedCpf = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        }
+
+        const bancoRaw = bankCol !== -1 ? String(row[bankCol] || '').trim() : '';
+        const banco = normalizeBank(bancoRaw);
+        const agencia = agCol !== -1 ? String(row[agCol] || '').trim() : '';
+        
+        // OP operation handling: pad numeric values, map strings to numbers
+        let op = opCol !== -1 ? String(row[opCol] || '').trim().toLowerCase() : '';
+        if (op) {
+          if (op.includes('poup') || op.includes('poupança')) {
+            op = '013';
+          } else if (op.includes('corr') || op.includes('corrente') || op.includes('cc')) {
+            op = '001';
+          } else if (op.includes('sal') || op.includes('salário') || op.includes('salario')) {
+            op = '037';
+          } else if (/^\d+$/.test(op)) {
+            op = op.padStart(3, '0');
+          }
+        }
+
+        // Infer tipo_conta based on operation
+        let tipo_conta = 'corrente';
+        if (op === '013') {
+          tipo_conta = 'poupanca';
+        } else if (op === '037') {
+          tipo_conta = 'salario';
+        }
+
+        const contaRaw = accCol !== -1 ? String(row[accCol] || '').trim() : '';
+        const conta = op ? `${contaRaw} (OP: ${op})` : contaRaw;
+
+        parsedCollabs.push({
+          id,
+          nome,
+          cpf: formattedCpf,
+          banco,
+          agencia: agencia || '0000',
+          conta: conta || '00000-0',
+          tipo_conta,
+          status: CollaboratorStatus.ACTIVE,
+          data_cadastro: new Date().toISOString()
+        });
+      }
+
+      if (parsedCollabs.length === 0) {
+        throw new Error('Nenhum colaborador válido encontrado para importação.');
+      }
+
+      const batchSize = 100;
+      for (let j = 0; j < parsedCollabs.length; j += batchSize) {
+        const batch = parsedCollabs.slice(j, j + batchSize);
+        const { error: upsertErr } = await supabase.from('collaborators').upsert(batch);
+        
+        if (upsertErr) {
+          throw new Error('Erro ao salvar lote no banco de dados: ' + upsertErr.message);
+        }
+
+        setImportProgress(Math.round(((j + batch.length) / parsedCollabs.length) * 100));
+      }
+
+      showToast(`Importação concluída! ${parsedCollabs.length} colaboradores importados.`, 'success');
+      setImportModalOpen(false);
+      await loadData();
+    } catch (err: any) {
+      console.error('Import failed:', err);
+      setImportError(err.message || 'Falha desconhecida na importação.');
+    } finally {
+      setIsImporting(false);
+      if (e.target) e.target.value = '';
+    }
   };
 
   useEffect(() => {
@@ -78,17 +253,20 @@ export const Collaborators: React.FC = () => {
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const cpf = formData.get('cpf') as string;
+    const cpfRaw = formData.get('cpf') as string;
+    const cpf = cpfRaw?.trim() ? cpfRaw.trim() : null;
 
-    if (!validateCPF(cpf)) {
-      setError('CPF inválido. Por favor, verifique os números.');
-      return;
-    }
+    if (cpf !== null) {
+      if (!validateCPF(cpf)) {
+        setError('CPF inválido. Por favor, verifique os números.');
+        return;
+      }
 
-    const existing = collaborators.find(c => c.cpf === cpf && c.id !== (editingCollab?.id || ''));
-    if (existing) {
-      setError('Este CPF já está cadastrado.');
-      return;
+      const existing = collaborators.find(c => c.cpf === cpf && c.id !== (editingCollab?.id || ''));
+      if (existing) {
+        setError('Este CPF já está cadastrado.');
+        return;
+      }
     }
 
     const getNextSequentialId = () => {
@@ -151,19 +329,29 @@ export const Collaborators: React.FC = () => {
           <h1 className="text-xl md:text-2xl font-black text-dark tracking-tight leading-none uppercase italic">COLABORADORES</h1>
           <p className="text-secondary/60 font-medium text-[10px]">Gerenciamento de colaboradores</p>
         </div>
-        <button
-          onClick={() => { 
-            setEditingCollab(null); 
-            setIsReadOnly(false); 
-            setCpfValue('');
-            setSelectedBank('');
-            setModalOpen(true); 
-          }}
-          className="!bg-primary !text-white px-5 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 hover:!bg-dark transition-all active:scale-95 shadow-lg shadow-primary/20 group"
-        >
-          <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
-          Novo Colaborador
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setImportModalOpen(true)}
+            className="px-5 py-3 bg-slate-150 hover:bg-slate-200 text-primary rounded-xl font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm border border-slate-250 cursor-pointer"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-primary" />
+            Importar Planilha
+          </button>
+          
+          <button
+            onClick={() => { 
+              setEditingCollab(null); 
+              setIsReadOnly(false); 
+              setCpfValue('');
+              setSelectedBank('');
+              setModalOpen(true); 
+            }}
+            className="!bg-primary !text-white px-5 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 hover:!bg-dark transition-all active:scale-95 shadow-lg shadow-primary/20 group cursor-pointer"
+          >
+            <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
+            Novo Colaborador
+          </button>
+        </div>
       </div>
 
       {/* Main Table Container - Occupies remaining space */}
@@ -283,7 +471,9 @@ export const Collaborators: React.FC = () => {
                     <div className="font-black text-dark text-[13px] uppercase tracking-tight leading-none">{c.nome}</div>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-[10px] font-black text-dark uppercase tracking-widest bg-slate-100 px-2 py-0.5 rounded border border-slate-200">ID: {c.id}</span>
-                      <span className="text-[10px] font-mono font-black tracking-wider text-dark">{c.cpf}</span>
+                      <span className={`text-[10px] font-mono font-black tracking-wider ${c.cpf ? 'text-dark' : 'text-slate-400 italic font-bold'}`}>
+                        {c.cpf || 'Sem CPF'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -423,15 +613,14 @@ export const Collaborators: React.FC = () => {
                   </div>
                   
                   <div className="space-y-1 group">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-dark/70 px-2">CPF</label>
+                    <label className="text-[11px] font-black uppercase tracking-widest text-dark/70 px-2">CPF (Opcional)</label>
                     <input 
                       name="cpf" 
-                      required 
                       disabled={isReadOnly}
-                      value={cpfValue}
+                      value={cpfValue || ''}
                       onChange={(e) => setCpfValue(formatCPF(e.target.value))}
                       className="w-full bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm font-mono shadow-sm disabled:opacity-70"
-                      placeholder="000.000.000-00"
+                      placeholder="000.000.000-00 (Opcional)"
                     />
                   </div>
 
@@ -605,6 +794,88 @@ export const Collaborators: React.FC = () => {
                 </div>
               </form>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Excel/CSV Import Modal */}
+      {isImportModalOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-dark/60 backdrop-blur-xl animate-in fade-in">
+          <div className="bg-white rounded-[32px] w-full max-w-lg shadow-2xl relative animate-in zoom-in-95 border border-white/20 flex flex-col overflow-hidden my-auto p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-black text-dark tracking-tight uppercase italic leading-none">
+                  Importar <span className="text-primary not-italic">Colaboradores</span>
+                </h2>
+                <p className="text-[8px] font-bold text-secondary/40 uppercase tracking-widest mt-1">Carregar Planilha Excel ou CSV</p>
+              </div>
+              <button 
+                onClick={() => setImportModalOpen(false)}
+                disabled={isImporting}
+                className="p-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl text-secondary/30 hover:text-primary transition-all cursor-pointer disabled:opacity-50"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {importError && (
+              <div className="flex items-start gap-3 bg-rose-50 border border-rose-100 p-3 rounded-2xl text-[10px] font-black text-rose-800 uppercase tracking-tight">
+                <AlertTriangle className="w-4 h-4 text-rose-700 flex-shrink-0 mt-0.5" />
+                <span>{importError}</span>
+              </div>
+            )}
+
+            {!isImporting ? (
+              <div className="space-y-4">
+                <div 
+                  onClick={() => importFileInputRef.current?.click()}
+                  className="border-2 border-dashed border-primary/25 hover:border-primary/50 bg-slate-50/50 hover:bg-slate-50 rounded-[24px] p-8 flex flex-col items-center justify-center gap-3 transition-all cursor-pointer group shadow-inner"
+                >
+                  <div className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-xs font-black text-dark uppercase tracking-tight">Escolha ou arraste o arquivo</p>
+                    <p className="text-[9px] font-black text-secondary/40 uppercase tracking-widest">Suporta planilhas Excel (.xlsx, .xlsm) ou CSV</p>
+                  </div>
+                  <input 
+                    type="file" 
+                    ref={importFileInputRef}
+                    onChange={handleImportFile}
+                    accept=".xlsx,.xlsm,.csv" 
+                    className="hidden" 
+                  />
+                </div>
+
+                <div className="p-3.5 bg-amber-500/5 border border-amber-500/10 rounded-2xl space-y-1.5">
+                  <p className="text-[8px] font-black text-amber-800 uppercase tracking-widest flex items-center gap-1.5 leading-none">
+                    <AlertCircle className="w-3.5 h-3.5" /> Dicas para Mapeamento Perfeito
+                  </p>
+                  <ul className="text-[9px] font-bold text-amber-900/60 list-disc list-inside space-y-0.5 leading-normal">
+                    <li>O sistema identifica colunas com nomes como: <strong>ID, Nome/Beneficiário, CPF, Banco, Agência, Conta e OP</strong>.</li>
+                    <li><strong>CPFs Ausentes ou Inválidos:</strong> Colaboradores sem CPF cadastrado, com CPFs inconsistentes ou errados, receberão automaticamente o valor "000.000.000-00" (zerado).</li>
+                    <li><strong>ID Sequencial:</strong> IDs vazios serão gerados de forma sequencial.</li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="p-6 flex flex-col items-center justify-center space-y-4">
+                <div className="relative w-20 h-20 flex items-center justify-center">
+                  <Loader2 className="w-12 h-12 text-primary animate-spin absolute" />
+                  <span className="font-black text-xs text-primary leading-none mt-1">{importProgress}%</span>
+                </div>
+                <div className="text-center space-y-1.5 w-full">
+                  <p className="text-xs font-black text-dark uppercase tracking-tight">Importando dados para o servidor...</p>
+                  <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden shadow-inner border border-slate-200">
+                    <div 
+                      className="bg-primary h-full rounded-full transition-all duration-300"
+                      style={{ width: `${importProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-[8px] font-black text-secondary/40 uppercase tracking-widest">Não feche esta tela até a conclusão</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

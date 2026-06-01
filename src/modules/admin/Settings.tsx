@@ -327,6 +327,37 @@ export const Settings: React.FC = () => {
     }
   };
 
+  const handleClearOperationalData = async () => {
+    if (!confirm('ATENÇÃO: Isso irá apagar permanentemente todas as semanas, registros de colheita e colaboradores da base de dados! Esta ação NÃO pode ser desfeita. Deseja realmente continuar?')) {
+      return;
+    }
+
+    const verify = prompt('Para confirmar a exclusão permanente de todos os dados operacionais, digite "EXCLUIR" abaixo:');
+    if (verify !== 'EXCLUIR') {
+      showToast('Limpeza de dados cancelada. Confirmação incorreta.', 'warning');
+      return;
+    }
+
+    showToast('Iniciando limpeza de dados operacionais...', 'success');
+    
+    try {
+      const { error: errLogs } = await supabase.from('harvest_logs').delete().neq('id', '');
+      if (errLogs) throw new Error('Erro ao limpar lançamentos: ' + errLogs.message);
+
+      const { error: errWeeks } = await supabase.from('harvest_weeks').delete().neq('id', '');
+      if (errWeeks) throw new Error('Erro ao limpar semanas: ' + errWeeks.message);
+
+      const { error: errCollabs } = await supabase.from('collaborators').delete().neq('id', '');
+      if (errCollabs) throw new Error('Erro ao limpar colaboradores: ' + errCollabs.message);
+
+      showToast('Banco de dados operacional limpo com sucesso!', 'success');
+      await loadData();
+    } catch (err: any) {
+      console.error('Failed to clear operational data:', err);
+      showToast('Erro ao limpar base de dados: ' + err.message, 'error');
+    }
+  };
+
   const handleRestore = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -468,6 +499,15 @@ export const Settings: React.FC = () => {
             accept=".json" 
             className="hidden" 
           />
+
+          <button 
+            onClick={handleClearOperationalData}
+            disabled={isBackingUp || isRestoring}
+            className="flex items-center gap-2 px-3 py-1.5 bg-danger/5 text-danger rounded-xl font-black uppercase tracking-widest text-[8px] hover:bg-danger hover:text-white transition-all disabled:opacity-50 border border-danger/10 group shadow-sm cursor-pointer"
+          >
+            <Database className="w-3 h-3 group-hover:scale-110 transition-transform" />
+            Limpar Base
+          </button>
 
           <button 
             onClick={() => signOut()}
