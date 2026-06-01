@@ -74,19 +74,38 @@ const shouldFetch = (key: keyof typeof cache.lastFetch) => {
 
 export const storage = {
   getCollaborators: async (forceRefresh = false): Promise<Collaborator[]> => {
-    if (!forceRefresh && !shouldFetch('collaborators')) return cache.collaborators!;
+    if (!forceRefresh && !shouldFetch('collaborators') && cache.collaborators) return cache.collaborators;
 
-    const { data, error } = await supabase
-      .from('collaborators')
-      .select('*')
-      .order('nome');
+    let allCollaborators: Collaborator[] = [];
+    let from = 0;
+    const limit = 1000;
+    let hasMore = true;
 
-    if (error) {
-      console.error('Error fetching collaborators:', error);
-      return cache.collaborators || [];
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('collaborators')
+        .select('*')
+        .order('nome')
+        .range(from, from + limit - 1);
+
+      if (error) {
+        console.error('Error fetching collaborators batch:', error);
+        return cache.collaborators || [];
+      }
+
+      if (data) {
+        allCollaborators = allCollaborators.concat(data);
+        if (data.length < limit) {
+          hasMore = false;
+        } else {
+          from += limit;
+        }
+      } else {
+        hasMore = false;
+      }
     }
-    
-    cache.collaborators = data || [];
+
+    cache.collaborators = allCollaborators;
     cache.lastFetch.collaborators = Date.now();
     return cache.collaborators;
   },

@@ -225,6 +225,8 @@ export const Collaborators: React.FC = () => {
         return s.includes('conta') && !s.includes('tipo') && !s.includes('op');
       });
 
+      const numCols = headers.length;
+
       // Fallback Scanner: If any critical column is not found in headers, analyze cells of non-empty rows
       const colScores = Array.from({ length: numCols }, () => ({
         id: 0,
