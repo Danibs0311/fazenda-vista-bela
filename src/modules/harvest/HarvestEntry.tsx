@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { storage } from '../../services/storageService';
 import { Collaborator, HarvestLog, CollaboratorStatus, Bank } from '../../types';
 import { getWeekRange, formatCurrency, formatDate } from '../../utils/dateUtils';
-import { Search, Save, History, Trash2, Calendar, UserPlus, Pickaxe, ChevronRight, X, ArrowUpRight, Plus, Landmark, User, AlertCircle, Edit2, Download, Cloud, CloudOff, Wifi, WifiOff } from 'lucide-react';
+import { Search, Save, History, Trash2, Calendar, UserPlus, Pickaxe, ChevronRight, X, ArrowUpRight, Plus, Landmark, User, AlertCircle, Edit2, Download, Cloud, CloudOff, Wifi, WifiOff, Fingerprint } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { Link } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
@@ -128,7 +128,7 @@ export const HarvestEntry: React.FC = () => {
     }
 
     const [collabs, recent, price, bankData] = await Promise.all([
-       storage.getCollaborators(),
+      storage.getCollaborators(true),
       storage.getHarvests(),
       storage.getCurrentPrice(date),
       storage.getBanks()
@@ -137,6 +137,19 @@ export const HarvestEntry: React.FC = () => {
     setRecentHarvests(recent);
     setCurrentPrice(price);
     setBanks(bankData);
+  };
+
+  const getNextSequentialId = () => {
+    const numericIds = collaborators
+      .map(c => parseInt(c.id))
+      .filter(id => !isNaN(id) && id > 0);
+    
+    const idSet = new Set(numericIds);
+    let candidate = 1;
+    while (idSet.has(candidate)) {
+      candidate++;
+    }
+    return candidate.toString();
   };
 
   const weekInfo = useMemo(() => getWeekRange(date), [date]);
@@ -192,26 +205,46 @@ export const HarvestEntry: React.FC = () => {
   const handleQuickRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const cpf = formData.get('cpf') as string;
+    const cpfRaw = formData.get('cpf') as string;
+    
+    // Normalize and validate CPF
+    const cleanCpf = (cpfRaw || '').replace(/\D/g, '');
+    let formattedCpf = '000.000.000-00';
+    
+    const isValidCpf = (val: string) => {
+      if (val === '00000000000') return true;
+      if (val.length !== 11) return false;
+      if (/^(\d)\1{10}$/.test(val)) return false;
+      let sum = 0;
+      let rest;
+      for (let i = 1; i <= 9; i++) sum = sum + parseInt(val.substring(i - 1, i)) * (11 - i);
+      rest = (sum * 10) % 11;
+      if ((rest === 10) || (rest === 11)) rest = 0;
+      if (rest !== parseInt(val.substring(9, 10))) return false;
+      sum = 0;
+      for (let i = 1; i <= 10; i++) sum = sum + parseInt(val.substring(i - 1, i)) * (12 - i);
+      rest = (sum * 10) % 11;
+      if ((rest === 10) || (rest === 11)) rest = 0;
+      if (rest !== parseInt(val.substring(10, 11))) return false;
+      return true;
+    };
 
-    const existing = collaborators.find(c => c.cpf === cpf);
-    if (existing) {
-      setRegError('Este CPF já está cadastrado.');
-      return;
+    if (cleanCpf && cleanCpf.length === 11 && isValidCpf(cleanCpf)) {
+      formattedCpf = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     }
 
-    const getNextSequentialId = () => {
-      const numericIds = collaborators
-        .map(c => parseInt(c.id))
-        .filter(id => !isNaN(id));
-      const maxId = numericIds.length > 0 ? Math.max(...numericIds) : 0;
-      return (maxId + 1).toString();
-    };
+    if (formattedCpf !== '000.000.000-00') {
+      const existing = collaborators.find(c => c.cpf === formattedCpf);
+      if (existing) {
+        setRegError('Este CPF já está cadastrado.');
+        return;
+      }
+    }
 
     const newCollab: Collaborator = {
       id: getNextSequentialId(),
       nome: formData.get('nome') as string,
-      cpf,
+      cpf: formattedCpf,
       banco: formData.get('banco') as string,
       agencia: formData.get('agencia') as string,
       conta: formData.get('conta') as string,
@@ -821,6 +854,18 @@ export const HarvestEntry: React.FC = () => {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="md:col-span-2 space-y-1 group opacity-60">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-secondary/40 px-2">ID Interno</label>
+                  <div className="relative">
+                    <Fingerprint className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary/20" />
+                    <input 
+                      disabled
+                      value={getNextSequentialId()} 
+                      className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl py-2 px-12 text-secondary/40 font-black text-base outline-none cursor-not-allowed" 
+                    />
+                  </div>
+                </div>
+
                 <div className="md:col-span-2 space-y-1 group">
                   <label className="text-[10px] font-black uppercase tracking-widest text-secondary/40 px-2">Nome Completo</label>
                   <div className="relative">
@@ -880,16 +925,13 @@ export const HarvestEntry: React.FC = () => {
                 </div>
 
                 <div className="space-y-1 group md:col-span-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-secondary/40 px-2">Tipo da Conta</label>
-                  <select 
+                  <label className="text-[10px] font-black uppercase tracking-widest text-secondary/40 px-2">Operação / Tipo de Conta</label>
+                  <input 
                     name="tipo_conta" 
                     required 
-                    className="w-full appearance-none bg-white border-2 border-primary focus:border-primary/50 rounded-2xl py-2 px-6 text-primary outline-none transition-all font-black text-base"
-                  >
-                    <option value="corrente">Conta Corrente</option>
-                    <option value="poupanca">Conta Poupança</option>
-                    <option value="salario">Conta Salário</option>
-                  </select>
+                    className="w-full bg-white border-2 border-primary focus:border-primary/50 rounded-2xl py-2 px-6 text-primary outline-none transition-all font-black text-base"
+                    placeholder="Ex: POUPANÇA, CORRENTE, 013, 001"
+                  />
                 </div>
               </div>
 

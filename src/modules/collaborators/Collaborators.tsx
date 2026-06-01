@@ -208,6 +208,9 @@ export const Collaborators: React.FC = () => {
         const nome = String(rawName).trim().toUpperCase();
         
         let rawId = idCol !== -1 ? String(row[idCol] || '').trim() : '';
+        if (rawId && /^\d+(\.0+)?$/.test(rawId)) {
+          rawId = String(Math.floor(parseFloat(rawId)));
+        }
         const id = rawId || String(nextAutoId++);
 
         // CPF handling: if empty, invalid or wrong length, set to "000.000.000-00" (zerado)
@@ -222,43 +225,11 @@ export const Collaborators: React.FC = () => {
         const banco = intelligentMatchBank(bancoRaw, banks);
         const agencia = agCol !== -1 ? String(row[agCol] || '').trim() : '';
         
-        // OP operation handling: pad numeric values, map strings to numbers
-        let op = opCol !== -1 ? String(row[opCol] || '').trim().toLowerCase()
-          .normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
-        
-        if (op) {
-          if (op.includes('poup') && (op.includes('pj') || op.includes('juridica'))) {
-            op = '022';
-          } else if (op.includes('poup') || op.includes('poupança')) {
-            op = '013';
-          } else if ((op.includes('corr') || op.includes('cc')) && (op.includes('pj') || op.includes('juridica'))) {
-            op = '003';
-          } else if (op.includes('corr') || op.includes('cc') || op.includes('corrente')) {
-            op = '001';
-          } else if (op.includes('sal') || op.includes('salario')) {
-            op = '037';
-          } else if (op.includes('facil')) {
-            op = '023';
-          } else if (/^\d+$/.test(op)) {
-            op = op.padStart(3, '0');
-          } else {
-            const numericOnly = op.replace(/\D/g, '');
-            if (numericOnly) {
-              op = numericOnly.padStart(3, '0');
-            }
-          }
-        }
+        // Read raw OP operation text exactly as it is in the spreadsheet
+        const rawOp = opCol !== -1 ? String(row[opCol] || '').trim() : '';
+        const tipo_conta = rawOp || 'CORRENTE';
 
-        // Infer tipo_conta based on operation
-        let tipo_conta = 'corrente';
-        if (op === '013' || op === '022') {
-          tipo_conta = 'poupanca';
-        } else if (op === '037') {
-          tipo_conta = 'salario';
-        }
-
-        const contaRaw = accCol !== -1 ? String(row[accCol] || '').trim() : '';
-        const conta = op ? `${contaRaw} (OP: ${op})` : contaRaw;
+        const conta = accCol !== -1 ? String(row[accCol] || '').trim() : '';
 
         parsedCollabs.push({
           id,
@@ -330,7 +301,7 @@ export const Collaborators: React.FC = () => {
   const loadData = async () => {
     const currentWeekId = getWeekRange().id;
     const [collabData, bankData, currentWeekHarvests] = await Promise.all([
-      storage.getCollaborators(),
+      storage.getCollaborators(true),
       storage.getBanks(),
       storage.getHarvestsByWeek(currentWeekId)
     ]);
@@ -338,6 +309,19 @@ export const Collaborators: React.FC = () => {
     setCollaborators(collabData);
     setBanks(bankData);
     setWeeklyHarvests(currentWeekHarvests);
+  };
+
+  const getNextSequentialId = () => {
+    const numericIds = collaborators
+      .map(c => parseInt(c.id))
+      .filter(id => !isNaN(id) && id > 0);
+    
+    const idSet = new Set(numericIds);
+    let candidate = 1;
+    while (idSet.has(candidate)) {
+      candidate++;
+    }
+    return candidate.toString();
   };
 
   const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -361,14 +345,6 @@ export const Collaborators: React.FC = () => {
         return;
       }
     }
-
-    const getNextSequentialId = () => {
-      const numericIds = collaborators
-        .map(c => parseInt(c.id))
-        .filter(id => !isNaN(id));
-      const maxId = numericIds.length > 0 ? Math.max(...numericIds) : 0;
-      return (maxId + 1).toString();
-    };
 
     const collab: Collaborator = {
       id: editingCollab?.id || getNextSequentialId(),
@@ -676,19 +652,17 @@ export const Collaborators: React.FC = () => {
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {editingCollab && (
-                    <div className="md:col-span-2 space-y-1 group opacity-60">
-                      <label className="text-[11px] font-black uppercase tracking-widest text-dark/70 px-2">ID Interno</label>
-                      <div className="relative">
-                        <Fingerprint className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary/20" />
-                        <input 
-                          disabled
-                          value={editingCollab.id} 
-                          className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-2 px-10 text-secondary/40 font-black text-sm outline-none cursor-not-allowed" 
-                        />
-                      </div>
+                  <div className="md:col-span-2 space-y-1 group opacity-60">
+                    <label className="text-[11px] font-black uppercase tracking-widest text-dark/70 px-2">ID Interno</label>
+                    <div className="relative">
+                      <Fingerprint className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-secondary/20" />
+                      <input 
+                        disabled
+                        value={editingCollab ? editingCollab.id : getNextSequentialId()} 
+                        className="w-full bg-slate-50 border-2 border-slate-100 rounded-xl py-2 px-10 text-secondary/40 font-black text-sm outline-none cursor-not-allowed" 
+                      />
                     </div>
-                  )}
+                  </div>
 
                   <div className="md:col-span-2 space-y-1 group">
                     <label className="text-[11px] font-black uppercase tracking-widest text-dark/70 px-2">Nome Completo</label>
@@ -770,21 +744,15 @@ export const Collaborators: React.FC = () => {
                   </div>
 
                   <div className="space-y-1 group md:col-span-2">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-dark/70 px-2">Tipo da Conta</label>
-                    <div className="relative">
-                      <select 
-                        name="tipo_conta" 
-                        required 
-                        disabled={isReadOnly}
-                        defaultValue={editingCollab?.tipo_conta?.toLowerCase() || 'corrente'} 
-                        className="w-full appearance-none bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm shadow-sm disabled:opacity-70"
-                      >
-                        <option value="corrente">Conta Corrente</option>
-                        <option value="poupanca">Conta Poupança</option>
-                        <option value="salario">Conta Salário</option>
-                      </select>
-                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40 pointer-events-none" />
-                    </div>
+                    <label className="text-[11px] font-black uppercase tracking-widest text-dark/70 px-2">Operação / Tipo de Conta</label>
+                    <input 
+                      name="tipo_conta" 
+                      required 
+                      disabled={isReadOnly}
+                      defaultValue={editingCollab?.tipo_conta} 
+                      className="w-full bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm shadow-sm disabled:opacity-70"
+                      placeholder="Ex: POUPANÇA, CORRENTE, 013, 001"
+                    />
                   </div>
                 </div>
 
