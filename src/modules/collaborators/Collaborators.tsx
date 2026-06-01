@@ -177,13 +177,40 @@ export const Collaborators: React.FC = () => {
 
       const headers = rows[headerIndex].map(h => String(h || '').trim());
       
-      const idCol = headers.findIndex(h => /^(id|código|codigo|nº|no|cadastro)$/i.test(h));
-      const nameCol = headers.findIndex(h => /^(beneficiários|beneficiario|nome|colaborador|nome completo)$/i.test(h));
-      const cpfCol = headers.findIndex(h => /^(cpf|documento)$/i.test(h));
-      const bankCol = headers.findIndex(h => /^(banco|instituição|instituicao)$/i.test(h));
-      const agCol = headers.findIndex(h => /^(ag\.?|agencia|agência)$/i.test(h));
-      const opCol = headers.findIndex(h => /^(op\.?|operação|operacao)$/i.test(h));
-      const accCol = headers.findIndex(h => /^(nº conta|conta|numero conta|nº da conta)$/i.test(h));
+      const idCol = headers.findIndex(h => {
+        const s = h.toLowerCase().trim();
+        return s === 'id' || s === 'código' || s === 'codigo' || s === 'nº' || s === 'no' || s === 'cadastro' || s === 'cod' || s.startsWith('id ') || s.startsWith('id.');
+      });
+
+      const nameCol = headers.findIndex(h => {
+        const s = h.toLowerCase().trim();
+        return s.includes('benefici') || s.includes('nome') || s.includes('colaborador') || s === 'nome completo';
+      });
+
+      const cpfCol = headers.findIndex(h => {
+        const s = h.toLowerCase().trim();
+        return s === 'cpf' || s === 'documento' || s.includes('cpf');
+      });
+
+      const bankCol = headers.findIndex(h => {
+        const s = h.toLowerCase().trim();
+        return s.includes('banco') || s.includes('institu');
+      });
+
+      const agCol = headers.findIndex(h => {
+        const s = h.toLowerCase().trim();
+        return s.startsWith('ag') || s.includes('agencia') || s.includes('agência');
+      });
+
+      const opCol = headers.findIndex(h => {
+        const s = h.toLowerCase().trim();
+        return s === 'op' || s === 'op.' || s.startsWith('operac') || s.startsWith('operaç') || s.includes('tipo de conta') || s.includes('tipo conta') || s.includes('cod op') || s.includes('op conta') || s === 'operaçao' || s === 'o.p';
+      });
+
+      const accCol = headers.findIndex(h => {
+        const s = h.toLowerCase().trim();
+        return s.includes('conta') && !s.includes('tipo') && !s.includes('op');
+      });
 
       if (nameCol === -1) {
         throw new Error('Coluna de "Nome/Beneficiário" não encontrada na planilha.');
@@ -509,16 +536,6 @@ export const Collaborators: React.FC = () => {
         {/* List - Scrollable area */}
         <div 
           className="flex-1 overflow-visible md:overflow-y-auto overscroll-contain no-scrollbar min-h-0 p-3 space-y-2 bg-slate-50/30"
-          onWheel={(e) => {
-            if (filtered.length > 0) {
-              e.preventDefault();
-              if (e.deltaY > 0) {
-                setActiveIndex(prev => Math.max(0, Math.min(prev + 1, filtered.length - 1)));
-              } else {
-                setActiveIndex(prev => Math.max(0, Math.min(prev - 1, filtered.length - 1)));
-              }
-            }
-          }}
         >
           {filtered.map((c, index) => (
             <div 
