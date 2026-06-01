@@ -176,6 +176,21 @@ export const storage = {
     cache.lastFetch.collaborators = 0; // Invalidate cache
   },
 
+  deleteCollaborator: async (id: string) => {
+    const { error } = await supabase
+      .from('collaborators')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      if (error.message.includes('violates foreign key constraint')) {
+        throw new Error('Este colaborador possui colheitas lançadas e não pode ser excluído.');
+      }
+      throw new Error('Erro ao excluir colaborador: ' + error.message);
+    }
+    cache.lastFetch.collaborators = 0; // Invalidate cache
+  },
+
   getPrices: async (forceRefresh = false): Promise<CanPriceConfig[]> => {
     if (!forceRefresh && !shouldFetch('prices') && cache.prices) return cache.prices;
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { storage, normalizeOperation } from '../../services/storageService';
 import { Collaborator, CollaboratorStatus, Bank, HarvestLog } from '../../types';
 import { getWeekRange } from '../../utils/dateUtils';
-import { Plus, Search, Edit2, AlertCircle, X, User, Fingerprint, Landmark, ChevronDown, Save, FileSpreadsheet, Loader2, Upload, AlertTriangle } from 'lucide-react';
+import { Plus, Search, Edit2, AlertCircle, X, User, Fingerprint, Landmark, ChevronDown, Save, FileSpreadsheet, Loader2, Upload, AlertTriangle, Trash2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { supabase } from '../../services/supabase';
 import * as XLSX from 'xlsx';
@@ -581,6 +581,18 @@ export const Collaborators: React.FC = () => {
     }
   };
 
+  const handleDelete = async (collab: Collaborator) => {
+    if (window.confirm(`Tem certeza que deseja excluir o colaborador "${collab.nome}" (ID: ${collab.id})?`)) {
+      try {
+        await storage.deleteCollaborator(collab.id);
+        await loadData();
+        showToast('Colaborador excluído com sucesso!', 'success');
+      } catch (err: any) {
+        showToast(err.message || 'Erro ao excluir colaborador.', 'error');
+      }
+    }
+  };
+
 
    const filtered = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -795,6 +807,13 @@ export const Collaborators: React.FC = () => {
                   >
                     <Edit2 className="w-3.5 h-3.5 !text-white" />
                     <span className="text-[10px] font-black uppercase tracking-tighter !text-white">Editar</span>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDelete(c); }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 !bg-success !text-white hover:!bg-success/90 rounded-lg transition-all active:scale-90 shadow-lg shadow-success/20 animate-in fade-in"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 !text-white" />
+                    <span className="text-[10px] font-black uppercase tracking-tighter !text-white">Excluir</span>
                   </button>
                 </div>
               </div>
