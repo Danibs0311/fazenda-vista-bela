@@ -277,6 +277,7 @@ export const Collaborators: React.FC = () => {
 
       showToast(`Importação concluída! ${parsedCollabs.length} colaboradores importados.`, 'success');
       setImportModalOpen(false);
+      await storage.getCollaborators(true); // Force-refresh and update cache once
       await loadData();
     } catch (err: any) {
       console.error('Import failed:', err);
@@ -301,7 +302,7 @@ export const Collaborators: React.FC = () => {
   const loadData = async () => {
     const currentWeekId = getWeekRange().id;
     const [collabData, bankData, currentWeekHarvests] = await Promise.all([
-      storage.getCollaborators(true),
+      storage.getCollaborators(),
       storage.getBanks(),
       storage.getHarvestsByWeek(currentWeekId)
     ]);

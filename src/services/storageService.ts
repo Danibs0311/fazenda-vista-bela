@@ -12,7 +12,13 @@ import { getWeekRange } from '../utils/dateUtils';
 import { localDb, OfflineHarvestLog } from './localDb';
 
 export const normalizeOperation = (op: string | null | undefined): string => {
-  const cleanOp = (op || '').trim().toUpperCase();
+  let cleanOp = (op || '').trim().toUpperCase();
+  
+  // Normalize float representations of integers, e.g., "13.0" -> "13"
+  if (/^\d+(\.0+)?$/.test(cleanOp)) {
+    cleanOp = String(Math.floor(parseFloat(cleanOp)));
+  }
+
   if (!cleanOp || cleanOp === '0') {
     return 'XXXX';
   }

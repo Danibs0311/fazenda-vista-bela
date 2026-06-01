@@ -128,7 +128,7 @@ export const HarvestEntry: React.FC = () => {
     }
 
     const [collabs, recent, price, bankData] = await Promise.all([
-      storage.getCollaborators(true),
+      storage.getCollaborators(),
       storage.getHarvests(),
       storage.getCurrentPrice(date),
       storage.getBanks()
