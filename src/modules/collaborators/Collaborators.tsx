@@ -225,10 +225,7 @@ export const Collaborators: React.FC = () => {
         return s.includes('conta') && !s.includes('tipo') && !s.includes('op');
       });
 
-      // Fallback Scanner: If any critical column is not found in headers, analyze cells in first 15 rows
-      const maxScanRows = Math.min(headerIndex + 15, rows.length);
-      const numCols = rows[headerIndex] ? rows[headerIndex].length : 0;
-      
+      // Fallback Scanner: If any critical column is not found in headers, analyze cells of non-empty rows
       const colScores = Array.from({ length: numCols }, () => ({
         id: 0,
         name: 0,
@@ -239,11 +236,18 @@ export const Collaborators: React.FC = () => {
         acc: 0
       }));
 
-      for (let i = headerIndex + 1; i < maxScanRows; i++) {
+      let scannedCount = 0;
+      for (let i = headerIndex + 1; i < rows.length && scannedCount < 50; i++) {
         const row = rows[i];
-        if (!row) continue;
+        if (!row || row.length === 0) continue;
         
-        for (let colIdx = 0; colIdx < numCols; colIdx++) {
+        // Skip completely empty rows
+        const hasData = row.some(cell => String(cell || '').trim() !== '');
+        if (!hasData) continue;
+
+        scannedCount++;
+        
+        for (let colIdx = 0; colIdx < Math.min(row.length, numCols); colIdx++) {
           const val = String(row[colIdx] || '').trim();
           if (!val) continue;
 
@@ -311,16 +315,16 @@ export const Collaborators: React.FC = () => {
         if (bestIdx !== -1) nameCol = bestIdx;
       }
 
-      if (opCol === -1) {
+      if (bankCol === -1) {
         let bestIdx = -1, maxScore = 0;
         for (let c = 0; c < numCols; c++) {
-          if (c === nameCol || c === bankCol) continue;
-          if (colScores[c].op > maxScore) {
-            maxScore = colScores[c].op;
+          if (c === nameCol) continue;
+          if (colScores[c].bank > maxScore) {
+            maxScore = colScores[c].bank;
             bestIdx = c;
           }
         }
-        if (bestIdx !== -1) opCol = bestIdx;
+        if (bestIdx !== -1) bankCol = bestIdx;
       }
 
       if (cpfCol === -1) {
@@ -333,18 +337,6 @@ export const Collaborators: React.FC = () => {
           }
         }
         if (bestIdx !== -1) cpfCol = bestIdx;
-      }
-
-      if (bankCol === -1) {
-        let bestIdx = -1, maxScore = 0;
-        for (let c = 0; c < numCols; c++) {
-          if (c === nameCol) continue;
-          if (colScores[c].bank > maxScore) {
-            maxScore = colScores[c].bank;
-            bestIdx = c;
-          }
-        }
-        if (bestIdx !== -1) bankCol = bestIdx;
       }
 
       if (agCol === -1) {
@@ -369,6 +361,18 @@ export const Collaborators: React.FC = () => {
           }
         }
         if (bestIdx !== -1) accCol = bestIdx;
+      }
+
+      if (opCol === -1) {
+        let bestIdx = -1, maxScore = 0;
+        for (let c = 0; c < numCols; c++) {
+          if (c === nameCol || c === bankCol || c === cpfCol || c === agCol || c === accCol) continue;
+          if (colScores[c].op > maxScore) {
+            maxScore = colScores[c].op;
+            bestIdx = c;
+          }
+        }
+        if (bestIdx !== -1) opCol = bestIdx;
       }
 
       if (idCol === -1) {
