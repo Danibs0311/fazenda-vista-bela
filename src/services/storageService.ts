@@ -177,13 +177,12 @@ export const storage = {
   },
 
   deleteCollaborator: async (id: string) => {
-    const { error } = await supabase
-      .from('collaborators')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.rpc('delete_collaborator_by_id', {
+      target_id: id
+    });
 
     if (error) {
-      if (error.message.includes('violates foreign key constraint')) {
+      if (error.message.includes('violates foreign key constraint') || error.message.includes('colheitas lançadas')) {
         throw new Error('Este colaborador possui colheitas lançadas e não pode ser excluído.');
       }
       throw new Error('Erro ao excluir colaborador: ' + error.message);
