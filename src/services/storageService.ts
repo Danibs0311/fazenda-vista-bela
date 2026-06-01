@@ -12,7 +12,7 @@ import { getWeekRange } from '../utils/dateUtils';
 import { localDb, OfflineHarvestLog } from './localDb';
 
 export const normalizeOperation = (op: string | null | undefined): string => {
-  let cleanOp = (op || '').trim().toUpperCase();
+  let cleanOp = (op || '').replace(/\s+/g, ' ').trim().toUpperCase();
   
   // Normalize float representations of integers, e.g., "13.0" -> "13"
   if (/^\d+(\.0+)?$/.test(cleanOp)) {
@@ -28,10 +28,27 @@ export const normalizeOperation = (op: string | null | undefined): string => {
   if (cleanOp === '23') {
     return '023';
   }
-  if (cleanOp === 'C/ CORR' || cleanOp === 'C/CORR' || cleanOp === 'CORR') {
+  if (
+    cleanOp === 'C/ CORR' || 
+    cleanOp === 'C/CORR' || 
+    cleanOp === 'CORR' || 
+    cleanOp === 'CC' || 
+    cleanOp === 'C.CORR' || 
+    cleanOp === 'C. CORR' || 
+    cleanOp === 'C.CORRENTE' || 
+    cleanOp === 'C. CORRENTE'
+  ) {
     return 'CORRENTE';
   }
-  if (cleanOp === 'C/POUP' || cleanOp === 'POUP') {
+  if (
+    cleanOp === 'C/POUP' || 
+    cleanOp === 'C/ POUP' || 
+    cleanOp === 'POUP' || 
+    cleanOp === 'CP' || 
+    cleanOp === 'POUPANCA' ||
+    cleanOp === 'C.POUP' ||
+    cleanOp === 'C. POUP'
+  ) {
     return 'POUPANÇA';
   }
   return cleanOp;

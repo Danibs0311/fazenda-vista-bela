@@ -204,7 +204,20 @@ export const Collaborators: React.FC = () => {
 
       const opCol = headers.findIndex(h => {
         const s = h.toLowerCase().trim();
-        return s === 'op' || s === 'op.' || s.startsWith('operac') || s.startsWith('operaç') || s.includes('tipo de conta') || s.includes('tipo conta') || s.includes('cod op') || s.includes('op conta') || s === 'operaçao' || s === 'o.p';
+        return (
+          s === 'op' || 
+          s === 'op.' || 
+          s === 'o.p' || 
+          s.startsWith('op ') || 
+          s.startsWith('op.') || 
+          s.startsWith('oper') || 
+          s.includes('tipo') || 
+          s.includes('tp') || 
+          s.includes('c/c') || 
+          s.includes('c/p') ||
+          s.includes('operação') ||
+          s.includes('operacao')
+        );
       });
 
       const accCol = headers.findIndex(h => {
