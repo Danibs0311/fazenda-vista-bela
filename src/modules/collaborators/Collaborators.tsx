@@ -589,7 +589,7 @@ export const Collaborators: React.FC = () => {
           (termDigits !== '' && (c.cpf?.replace(/\D/g, '').startsWith(termDigits) ?? false))
         );
       })
-      .sort((a, b) => (a.nome || "").localeCompare(b.nome || "", undefined, { numeric: true, sensitivity: 'base' }));
+      .sort((a, b) => (a.id || "").localeCompare(b.id || "", undefined, { numeric: true }));
   }, [collaborators, searchTerm]);
 
   return (
