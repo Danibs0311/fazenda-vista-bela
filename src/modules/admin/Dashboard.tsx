@@ -74,40 +74,7 @@ export const Dashboard: React.FC = () => {
     };
   }, []);
 
-  const handleSeedData = async () => {
-    try {
-      // Seed Banks
-      const banksToSeed = [
-        { nome: 'Banco do Brasil', codigo: '001' },
-        { nome: 'Itaú Unibanco', codigo: '341' },
-        { nome: 'Bradesco', codigo: '237' }
-      ];
-      for (const b of banksToSeed) {
-        await storage.saveBank(b);
-      }
 
-      // Seed Collaborators
-      const collaboratorsToSeed = [
-        { id: 'COLLAB01', nome: 'JOAO SILVA', cpf: '111.111.111-11', banco: 'Banco do Brasil', agencia: '0001', conta: '12345-6', tipo_conta: 'corrente', status: 'active', data_cadastro: new Date().toISOString() },
-        { id: 'COLLAB02', nome: 'MARIA SANTOS', cpf: '222.222.222-22', banco: 'Itaú Unibanco', agencia: '0002', conta: '23456-7', tipo_conta: 'poupanca', status: 'active', data_cadastro: new Date().toISOString() },
-        { id: 'COLLAB03', nome: 'PEDRO OLIVEIRA', cpf: '333.333.333-33', banco: 'Bradesco', agencia: '0003', conta: '34567-8', tipo_conta: 'corrente', status: 'active', data_cadastro: new Date().toISOString() },
-        { id: 'COLLAB04', nome: 'ANA COSTA', cpf: '444.444.444-44', banco: 'Banco do Brasil', agencia: '0004', conta: '45678-9', tipo_conta: 'salario', status: 'active', data_cadastro: new Date().toISOString() },
-        { id: 'COLLAB05', nome: 'FRANCISCO PEREIRA', cpf: '555.555.555-55', banco: 'Itaú Unibanco', agencia: '0005', conta: '56789-0', tipo_conta: 'corrente', status: 'active', data_cadastro: new Date().toISOString() },
-        { id: 'COLLAB06', nome: 'LUCIA MENDES', cpf: '666.666.666-66', banco: 'Bradesco', agencia: '0006', conta: '67890-1', tipo_conta: 'poupanca', status: 'active', data_cadastro: new Date().toISOString() },
-        { id: 'COLLAB07', nome: 'CARLOS SOUZA', cpf: '777.777.777-77', banco: 'Banco do Brasil', agencia: '0007', conta: '78901-2', tipo_conta: 'corrente', status: 'active', data_cadastro: new Date().toISOString() },
-        { id: 'COLLAB08', nome: 'ADRIANA LIMA', cpf: '888.888.888-88', banco: 'Itaú Unibanco', agencia: '0008', conta: '89012-3', tipo_conta: 'salario', status: 'active', data_cadastro: new Date().toISOString() },
-        { id: 'COLLAB09', nome: 'RICARDO BARBOSA', cpf: '999.999.999-99', banco: 'Bradesco', agencia: '0009', conta: '90123-4', tipo_conta: 'corrente', status: 'active', data_cadastro: new Date().toISOString() },
-        { id: 'COLLAB10', nome: 'JULIANA ROCHA', cpf: '000.000.000-00', banco: 'Banco do Brasil', agencia: '0010', conta: '01234-5', tipo_conta: 'poupanca', status: 'active', data_cadastro: new Date().toISOString() }
-      ];
-      for (const c of collaboratorsToSeed) {
-        await storage.saveCollaborator(c as any);
-      }
-      alert('Dados de teste criados com sucesso!');
-      window.location.reload();
-    } catch (error: any) {
-      alert('Erro ao criar dados: ' + error.message);
-    }
-  };
 
   const currentWeekHarvests = harvests.filter(h => h.semana_id === currentWeek.id);
   const totalLatas = currentWeekHarvests.reduce((sum, h) => sum + h.quantidade_latas, 0);
@@ -172,16 +139,7 @@ export const Dashboard: React.FC = () => {
             </button>
           </div>
 
-          {/* Seed Data Button - Standardized & Centralized */}
-          <button 
-            onClick={handleSeedData}
-            className="!bg-primary text-white px-5 py-2 rounded-xl shadow-lg shadow-primary/20 flex flex-col items-center justify-center hover:bg-dark transition-all group border border-white/5 h-[52px] w-full sm:w-[240px] flex-1 sm:flex-none relative overflow-hidden"
-          >
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/50 leading-none">Dados de</span>
-              <span className="text-[13px] font-black text-white mt-0.5 uppercase tracking-wide">Testes</span>
-            </div>
-          </button>
+
 
           {/* Today Card - Standardized & Centralized */}
           <div className="bg-primary text-white px-5 py-2 rounded-xl shadow-lg shadow-primary/20 flex flex-col items-center justify-center border border-white/5 h-[52px] w-full sm:w-[240px] flex-1 sm:flex-none">
