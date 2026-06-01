@@ -61,20 +61,82 @@ export const Collaborators: React.FC = () => {
       .replace(/(-\d{2})\d+?$/, '$1');
   };
 
-  const normalizeBank = (bankName: string) => {
-    if (!bankName) return 'Outro';
+  const intelligentMatchBank = (bankName: string, registeredBanks: Bank[]) => {
+    if (!bankName) return 'OUTRO';
+    
     const clean = String(bankName).trim().toLowerCase()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]/g, ' ');
-    if (clean.includes('caixa') || clean.includes('cx') || clean.includes('cef') || clean.includes('economica')) return 'Caixa Econômica';
-    if (clean.includes('bradesco') || clean.includes('brad')) return 'Bradesco';
-    if (clean.includes('brasil') || clean.includes('do brasil') || clean.includes('bb')) return 'Banco do Brasil';
-    if (clean.includes('itau')) return 'Itaú';
-    if (clean.includes('nubank') || clean.includes('nu ')) return 'Nubank';
-    if (clean.includes('inter')) return 'Inter';
-    if (clean.includes('c6')) return 'C6 Bank';
-    if (clean.includes('santander')) return 'Santander';
-    return String(bankName).trim();
+      .replace(/[^a-z0-9]/g, '');
+
+    // 1. Caixa Econômica
+    if (clean.includes('caixa') || clean.includes('cx') || clean.includes('cef') || clean.includes('economica')) {
+      const found = registeredBanks.find(b => {
+        const nameClean = b.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return nameClean.includes('caixa') || nameClean.includes('cx') || nameClean.includes('cef') || nameClean.includes('economica');
+      });
+      if (found) return found.nome;
+      return 'CAIXA ECONÔMICA';
+    }
+
+    // 2. Banco do Brasil
+    if (clean === 'bb' || clean.includes('brasil') || clean.includes('dobrasil')) {
+      const found = registeredBanks.find(b => {
+        const nameClean = b.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return nameClean.includes('brasil') || nameClean.includes('bb');
+      });
+      if (found) return found.nome;
+      return 'BANCO DO BRASIL';
+    }
+
+    // 3. Itaú
+    if (clean.includes('itau')) {
+      const found = registeredBanks.find(b => {
+        const nameClean = b.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return nameClean.includes('itau');
+      });
+      if (found) return found.nome;
+      return 'ITAÚ UNIBANCO';
+    }
+
+    // 4. Nubank
+    if (clean.includes('nubank') || clean === 'nu') {
+      const found = registeredBanks.find(b => {
+        const nameClean = b.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return nameClean.includes('nubank') || nameClean === 'nu';
+      });
+      if (found) return found.nome;
+      return 'NUBANK';
+    }
+
+    // 5. Inter
+    if (clean.includes('inter')) {
+      const found = registeredBanks.find(b => {
+        const nameClean = b.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return nameClean.includes('inter');
+      });
+      if (found) return found.nome;
+      return 'INTER';
+    }
+
+    // 6. Bradesco
+    if (clean.includes('bradesco') || clean.includes('brad')) {
+      const found = registeredBanks.find(b => {
+        const nameClean = b.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        return nameClean.includes('bradesco') || nameClean.includes('brad');
+      });
+      if (found) return found.nome;
+      return 'BRADESCO';
+    }
+
+    // 7. Match generic
+    for (const b of registeredBanks) {
+      const nameClean = b.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+      if (nameClean.includes(clean) || clean.includes(nameClean)) {
+        return b.nome;
+      }
+    }
+
+    return String(bankName).trim().toUpperCase();
   };
 
   const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,26 +219,39 @@ export const Collaborators: React.FC = () => {
         }
 
         const bancoRaw = bankCol !== -1 ? String(row[bankCol] || '').trim() : '';
-        const banco = normalizeBank(bancoRaw);
+        const banco = intelligentMatchBank(bancoRaw, banks);
         const agencia = agCol !== -1 ? String(row[agCol] || '').trim() : '';
         
         // OP operation handling: pad numeric values, map strings to numbers
-        let op = opCol !== -1 ? String(row[opCol] || '').trim().toLowerCase() : '';
+        let op = opCol !== -1 ? String(row[opCol] || '').trim().toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
+        
         if (op) {
-          if (op.includes('poup') || op.includes('poupança')) {
+          if (op.includes('poup') && (op.includes('pj') || op.includes('juridica'))) {
+            op = '022';
+          } else if (op.includes('poup') || op.includes('poupança')) {
             op = '013';
-          } else if (op.includes('corr') || op.includes('corrente') || op.includes('cc')) {
+          } else if ((op.includes('corr') || op.includes('cc')) && (op.includes('pj') || op.includes('juridica'))) {
+            op = '003';
+          } else if (op.includes('corr') || op.includes('cc') || op.includes('corrente')) {
             op = '001';
-          } else if (op.includes('sal') || op.includes('salário') || op.includes('salario')) {
+          } else if (op.includes('sal') || op.includes('salario')) {
             op = '037';
+          } else if (op.includes('facil')) {
+            op = '023';
           } else if (/^\d+$/.test(op)) {
             op = op.padStart(3, '0');
+          } else {
+            const numericOnly = op.replace(/\D/g, '');
+            if (numericOnly) {
+              op = numericOnly.padStart(3, '0');
+            }
           }
         }
 
         // Infer tipo_conta based on operation
         let tipo_conta = 'corrente';
-        if (op === '013') {
+        if (op === '013' || op === '022') {
           tipo_conta = 'poupanca';
         } else if (op === '037') {
           tipo_conta = 'salario';
@@ -187,12 +262,12 @@ export const Collaborators: React.FC = () => {
 
         parsedCollabs.push({
           id,
-          nome,
+          nome: nome.toUpperCase(),
           cpf: formattedCpf,
-          banco,
-          agencia: agencia || '0000',
-          conta: conta || '00000-0',
-          tipo_conta,
+          banco: banco.toUpperCase(),
+          agencia: (agencia || '0000').toUpperCase(),
+          conta: (conta || '00000-0').toUpperCase(),
+          tipo_conta: tipo_conta.toUpperCase(),
           status: CollaboratorStatus.ACTIVE,
           data_cadastro: new Date().toISOString()
         });
@@ -200,6 +275,21 @@ export const Collaborators: React.FC = () => {
 
       if (parsedCollabs.length === 0) {
         throw new Error('Nenhum colaborador válido encontrado para importação.');
+      }
+
+      // Auto-register any new banks found during import
+      const uniqueBanksInImport = Array.from(new Set(parsedCollabs.map(c => c.banco)));
+      const existingBankNamesNormalized = banks.map(b => b.nome.toUpperCase());
+      
+      for (const importBankName of uniqueBanksInImport) {
+        if (!existingBankNamesNormalized.includes(importBankName.toUpperCase())) {
+          try {
+            await storage.saveBank({ nome: importBankName.toUpperCase() });
+            console.log(`Auto-registered bank: ${importBankName}`);
+          } catch (bankErr) {
+            console.error(`Failed to auto-register bank ${importBankName}:`, bankErr);
+          }
+        }
       }
 
       const batchSize = 100;
@@ -254,15 +344,18 @@ export const Collaborators: React.FC = () => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const cpfRaw = formData.get('cpf') as string;
-    const cpf = cpfRaw?.trim() ? cpfRaw.trim() : null;
+    
+    // Normalize and validate CPF
+    const cleanCpf = (cpfRaw || '').replace(/\D/g, '');
+    let formattedCpf = '000.000.000-00';
+    
+    if (cleanCpf && cleanCpf.length === 11 && validateCPF(cleanCpf)) {
+      formattedCpf = cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    }
 
-    if (cpf !== null) {
-      if (!validateCPF(cpf)) {
-        setError('CPF inválido. Por favor, verifique os números.');
-        return;
-      }
-
-      const existing = collaborators.find(c => c.cpf === cpf && c.id !== (editingCollab?.id || ''));
+    // Only validate uniqueness for non-zeroed CPFs
+    if (formattedCpf !== '000.000.000-00') {
+      const existing = collaborators.find(c => c.cpf === formattedCpf && c.id !== (editingCollab?.id || ''));
       if (existing) {
         setError('Este CPF já está cadastrado.');
         return;
@@ -280,7 +373,7 @@ export const Collaborators: React.FC = () => {
     const collab: Collaborator = {
       id: editingCollab?.id || getNextSequentialId(),
       nome: formData.get('nome') as string,
-      cpf,
+      cpf: formattedCpf,
       banco: formData.get('banco') as string,
       agencia: formData.get('agencia') as string,
       conta: formData.get('conta') as string,
@@ -683,7 +776,7 @@ export const Collaborators: React.FC = () => {
                         name="tipo_conta" 
                         required 
                         disabled={isReadOnly}
-                        defaultValue={editingCollab?.tipo_conta || 'corrente'} 
+                        defaultValue={editingCollab?.tipo_conta?.toLowerCase() || 'corrente'} 
                         className="w-full appearance-none bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm shadow-sm disabled:opacity-70"
                       >
                         <option value="corrente">Conta Corrente</option>
