@@ -11,6 +11,26 @@ import { supabase } from './supabase';
 import { getWeekRange } from '../utils/dateUtils';
 import { localDb, OfflineHarvestLog } from './localDb';
 
+export const normalizeOperation = (op: string | null | undefined): string => {
+  const cleanOp = (op || '').trim().toUpperCase();
+  if (!cleanOp || cleanOp === '0') {
+    return 'XXXX';
+  }
+  if (cleanOp === '13') {
+    return '013';
+  }
+  if (cleanOp === '23') {
+    return '023';
+  }
+  if (cleanOp === 'C/ CORR' || cleanOp === 'C/CORR' || cleanOp === 'CORR') {
+    return 'CORRENTE';
+  }
+  if (cleanOp === 'C/POUP' || cleanOp === 'POUP') {
+    return 'POUPANÇA';
+  }
+  return cleanOp;
+};
+
 // Simple memory cache to avoid redundant network requests
 const cache = {
   collaborators: null as Collaborator[] | null,
@@ -56,7 +76,7 @@ export const storage = {
       banco: col.banco?.toUpperCase(),
       agencia: col.agencia?.toUpperCase(),
       conta: col.conta?.toUpperCase(),
-      tipo_conta: col.tipo_conta?.toUpperCase()
+      tipo_conta: normalizeOperation(col.tipo_conta)
     };
 
     const { error } = await supabase

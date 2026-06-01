@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { storage } from '../../services/storageService';
+import { storage, normalizeOperation } from '../../services/storageService';
 import { Collaborator, CollaboratorStatus, Bank, HarvestLog } from '../../types';
 import { getWeekRange } from '../../utils/dateUtils';
 import { Plus, Search, Edit2, AlertCircle, X, User, Fingerprint, Landmark, ChevronDown, Save, FileSpreadsheet, Loader2, Upload, AlertTriangle } from 'lucide-react';
@@ -225,9 +225,9 @@ export const Collaborators: React.FC = () => {
         const banco = intelligentMatchBank(bancoRaw, banks);
         const agencia = agCol !== -1 ? String(row[agCol] || '').trim() : '';
         
-        // Read raw OP operation text exactly as it is in the spreadsheet
+        // Read raw OP operation text and normalize it
         const rawOp = opCol !== -1 ? String(row[opCol] || '').trim() : '';
-        const tipo_conta = rawOp || 'CORRENTE';
+        const tipo_conta = normalizeOperation(rawOp);
 
         const conta = accCol !== -1 ? String(row[accCol] || '').trim() : '';
 
