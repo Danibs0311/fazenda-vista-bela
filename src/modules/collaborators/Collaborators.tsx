@@ -177,32 +177,32 @@ export const Collaborators: React.FC = () => {
 
       const headers = rows[headerIndex].map(h => String(h || '').trim());
       
-      const idCol = headers.findIndex(h => {
+      let idCol = headers.findIndex(h => {
         const s = h.toLowerCase().trim();
         return s === 'id' || s === 'código' || s === 'codigo' || s === 'nº' || s === 'no' || s === 'cadastro' || s === 'cod' || s.startsWith('id ') || s.startsWith('id.');
       });
 
-      const nameCol = headers.findIndex(h => {
+      let nameCol = headers.findIndex(h => {
         const s = h.toLowerCase().trim();
         return s.includes('benefici') || s.includes('nome') || s.includes('colaborador') || s === 'nome completo';
       });
 
-      const cpfCol = headers.findIndex(h => {
+      let cpfCol = headers.findIndex(h => {
         const s = h.toLowerCase().trim();
         return s === 'cpf' || s === 'documento' || s.includes('cpf');
       });
 
-      const bankCol = headers.findIndex(h => {
+      let bankCol = headers.findIndex(h => {
         const s = h.toLowerCase().trim();
         return s.includes('banco') || s.includes('institu');
       });
 
-      const agCol = headers.findIndex(h => {
+      let agCol = headers.findIndex(h => {
         const s = h.toLowerCase().trim();
         return s.startsWith('ag') || s.includes('agencia') || s.includes('agência');
       });
 
-      const opCol = headers.findIndex(h => {
+      let opCol = headers.findIndex(h => {
         const s = h.toLowerCase().trim();
         return (
           s === 'op' || 
@@ -220,10 +220,168 @@ export const Collaborators: React.FC = () => {
         );
       });
 
-      const accCol = headers.findIndex(h => {
+      let accCol = headers.findIndex(h => {
         const s = h.toLowerCase().trim();
         return s.includes('conta') && !s.includes('tipo') && !s.includes('op');
       });
+
+      // Fallback Scanner: If any critical column is not found in headers, analyze cells in first 15 rows
+      const maxScanRows = Math.min(headerIndex + 15, rows.length);
+      const numCols = rows[headerIndex] ? rows[headerIndex].length : 0;
+      
+      const colScores = Array.from({ length: numCols }, () => ({
+        id: 0,
+        name: 0,
+        cpf: 0,
+        bank: 0,
+        ag: 0,
+        op: 0,
+        acc: 0
+      }));
+
+      for (let i = headerIndex + 1; i < maxScanRows; i++) {
+        const row = rows[i];
+        if (!row) continue;
+        
+        for (let colIdx = 0; colIdx < numCols; colIdx++) {
+          const val = String(row[colIdx] || '').trim();
+          if (!val) continue;
+
+          const valUpper = val.toUpperCase();
+          const digits = val.replace(/\D/g, '');
+
+          // Check for OP candidate
+          const normalizedDigits = /^\d+(\.0+)?$/.test(valUpper) ? String(Math.floor(parseFloat(valUpper))) : '';
+          if (
+            valUpper === '13' || valUpper === '23' || valUpper === '013' || valUpper === '023' ||
+            normalizedDigits === '13' || normalizedDigits === '23' || normalizedDigits === '013' || normalizedDigits === '023' ||
+            valUpper === 'CC' || valUpper === 'CP' || valUpper === 'POUP' || valUpper === 'CORR' ||
+            valUpper === 'CORRENTE' || valUpper === 'POUPANÇA' || valUpper === 'POUPANCA' ||
+            valUpper === 'C/C' || valUpper === 'C/P' || valUpper === 'C/ CORR' || valUpper === 'C/CORR' ||
+            valUpper === 'C/POUP' || valUpper === 'C/ POUP' || valUpper === '0'
+          ) {
+            colScores[colIdx].op += 1;
+          }
+
+          // Check for CPF candidate
+          if (digits.length === 11) {
+            colScores[colIdx].cpf += 1;
+          }
+
+          // Check for Bank candidate
+          if (
+            valUpper.includes('BRASIL') || valUpper.includes('ITAU') || valUpper.includes('ITAÚ') ||
+            valUpper.includes('BRADESCO') || valUpper.includes('CAIXA') || valUpper.includes('SANTANDER') ||
+            valUpper.includes('NUBANK') || valUpper.includes('INTER') || valUpper.includes('C6')
+          ) {
+            colScores[colIdx].bank += 1;
+          }
+
+          // Check for Agencia candidate
+          if (digits.length >= 3 && digits.length <= 5 && /^\d+[-]?\d*$/.test(val)) {
+            colScores[colIdx].ag += 1;
+          }
+
+          // Check for Conta candidate
+          if (digits.length >= 4 && digits.length <= 12 && val.includes('-')) {
+            colScores[colIdx].acc += 1;
+          }
+
+          // Check for ID candidate
+          if (/^\d+$/.test(val) && parseInt(val) < 2000) {
+            colScores[colIdx].id += 1;
+          }
+
+          // Check for Name candidate
+          if (val.length > 5 && /^[A-ZÁÉÍÓÚÂÊÔÃÕÇ\s]+$/i.test(val) && !val.includes('-')) {
+            colScores[colIdx].name += 1;
+          }
+        }
+      }
+
+      // Assign columns based on highest score if they were not found in headers
+      if (nameCol === -1) {
+        let bestIdx = -1, maxScore = 0;
+        for (let c = 0; c < numCols; c++) {
+          if (colScores[c].name > maxScore) {
+            maxScore = colScores[c].name;
+            bestIdx = c;
+          }
+        }
+        if (bestIdx !== -1) nameCol = bestIdx;
+      }
+
+      if (opCol === -1) {
+        let bestIdx = -1, maxScore = 0;
+        for (let c = 0; c < numCols; c++) {
+          if (c === nameCol || c === bankCol) continue;
+          if (colScores[c].op > maxScore) {
+            maxScore = colScores[c].op;
+            bestIdx = c;
+          }
+        }
+        if (bestIdx !== -1) opCol = bestIdx;
+      }
+
+      if (cpfCol === -1) {
+        let bestIdx = -1, maxScore = 0;
+        for (let c = 0; c < numCols; c++) {
+          if (c === nameCol || c === bankCol) continue;
+          if (colScores[c].cpf > maxScore) {
+            maxScore = colScores[c].cpf;
+            bestIdx = c;
+          }
+        }
+        if (bestIdx !== -1) cpfCol = bestIdx;
+      }
+
+      if (bankCol === -1) {
+        let bestIdx = -1, maxScore = 0;
+        for (let c = 0; c < numCols; c++) {
+          if (c === nameCol) continue;
+          if (colScores[c].bank > maxScore) {
+            maxScore = colScores[c].bank;
+            bestIdx = c;
+          }
+        }
+        if (bestIdx !== -1) bankCol = bestIdx;
+      }
+
+      if (agCol === -1) {
+        let bestIdx = -1, maxScore = 0;
+        for (let c = 0; c < numCols; c++) {
+          if (c === nameCol || c === bankCol || c === cpfCol) continue;
+          if (colScores[c].ag > maxScore) {
+            maxScore = colScores[c].ag;
+            bestIdx = c;
+          }
+        }
+        if (bestIdx !== -1) agCol = bestIdx;
+      }
+
+      if (accCol === -1) {
+        let bestIdx = -1, maxScore = 0;
+        for (let c = 0; c < numCols; c++) {
+          if (c === nameCol || c === bankCol || c === cpfCol || c === agCol) continue;
+          if (colScores[c].acc > maxScore) {
+            maxScore = colScores[c].acc;
+            bestIdx = c;
+          }
+        }
+        if (bestIdx !== -1) accCol = bestIdx;
+      }
+
+      if (idCol === -1) {
+        let bestIdx = -1, maxScore = 0;
+        for (let c = 0; c < numCols; c++) {
+          if (c === nameCol || c === bankCol || c === cpfCol || c === agCol || c === accCol || c === opCol) continue;
+          if (colScores[c].id > maxScore) {
+            maxScore = colScores[c].id;
+            bestIdx = c;
+          }
+        }
+        if (bestIdx !== -1) idCol = bestIdx;
+      }
 
       if (nameCol === -1) {
         throw new Error('Coluna de "Nome/Beneficiário" não encontrada na planilha.');
