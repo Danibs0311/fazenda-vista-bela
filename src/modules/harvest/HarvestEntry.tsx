@@ -466,7 +466,7 @@ export const HarvestEntry: React.FC = () => {
           {/* Operational Cycle - Standardized & Centralized */}
           <div className="bg-primary px-5 py-2 rounded-xl shadow-lg shadow-primary/20 flex flex-col items-center justify-center border border-white/5 h-[52px] w-full sm:w-[240px]">
              <span className="text-[10px] font-black uppercase tracking-widest text-white/50 leading-none">Ciclo Operacional</span>
-             <span className="text-[11px] font-black text-white leading-none mt-0.5 whitespace-nowrap uppercase tracking-tighter">{formatDate(weekInfo.start)} A {formatDate(weekInfo.end)}</span>
+             <span className="text-[10px] font-black text-white leading-none mt-1 whitespace-nowrap uppercase tracking-wider">{formatDate(weekInfo.start)} A {formatDate(weekInfo.end)}</span>
           </div>
 
           {/* Produção do Dia Card/Button - Standardized & Centralized */}
