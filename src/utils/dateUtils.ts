@@ -4,6 +4,13 @@
  * Payments for a week are made on the FRIDAY immediately after it ends.
  */
 
+export const getLocalDateString = (d: Date = new Date()) => {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 export const getWeekRange = (dateStr?: string, weekOffset: number = 0) => {
   const date = dateStr ? new Date(dateStr + 'T12:00:00') : new Date();
   date.setDate(date.getDate() + (weekOffset * 7));
@@ -21,10 +28,7 @@ export const getWeekRange = (dateStr?: string, weekOffset: number = 0) => {
   endDate.setDate(startDate.getDate() + 6); // Ends on Thursday
 
   const toLocalDateString = (d: Date) => {
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`;
+    return getLocalDateString(d);
   };
 
   return {

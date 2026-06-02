@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { storage } from '../../services/storageService';
 import { Collaborator, HarvestLog, CollaboratorStatus, Bank } from '../../types';
-import { getWeekRange, formatCurrency, formatDate } from '../../utils/dateUtils';
+import { getWeekRange, formatCurrency, formatDate, getLocalDateString } from '../../utils/dateUtils';
 import { Search, Save, History, Trash2, Calendar, UserPlus, Pickaxe, ChevronRight, X, ArrowUpRight, Plus, Landmark, User, AlertCircle, Edit2, Download, Cloud, CloudOff, Wifi, WifiOff, Fingerprint } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { Link } from 'react-router-dom';
@@ -18,7 +18,7 @@ export const HarvestEntry: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCollab, setSelectedCollab] = useState<Collaborator | null>(null);
   const [quantity, setQuantity] = useState<number>(0);
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(getLocalDateString());
   const [recentHarvests, setRecentHarvests] = useState<OfflineHarvestLog[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [currentPrice, setCurrentPrice] = useState<number>(0);
@@ -30,7 +30,7 @@ export const HarvestEntry: React.FC = () => {
   const [regError, setRegError] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const [activeIndexRecent, setActiveIndexRecent] = useState<number | null>(null);
-  const [productionReportDate, setProductionReportDate] = useState(new Date().toISOString().split('T')[0]);
+  const [productionReportDate, setProductionReportDate] = useState(getLocalDateString());
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
