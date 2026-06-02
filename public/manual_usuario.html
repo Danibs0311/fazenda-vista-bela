@@ -388,7 +388,7 @@
         
         <div class="cover-meta">
           <span><strong>Produtor:</strong> Fazenda Vista Bela</span>
-          <span><strong>Desenvolvedora:</strong> DG TECH</span>
+          <span><strong>Desenvolvedora:</strong> DG TECH — SOLUÇÕES TECNOLÓGICAS</span>
           <span><strong>Data:</strong> Junho 2026</span>
         </div>
       </section>
@@ -396,13 +396,13 @@
       <!-- Important Copyright Alert -->
       <div class="alert alert-important">
         <span class="alert-title">Termo de Propriedade Intelectual</span>
-        <p>Este sistema e este manual do usuário são de propriedade intelectual exclusiva e protegidos por direitos autorais pertencentes à <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong>. Qualquer reprodução, modificação, engenharia reversa ou distribuição sem autorização formal da desenvolvedora é proibida.</p>
+        <p>Este sistema e este manual do usuário são de propriedade intelectual exclusiva e protegidos por direitos autorais pertencentes à <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong>. Qualquer reprodução, modificação, engenharia reversa ou distribuição sem autorização formal da desenvolvedora é expressamente proibida.</p>
       </div>
 
       <!-- Introduction Section -->
       <section id="apresentacao" class="section-block">
         <h2 class="section-title">1. Apresentação do Sistema</h2>
-        <p>O <strong>Sistema Inteligente de Gestão de Colheita de Café — Fazenda Vista Bela</strong> é uma solução de software robusta criada pela <strong>DG TECH</strong> para modernizar os processos de pesagem e consolidação financeira do campo.</p>
+        <p>O <strong>Sistema Inteligente de Gestão de Colheita de Café — Fazenda Vista Bela</strong> é uma solução de software robusta criada pela <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong> para modernizar os processos de pesagem e consolidação financeira do campo.</p>
         <p>Substituindo controles manuais em papel por apontamentos web-mobile e sincronização inteligente, a ferramenta assegura o fim das fraudes, a mitigação de erros de preenchimento e a redução imediata em até 80% do tempo gasto para apuração de fechamentos de folhas de pagamentos semanais.</p>
       </section>
 
@@ -451,15 +451,16 @@
 
       <!-- Menu Navigation Section -->
       <section id="menu-principal" class="section-block">
-        <h2 class="section-title">3. Detalhamento do Menu Principal</h2>
-        <p>Abaixo detalhamos todas as seções funcionais do sistema, em conformidade com o menu de navegação lateral:</p>
+        <h2 class="section-title">3. Detalhamento de Módulos e Funções do Menu</h2>
+        <p>Abaixo detalhamos todas as seções funcionais do sistema de forma integral, em conformidade com o menu de navegação lateral:</p>
 
         <!-- Dashboard Sub-section -->
         <h3 id="dashboard" class="section-subtitle">3.1. Dashboard</h3>
         <p>O centro administrativo do gestor da fazenda. Consolida visualmente as informações fundamentais.</p>
         <ul>
           <li><strong>Cartões Operacionais:</strong> Volume colhido no dia (em latas), despesas de mão de obra calculadas e total de funcionários do campo ativos.</li>
-          <li><strong>Gráfico Reativo:</strong> Exibição cronológica interativa demonstrando picos e quedas de produtividade da colheita.</li>
+          <li><strong>Seletor de Ciclos:</strong> Setas físicas direcionais que permitem avançar ou retroceder nos períodos da colheita para ver safras passadas.</li>
+          <li><strong>Gráfico Reativo:</strong> Exibição cronológica demonstrando a evolução e produtividade da colheita ao longo da semana.</li>
           <li><strong>Tecnologia:</strong> Implementado com a biblioteca de gráficos vetoriais <code>Recharts</code> para visualizações responsivas em tempo real.</li>
         </ul>
 
@@ -468,7 +469,9 @@
         <p>Gerenciamento completo das fichas cadastrais do time de colheita.</p>
         <ul>
           <li><strong>Cadastro e Manutenção (CRUD):</strong> Controle de nome completo, CPF, dados bancários (Banco, Agência, Conta, Tipo de Conta) e status de atividade.</li>
-          <li><strong>Filtros Avançados:</strong> Busca instantânea no navegador por nome do colhedor ou status.</li>
+          <li><strong>Autocomplete e Teclado:</strong> Entrada de busca inteligente com auto-preenchimento via <code>Tab</code> ou seta direita e navegação de linhas via setas ou scroll do mouse.</li>
+          <li><strong>Importação Inteligente (XLSX):</strong> Mecanismo de leitura com <strong>Fallback Scanner</strong> para decodificar e importar planilhas Excel mesmo sem cabeçalhos idênticos aos do sistema.</li>
+          <li><strong>Modo PIX:</strong> Oculta Banco/Agência dinamicamente e valida os tipos de chaves informados.</li>
           <li><strong>Tecnologia:</strong> Validações internas em TypeScript e restrições de integridade no Supabase para impedir a exclusão acidental de colaboradores vinculados a ciclos.</li>
         </ul>
 
@@ -476,9 +479,11 @@
         <h3 id="registrar-colheita" class="section-subtitle">3.3. Registrar Colheita</h3>
         <p>Painel principal dos fiscais operacionais que atuam diretamente no campo.</p>
         <ul>
-          <li><strong>Entrada Prática:</strong> Registro veloz da quantidade de latas obtida por colaborador.</li>
-          <li><strong>Cálculo Automático:</strong> O preço unitário pago pela lata é consultado na base de regras vigente no exato dia da colheita, computando o valor financeiro do colaborador.</li>
-          <li><strong>Tecnologia:</strong> Banco de dados local <code>IndexedDB</code> que suporta o funcionamento completo em modo offline sem sinal de celular.</li>
+          <li><strong>Lançamentos de Volume:</strong> Registro rápido de volume em latas com incremento decimal de 0.5 lata.</li>
+          <li><strong>Cálculo do Preço Vigente:</strong> O sistema busca o preço da lata cadastrado para a data da colheita de forma automática e realiza a multiplicação.</li>
+          <li><strong>Modo Offline e Sincronização:</strong> Banco de dados local <code>IndexedDB</code> que suporta o funcionamento completo em modo offline sem sinal de celular. Exibe nuvem verde para registros sincronizados e laranja para registros mantidos localmente no navegador.</li>
+          <li><strong>Cadastro On-The-Fly:</strong> Abre formulário pop-up simplificado para cadastrar novos colhedores na mesma tela sem perder o lançamento de latas que estava sendo feito.</li>
+          <li><strong>PDF de Produção Diária:</strong> Emite o fechamento de registros do dia selecionado em PDFPortrait A4 com cabeçalho analítico oficial.</li>
         </ul>
 
         <!-- Cycles Sub-section -->
@@ -486,7 +491,8 @@
         <p>Modulo de controle dos limites temporais operacionais da fazenda.</p>
         <ul>
           <li><strong>Ciclos Automatizados:</strong> Um ciclo compreende a sexta-feira (início) até a quinta-feira subsequente (término), gerenciado de forma transparente pela aplicação.</li>
-          <li><strong>Encerramento Manual:</strong> O botão "Encerrar Ciclo" permite ao administrador interromper e congelar a semana ativa a qualquer momento, forçando o envio dos dados de auditoria para folha de pagamentos.</li>
+          <li><strong>Encerramento Manual (Ativado):</strong> Botão que permite congelar e encerrar a semana ativa a qualquer momento com dupla confirmação física para exportar dados para quitação.</li>
+          <li><strong>Conferência e Reabertura:</strong> Permite inspecionar todos os logs de uma semana e reabrir o ciclo se for preciso realizar algum ajuste em lançamentos.</li>
           <li><strong>Tecnologia:</strong> Robô de controle <code>cycleManager.ts</code> que avalia a passagem dos limites do ciclo a cada 5 segundos.</li>
         </ul>
 
@@ -495,6 +501,7 @@
         <p>Tela de auditoria analítica destinada a validar os apontamentos do campo.</p>
         <ul>
           <li><strong>Consolidação:</strong> Agrupamento reativo do volume total e valores a pagar por colaborador na semana selecionada.</li>
+          <li><strong>Abertura em Sanfona:</strong> Detalhamento de cada dia trabalhado de forma isolada clicando em expandir.</li>
           <li><strong>Aprovação e Bloqueio:</strong> Ao clicar em "Aprovar", a semana é fixada na base de dados para processamento final, e o sistema impede edições posteriores das colheitas diárias pertencentes àquela semana.</li>
           <li><strong>Tecnologia:</strong> Memorização de computação reativa (hooks <code>useMemo</code>) para otimização de processamento no dispositivo.</li>
         </ul>
@@ -504,7 +511,8 @@
         <p>Fase final do processamento das remunerações da semana.</p>
         <ul>
           <li><strong>Divisão Bancária:</strong> Consolidação de depósitos totais necessários agrupados por banco (Banco do Brasil, Bradesco, Caixa, etc.), facilitando a emissão de remessas e transferências Pix.</li>
-          <li><strong>Recibos PDF:</strong> Emissão ágil de recibos de quitação e exportação de folhas de pagamento completas.</li>
+          <li><strong>Recibos PDF em Lote:</strong> Geração de PDF landscape formatado para cada banco. Permite baixar de forma automática e sequencial arquivos separados para todos os bancos com um único clique.</li>
+          <li><strong>Navegação por Teclado:</strong> Navegação integral entre as linhas da folha e auto-scroll dinâmico.</li>
           <li><strong>Tecnologia:</strong> Integrações com as bibliotecas <code>jspdf</code> e <code>jspdf-autotable</code> para desenho e renderização direta de PDFs customizados.</li>
         </ul>
 
@@ -512,7 +520,7 @@
         <h3 id="relatorios" class="section-subtitle">3.7. Relatórios</h3>
         <p>Módulo de auditoria histórica e exportação para BI corporativo.</p>
         <ul>
-          <li><strong>Consultas Flexíveis:</strong> Geração de dados de produção agregados ou individualizados por períodos de datas específicos e filtros por colhedor.</li>
+          <li><strong>Consultas Flexíveis:</strong> Geração de dados de produção filtrados por datas, banco dos colaboradores, intervalo de volumes e ordenações personalizáveis.</li>
           <li><strong>Exportação:</strong> Download instantâneo de planilhas nativas em arquivos Microsoft Excel.</li>
           <li><strong>Tecnologia:</strong> Parser binário <code>xlsx</code> da SheetJS integrado.</li>
         </ul>
@@ -521,8 +529,10 @@
         <h3 id="configuracoes" class="section-subtitle">3.8. Configurações</h3>
         <p>Ajustes de governança e precificação básica da fazenda.</p>
         <ul>
-          <li><strong>Configurações Cadastrais:</strong> Registro do nome oficial da fazenda e dados cadastrais da empresa produtora.</li>
-          <li><strong>Tabela de Preço Dinâmico:</strong> Cadastro e histórico do valor pago por lata de café com especificação de data de vigência para os cálculos operacionais do campo.</li>
+          <li><strong>Tabela de Preço Dinâmico:</strong> Cadastro e histórico do valor pago por lata de café com especificação de data de vigência para os cálculos operacionais do campo. Bloqueia preventivamente o cadastro de datas de vigência futuras.</li>
+          <li><strong>Assistente de Código Bancário:</strong> Preenche automaticamente o código de compensação dos bancos cadastrados de forma autônoma.</li>
+          <li><strong>Gestão de Acesso da Equipe:</strong> Cadastro de Cabos e Admins com credenciais auto-geradas e inativação de acessos em tempo real.</li>
+          <li><strong>Ferramentas de Banco de Dados:</strong> Geração de backups JSON protegidos por senha e com encriptação de dados de CPFs e contas, restauração de arquivos e limpeza irreversível com palavra de segurança "EXCLUIR".</li>
         </ul>
       </section>
 
@@ -540,7 +550,7 @@
       <!-- Technical support Section -->
       <section id="suporte" class="section-block">
         <h2 class="section-title">5. Contatos e Suporte Técnico</h2>
-        <p>A equipe da <strong>DG TECH — Soluções Tecnológicas</strong> está inteiramente à disposição para esclarecimentos, inclusão de novas melhorias ou customizações de relatórios:</p>
+        <p>A equipe da <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong> está inteiramente à disposição para esclarecimentos, inclusão de novas melhorias ou customizações de relatórios:</p>
         <ul>
           <li><strong>E-mail de Suporte:</strong> suporte@dgtech.com.br</li>
           <li><strong>WhatsApp de Suporte:</strong> (77) 99999-8888</li>
@@ -550,7 +560,7 @@
 
       <!-- Copyright Footer -->
       <footer class="footer">
-        <p>© 2026 DG TECH - Soluções Tecnológicas. Todos os direitos reservados. "Fazenda Vista Bela - Sistema Inteligente de Gestão de Colheita de Café" é marca exclusiva da DG TECH.</p>
+        <p>© 2026 <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong>. Todos os direitos reservados. "Fazenda Vista Bela - Sistema Inteligente de Gestão de Colheita de Café" é marca exclusiva da <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong>.</p>
       </footer>
 
     </main>
