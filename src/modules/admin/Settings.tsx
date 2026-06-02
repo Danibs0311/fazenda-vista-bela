@@ -36,7 +36,7 @@ export const Settings: React.FC = () => {
   const [editingUserRole, setEditingUserRole] = useState<'admin' | 'cabo'>('cabo');
   const [isEditUserModalOpen, setEditUserModalOpen] = useState(false);
 
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { showToast } = useToast();
 
   const [selectedHistoryIndex, setSelectedHistoryIndex] = useState(0);
@@ -272,6 +272,12 @@ export const Settings: React.FC = () => {
   // Toggle user status: Active/Inactive (Soft Delete)
   const handleToggleUserStatus = async (userId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+
+    if (user && userId === user.id && newStatus === 'inactive') {
+      showToast('Por segurança, você não pode inativar a sua própria conta administrativa.', 'error');
+      return;
+    }
+
     const msg = newStatus === 'inactive' 
       ? 'Deseja realmente INATIVAR este usuário? Ele será desconectado e impedido de fazer login imediatamente.' 
       : 'Deseja reativar o acesso deste usuário?';
@@ -320,6 +326,11 @@ export const Settings: React.FC = () => {
 
   // Delete user permanently
   const handleDeleteUser = async (userId: string) => {
+    if (user && userId === user.id) {
+      showToast('Por segurança, você não pode excluir a sua própria conta.', 'error');
+      return;
+    }
+
     if (!confirm('ATENÇÃO: Deseja realmente EXCLUIR permanentemente este usuário? Isso apagará seu login e perfil permanentemente.')) return;
 
     try {

@@ -223,6 +223,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
+  // Real-time and periodic checks to log out immediately if the user is inactivated
+  useEffect(() => {
+    if (!user) return;
+
+    const checkUserStatus = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('status')
+          .eq('id', user.id)
+          .single();
+
+        if (!error && data && data.status === 'inactive') {
+          console.warn('User status is inactive in periodic check. Logging out.');
+          await signOut();
+        }
+      } catch (err) {
+        console.error('Error verifying user status:', err);
+      }
+    };
+
+    // Run status verification immediately
+    checkUserStatus();
+
+    // Verification check every 15 seconds as a solid backup
+    const checkInterval = setInterval(checkUserStatus, 15000);
+
+    // Primary immediate trigger: Supabase Realtime channel
+    const channel = supabase
+      .channel(`profile-status-realtime-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`
+        },
+        async (payload: any) => {
+          if (payload.new && payload.new.status === 'inactive') {
+            console.warn('Current user inactivated via database realtime event. Logging out immediately.');
+            await signOut();
+          } else if (payload.new) {
+            setProfile(payload.new as UserProfile);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(checkInterval);
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+
   return (
     <AuthContext.Provider value={{ user, session, profile, loading, signOut, refreshProfile }}>
       {children}
