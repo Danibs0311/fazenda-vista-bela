@@ -24,6 +24,15 @@ export const Collaborators: React.FC = () => {
   const [cpfValue, setCpfValue] = useState('');
   const [visibleCount, setVisibleCount] = useState(50);
 
+  // PIX and Operation States
+  const [isPixModalOpen, setPixModalOpen] = useState(false);
+  const [pixKeyType, setPixKeyType] = useState<'TELEFONE' | 'CPF' | 'EMAIL' | 'CHAVE ALEATÓRIA'>('CPF');
+  const [pixKeyValue, setPixKeyValue] = useState('');
+  const [selectedOperationOption, setSelectedOperationOption] = useState('');
+  const [customOperationValue, setCustomOperationValue] = useState('');
+  const [agenciaValue, setAgenciaValue] = useState('');
+  const [contaValue, setContaValue] = useState('');
+
   useEffect(() => {
     setVisibleCount(50);
   }, [searchTerm]);
@@ -560,10 +569,12 @@ export const Collaborators: React.FC = () => {
       id: editingCollab?.id || getNextSequentialId(),
       nome: formData.get('nome') as string,
       cpf: formattedCpf,
-      banco: formData.get('banco') as string,
-      agencia: formData.get('agencia') as string,
-      conta: formData.get('conta') as string,
-      tipo_conta: formData.get('tipo_conta') as string,
+      banco: selectedOperationOption === 'PIX' ? '' : (formData.get('banco') as string || ''),
+      agencia: selectedOperationOption === 'PIX' ? '' : (formData.get('agencia') as string || ''),
+      conta: selectedOperationOption === 'PIX' ? pixKeyValue : (formData.get('conta') as string || ''),
+      tipo_conta: selectedOperationOption === 'PIX' 
+        ? `PIX (${pixKeyType})` 
+        : (selectedOperationOption === 'OUTRO' ? customOperationValue : selectedOperationOption),
       status: editingCollab?.status || CollaboratorStatus.ACTIVE,
       data_cadastro: editingCollab?.data_cadastro || new Date().toISOString()
     };
@@ -592,9 +603,74 @@ export const Collaborators: React.FC = () => {
       }
     }
   };
+  const existingOperations = useMemo(() => {
+    const ops = new Set<string>();
+    collaborators.forEach(c => {
+      if (c.tipo_conta) {
+        const clean = c.tipo_conta.toUpperCase().trim();
+        if (clean && !clean.startsWith('PIX')) {
+          ops.add(clean);
+        }
+      }
+    });
+    ops.add('CORRENTE');
+    ops.add('POUPANÇA');
+    return Array.from(ops);
+  }, [collaborators]);
 
+  const handleOpenEditModal = (c: Collaborator, readOnly = false) => {
+    setEditingCollab(c);
+    setIsReadOnly(readOnly);
+    setCpfValue(c.cpf || '');
+    setSelectedBank(c.banco || '');
+    setAgenciaValue(c.agencia || '');
+    setContaValue(c.conta || '');
 
-   const filtered = useMemo(() => {
+    const op = c.tipo_conta || '';
+    const upperOp = op.toUpperCase().trim();
+    if (upperOp.startsWith('PIX')) {
+      setSelectedOperationOption('PIX');
+      const match = op.match(/\(([^)]+)\)/);
+      const keyType = match ? match[1].toUpperCase() : 'CPF';
+      if (['TELEFONE', 'CPF', 'EMAIL', 'CHAVE ALEATÓRIA'].includes(keyType)) {
+        setPixKeyType(keyType as any);
+      } else {
+        setPixKeyType('CPF');
+      }
+      setPixKeyValue(c.conta || '');
+    } else {
+      if (['CORRENTE', 'POUPANÇA', '013', '023'].includes(upperOp) || existingOperations.includes(upperOp)) {
+        setSelectedOperationOption(upperOp);
+        setCustomOperationValue('');
+      } else if (upperOp) {
+        setSelectedOperationOption('OUTRO');
+        setCustomOperationValue(op);
+      } else {
+        setSelectedOperationOption('');
+        setCustomOperationValue('');
+      }
+      setPixKeyType('CPF');
+      setPixKeyValue('');
+    }
+
+    setModalOpen(true);
+  };
+
+  const handleOpenNewModal = () => {
+    setEditingCollab(null);
+    setIsReadOnly(false);
+    setCpfValue('');
+    setSelectedBank('');
+    setAgenciaValue('');
+    setContaValue('');
+    setSelectedOperationOption('');
+    setCustomOperationValue('');
+    setPixKeyType('CPF');
+    setPixKeyValue('');
+    setModalOpen(true);
+  };
+
+  const filtered = useMemo(() => {
     const term = searchTerm.toLowerCase();
     return collaborators
       .filter(c => {
@@ -630,13 +706,7 @@ export const Collaborators: React.FC = () => {
           </button>
           
           <button
-            onClick={() => { 
-              setEditingCollab(null); 
-              setIsReadOnly(false); 
-              setCpfValue('');
-              setSelectedBank('');
-              setModalOpen(true); 
-            }}
+            onClick={handleOpenNewModal}
             className="!bg-primary !text-white px-5 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 hover:!bg-dark transition-all active:scale-95 shadow-lg shadow-primary/20 group cursor-pointer"
           >
             <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform" />
@@ -700,11 +770,7 @@ export const Collaborators: React.FC = () => {
                 if (e.key === 'Enter' && searchTerm && filtered.length > 0) {
                   e.preventDefault();
                   const current = filtered[activeIndex];
-                  setEditingCollab(current);
-                  setIsReadOnly(true);
-                  setCpfValue(current.cpf);
-                  setSelectedBank(current.banco);
-                  setModalOpen(true);
+                  handleOpenEditModal(current, true);
                 }
                 if ((e.key === 'Tab' || e.key === 'ArrowRight') && searchTerm && filtered.length > 0) {
                   const current = filtered[activeIndex];
@@ -768,18 +834,35 @@ export const Collaborators: React.FC = () => {
 
               {/* Dados Bancários */}
               <div className="flex-[1.5] px-4 md:px-8 py-1 border-t md:border-t-0 md:border-l border-slate-50">
-                <div className="flex items-center gap-3 text-dark/80">
-                  <div className="w-9 h-9 rounded-lg bg-white border border-slate-100 shadow-sm flex items-center justify-center">
-                    <Landmark className="w-4.5 h-4.5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="font-black text-dark uppercase tracking-tight leading-none text-[13px]">{c.banco}</div>
-                    <div className="text-[9px] font-black text-dark mt-1 uppercase tracking-widest flex items-center gap-2">
-                      {c.agencia} • {c.conta} 
-                      <span className="bg-slate-100 px-2 py-0.5 rounded-full italic text-[8px] border border-slate-200 text-dark/80">{c.tipo_conta}</span>
+                {c.tipo_conta?.toUpperCase().startsWith('PIX') ? (
+                  <div className="flex items-center gap-3 text-dark/80">
+                    <div className="w-9 h-9 rounded-lg bg-success/5 border border-success/15 shadow-sm flex items-center justify-center">
+                      <span className="text-[9px] font-black text-success">PIX</span>
+                    </div>
+                    <div>
+                      <div className="font-black text-success uppercase tracking-wider leading-none text-[12px]">PIX</div>
+                      <div className="text-[10px] font-black text-dark mt-1 uppercase tracking-tight flex items-center gap-2">
+                        <span className="bg-success/10 px-2 py-0.5 rounded-full italic text-[8px] border border-success/10 text-success font-black">
+                          {c.tipo_conta}
+                        </span>
+                        <span className="font-mono text-primary font-black select-all">{c.conta}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="flex items-center gap-3 text-dark/80">
+                    <div className="w-9 h-9 rounded-lg bg-white border border-slate-100 shadow-sm flex items-center justify-center">
+                      <Landmark className="w-4.5 h-4.5 text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-black text-dark uppercase tracking-tight leading-none text-[13px]">{c.banco}</div>
+                      <div className="text-[9px] font-black text-dark mt-1 uppercase tracking-widest flex items-center gap-2">
+                        {c.agencia} • {c.conta} 
+                        <span className="bg-slate-100 px-2 py-0.5 rounded-full italic text-[8px] border border-slate-200 text-dark/80">{c.tipo_conta}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Status */}
@@ -802,7 +885,7 @@ export const Collaborators: React.FC = () => {
               <div className="w-full md:w-44 px-4 md:px-6 py-1 text-right border-t md:border-t-0 md:border-l border-slate-50">
                 <div className="flex justify-center md:justify-end gap-1.5 transition-all">
                   <button
-                    onClick={(e) => { e.stopPropagation(); setEditingCollab(c); setIsReadOnly(false); setCpfValue(c.cpf); setSelectedBank(c.banco); setModalOpen(true); }}
+                    onClick={(e) => { e.stopPropagation(); handleOpenEditModal(c, false); }}
                     className="flex items-center gap-1.5 px-3 py-1.5 !bg-primary !text-white hover:!bg-dark rounded-lg transition-all active:scale-90 shadow-lg shadow-primary/20"
                   >
                     <Edit2 className="w-3.5 h-3.5 !text-white" />
@@ -830,7 +913,7 @@ export const Collaborators: React.FC = () => {
                 <div className="flex items-center justify-center gap-3">
                   <button
                     type="button"
-                    onClick={() => { setEditingCollab(null); setIsReadOnly(false); setCpfValue(''); setSelectedBank(''); setModalOpen(true); }}
+                    onClick={handleOpenNewModal}
                     className="bg-primary text-white px-6 py-2.5 rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/25"
                   >
                     Sim, Cadastrar
@@ -921,9 +1004,9 @@ export const Collaborators: React.FC = () => {
                     <div className="relative">
                        <select 
                         name="banco" 
-                        required 
-                        disabled={isReadOnly}
-                        value={selectedBank}
+                        required={selectedOperationOption !== 'PIX'} 
+                        disabled={isReadOnly || selectedOperationOption === 'PIX'}
+                        value={selectedOperationOption === 'PIX' ? '' : selectedBank}
                         onChange={(e) => {
                           const val = e.target.value;
                           if (val === 'OUTRO') {
@@ -932,7 +1015,7 @@ export const Collaborators: React.FC = () => {
                             setSelectedBank(val);
                           }
                         }}
-                        className="w-full appearance-none bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm cursor-pointer shadow-sm disabled:opacity-70"
+                        className="w-full appearance-none bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm cursor-pointer shadow-sm disabled:opacity-75 disabled:bg-slate-50"
                       >
                         <option value="">Selecione</option>
                         {banks.map(b => (
@@ -948,10 +1031,11 @@ export const Collaborators: React.FC = () => {
                     <label className="text-[11px] font-black uppercase tracking-widest text-dark/70 px-2">Agência</label>
                     <input 
                       name="agencia" 
-                      required 
-                      disabled={isReadOnly}
-                      defaultValue={editingCollab?.agencia} 
-                      className="w-full bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm shadow-sm disabled:opacity-70"
+                      required={selectedOperationOption !== 'PIX'} 
+                      disabled={isReadOnly || selectedOperationOption === 'PIX'}
+                      value={selectedOperationOption === 'PIX' ? '0' : agenciaValue}
+                      onChange={(e) => setAgenciaValue(e.target.value)}
+                      className="w-full bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm shadow-sm disabled:opacity-75 disabled:bg-slate-50"
                       placeholder="0000"
                     />
                   </div>
@@ -960,25 +1044,81 @@ export const Collaborators: React.FC = () => {
                     <label className="text-[11px] font-black uppercase tracking-widest text-dark/70 px-2">Conta</label>
                     <input 
                       name="conta" 
-                      required 
-                      disabled={isReadOnly}
-                      defaultValue={editingCollab?.conta} 
-                      className="w-full bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm font-mono shadow-sm disabled:opacity-70"
-                      placeholder="00000-0"
+                      required={selectedOperationOption !== 'PIX'} 
+                      disabled={isReadOnly || selectedOperationOption === 'PIX'}
+                      value={selectedOperationOption === 'PIX' ? pixKeyValue : contaValue}
+                      onChange={(e) => setContaValue(e.target.value)}
+                      className="w-full bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm font-mono shadow-sm disabled:opacity-75 disabled:bg-slate-50"
+                      placeholder={selectedOperationOption === 'PIX' ? 'Chave PIX' : '00000-0'}
                     />
                   </div>
 
                   <div className="space-y-1 group md:col-span-2">
                     <label className="text-[11px] font-black uppercase tracking-widest text-dark/70 px-2">Operação / Tipo de Conta</label>
-                    <input 
-                      name="tipo_conta" 
-                      required 
-                      disabled={isReadOnly}
-                      defaultValue={editingCollab?.tipo_conta} 
-                      className="w-full bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm shadow-sm disabled:opacity-70"
-                      placeholder="Ex: POUPANÇA, CORRENTE, 013, 001"
-                    />
+                    <div className="relative">
+                      <select
+                        name="tipo_conta"
+                        required
+                        disabled={isReadOnly}
+                        value={selectedOperationOption}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSelectedOperationOption(val);
+                          if (val === 'PIX') {
+                            if (!pixKeyValue && cpfValue && cpfValue !== '000.000.000-00') {
+                              setPixKeyValue(cpfValue);
+                              setPixKeyType('CPF');
+                            }
+                            setPixModalOpen(true);
+                          }
+                        }}
+                        className="w-full appearance-none bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm cursor-pointer shadow-sm disabled:opacity-70"
+                      >
+                        <option value="">Selecione</option>
+                        {existingOperations.map(op => (
+                          <option key={op} value={op}>{op}</option>
+                        ))}
+                        <option value="PIX" className="font-black text-success bg-slate-50">PIX</option>
+                        <option value="OUTRO" className="font-black text-accent bg-slate-50">+ OUTRO (CADASTRAR NOVO)</option>
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary/40 pointer-events-none" />
+                    </div>
                   </div>
+
+                  {selectedOperationOption === 'OUTRO' && (
+                    <div className="space-y-1 group md:col-span-2 animate-in slide-in-from-top-1 duration-200">
+                      <label className="text-[11px] font-black uppercase tracking-widest text-dark/70 px-2">Nova Operação / Tipo de Conta</label>
+                      <input
+                        type="text"
+                        required
+                        disabled={isReadOnly}
+                        value={customOperationValue}
+                        onChange={(e) => setCustomOperationValue(e.target.value)}
+                        className="w-full bg-white border-2 border-primary focus:border-primary/50 rounded-xl py-2 px-4 text-primary outline-none transition-all font-black text-sm shadow-sm"
+                        placeholder="Ex: CONTA FÁCIL, 022, POUPANÇA INTEGRADA"
+                      />
+                    </div>
+                  )}
+
+                  {selectedOperationOption === 'PIX' && (
+                    <div className="space-y-1 group md:col-span-2 animate-in slide-in-from-top-1 duration-200">
+                      <div className="bg-success/5 border border-success/10 rounded-2xl p-4 flex items-center justify-between gap-4">
+                        <div className="space-y-0.5">
+                          <span className="text-[9px] font-black text-success uppercase tracking-widest">Chave PIX Configurada</span>
+                          <p className="font-black text-dark text-xs uppercase">{pixKeyType}: <span className="font-mono text-primary select-all">{pixKeyValue || 'Não definida'}</span></p>
+                        </div>
+                        {!isReadOnly && (
+                          <button
+                            type="button"
+                            onClick={() => setPixModalOpen(true)}
+                            className="px-4 py-2 bg-success text-white hover:bg-success/90 rounded-xl font-black uppercase tracking-wider text-[10px] transition-all active:scale-95 cursor-pointer shadow-md shadow-success/20"
+                          >
+                            Configurar Chave
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="pt-2 flex gap-3">
@@ -1079,6 +1219,98 @@ export const Collaborators: React.FC = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pequeno Modal do PIX */}
+      {isPixModalOpen && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-dark/65 backdrop-blur-md animate-in fade-in">
+          <div className="bg-white rounded-[24px] w-full max-w-sm shadow-2xl relative animate-in zoom-in-95 border border-slate-100 flex flex-col overflow-hidden">
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-md font-black text-dark uppercase tracking-tight italic">
+                Configurar <span className="text-primary not-italic">Chave PIX</span>
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setPixModalOpen(false);
+                  if (!pixKeyValue) setSelectedOperationOption('');
+                }} 
+                className="p-1.5 bg-slate-50 rounded-lg text-secondary/30 hover:text-danger transition-all"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="p-5 space-y-4">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase tracking-widest text-dark/70 px-1">Tipo de Chave</label>
+                <select
+                  value={pixKeyType}
+                  onChange={(e) => {
+                    const type = e.target.value as any;
+                    setPixKeyType(type);
+                    if (type === 'CPF' && cpfValue && cpfValue !== '000.000.000-00') {
+                      setPixKeyValue(cpfValue);
+                    } else if (type === 'CPF') {
+                      setPixKeyValue('');
+                    }
+                  }}
+                  className="w-full bg-white border-2 border-primary rounded-xl py-2 px-3 text-primary font-black text-xs outline-none"
+                >
+                  <option value="CPF">CPF</option>
+                  <option value="TELEFONE">TELEFONE</option>
+                  <option value="EMAIL">E-MAIL</option>
+                  <option value="CHAVE ALEATÓRIA">CHAVE ALEATÓRIA</option>
+                </select>
+              </div>
+              
+              <div className="space-y-1">
+                <label className="text-[10px] font-black uppercase tracking-widest text-dark/70 px-1">Valor da Chave</label>
+                <input
+                  type="text"
+                  required
+                  value={pixKeyValue}
+                  onChange={(e) => setPixKeyValue(e.target.value)}
+                  placeholder={
+                    pixKeyType === 'CPF' ? '000.000.000-00' :
+                    pixKeyType === 'TELEFONE' ? '(00) 00000-0000' :
+                    pixKeyType === 'EMAIL' ? 'exemplo@email.com' :
+                    'Chave aleatória de 36 caracteres'
+                  }
+                  className="w-full bg-white border-2 border-primary rounded-xl py-2 px-3 text-primary font-black text-xs outline-none"
+                />
+              </div>
+              
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPixModalOpen(false);
+                    if (!pixKeyValue) setSelectedOperationOption('');
+                  }}
+                  className="flex-1 bg-slate-100 hover:bg-slate-200 text-secondary font-black uppercase text-[10px] py-2.5 rounded-lg tracking-wider"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!pixKeyValue.trim()) {
+                      alert('Por favor, insira o valor da chave PIX.');
+                      return;
+                    }
+                    setPixModalOpen(false);
+                    // Clear bank fields automatically
+                    setSelectedBank('');
+                  }}
+                  className="flex-1 bg-primary hover:bg-dark text-white font-black uppercase text-[10px] py-2.5 rounded-lg tracking-wider"
+                >
+                  Confirmar
+                </button>
+              </div>
             </div>
           </div>
         </div>
