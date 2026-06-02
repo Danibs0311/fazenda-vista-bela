@@ -1,8 +1,10 @@
-const CACHE_NAME = 'vista-bela-v2';
+const CACHE_NAME = 'vista-bela-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/logo_fazenda.png',
+  '/logo_dg_tech.jpg',
+  '/manual_usuario.html',
   '/manifest.json'
 ];
 

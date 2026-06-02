@@ -2,9 +2,14 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <title>Manual do Usuário - Fazenda Vista Bela</title>
   <link rel="icon" type="image/png" href="./logo_fazenda.png">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Manual Vista Bela">
   
   <!-- Google Fonts: Inter & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -387,6 +392,7 @@
       border-radius: 16px;
       padding: 2rem;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      flex-wrap: wrap;
     }
 
     .support-logo {
@@ -400,6 +406,46 @@
     .support-info {
       flex: 1;
       min-width: 250px;
+    }
+
+    .support-info p {
+      text-align: left;
+    }
+
+    .mobile-toc {
+      display: none;
+    }
+
+    .back-to-top-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background-color: var(--primary);
+      color: #ffffff;
+      border: none;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      cursor: pointer;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      z-index: 1000;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      outline: none;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .back-to-top-btn:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-3px);
+    }
+
+    .back-to-top-btn:active {
+      transform: scale(0.9);
     }
 
     /* Responsive */
@@ -416,6 +462,63 @@
       }
       .cover-logos {
         gap: 1.5rem;
+      }
+      .support-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+      }
+      .support-logo {
+        width: 120px;
+      }
+      .support-info {
+        width: 100%;
+        min-width: unset;
+      }
+      .mobile-toc {
+        display: block;
+        padding: 2rem;
+        margin-bottom: 2.5rem;
+      }
+      .nav-menu-mobile {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0 0 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      .nav-menu-mobile li {
+        margin-bottom: 0;
+      }
+      .nav-menu-mobile li a {
+        color: var(--primary-dark);
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: color 0.2s ease;
+      }
+      .nav-menu-mobile li a:hover {
+        color: var(--primary);
+      }
+      .nav-sub-menu-mobile {
+        list-style: none;
+        padding-left: 1.25rem;
+        margin-top: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        border-left: 2px solid var(--border);
+        margin-left: 0.5rem;
+      }
+      .nav-sub-menu-mobile li a {
+        font-size: 0.85rem;
+        color: var(--secondary);
+        font-weight: 600;
+      }
+      .nav-sub-menu-mobile li a:hover {
+        color: var(--primary-dark);
       }
     }
   </style>
@@ -473,6 +576,34 @@
           <span><strong>Desenvolvedora:</strong> DG TECH — SOLUÇÕES TECNOLÓGICAS</span>
           <span><strong>Data:</strong> Junho 2026</span>
         </div>
+      </section>
+
+      <!-- Mobile Table of Contents (visible only on mobile) -->
+      <section class="mobile-toc section-block">
+        <h2 class="section-title">Índice do Manual</h2>
+        <nav>
+          <ul class="nav-menu-mobile">
+            <li><a href="#apresentacao">1. Apresentação</a></li>
+            <li><a href="#rotina">2. Rotina Operacional</a></li>
+            <li>
+              <a href="#guiatelas">3. Guia de Telas</a>
+              <ul class="nav-sub-menu-mobile">
+                <li><a href="#dashboard">3.1. Dashboard (Monitoramento)</a></li>
+                <li><a href="#colhedores">3.2. Colhedores (Cadastros)</a></li>
+                <li><a href="#registrar-colheita">3.3. Registrar Colheita (Pesagem)</a></li>
+                <li><a href="#ciclos">3.4. Ciclos de Colheita (Semanas)</a></li>
+                <li><a href="#conferencia">3.5. Conferência (Auditoria)</a></li>
+                <li><a href="#pagamentos">3.6. Pagamentos (Consolidação)</a></li>
+                <li><a href="#relatorios">3.7. Relatórios (Históricos)</a></li>
+                <li><a href="#configuracoes">3.8. Configurações (Ajustes)</a></li>
+                <li><a href="#rbac">3.9. Perfis de Acesso (RBAC)</a></li>
+              </ul>
+            </li>
+            <li><a href="#seguranca-offline">4. Segurança e Persistência</a></li>
+            <li><a href="#faq">5. Perguntas Frequentes</a></li>
+            <li><a href="#suporte">6. Suporte Técnico</a></li>
+          </ul>
+        </nav>
       </section>
 
       <!-- Termo de Propriedade Intelectual -->
@@ -696,6 +827,35 @@
     </main>
 
   </div>
+
+  <!-- Floating Back to Top Button -->
+  <button id="back-to-top" class="back-to-top-btn" title="Voltar ao Topo">
+    ↑
+  </button>
+
+  <script>
+    // Floating Back to Top Button Logic
+    const backToTopBtn = document.getElementById('back-to-top');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTopBtn.style.display = 'flex';
+      } else {
+        backToTopBtn.style.display = 'none';
+      }
+    });
+    backToTopBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker do manual registrado:', reg.scope))
+          .catch((err) => console.error('Erro ao registrar Service Worker do manual:', err));
+      });
+    }
+  </script>
 
 </body>
 </html>
