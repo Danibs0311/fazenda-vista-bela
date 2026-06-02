@@ -840,12 +840,12 @@ export const Collaborators: React.FC = () => {
                       <span className="text-[9px] font-black text-success">PIX</span>
                     </div>
                     <div>
-                      <div className="font-black text-success uppercase tracking-wider leading-none text-[12px]">PIX</div>
-                      <div className="text-[10px] font-black text-dark mt-1 uppercase tracking-tight flex items-center gap-2">
-                        <span className="bg-success/10 px-2 py-0.5 rounded-full italic text-[8px] border border-success/10 text-success font-black">
+                      <div className="font-black text-dark uppercase tracking-tight leading-none text-[13px]">PIX</div>
+                      <div className="text-[9px] font-black text-dark mt-1 uppercase tracking-widest flex items-center gap-2">
+                        <span className="bg-slate-100 px-2 py-0.5 rounded-full italic text-[8px] border border-slate-200 text-dark/80">
                           {c.tipo_conta}
                         </span>
-                        <span className="font-mono text-primary font-black select-all">{c.conta}</span>
+                        <span className="font-mono">{c.conta}</span>
                       </div>
                     </div>
                   </div>
