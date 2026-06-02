@@ -628,7 +628,7 @@ export const Settings: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-5 py-2 text-right">
-                          {idx !== 0 && (
+                          {prices.length > 1 && (
                             <button 
                               onClick={() => handleDeletePrice(p.id)}
                               className="p-1 text-secondary/20 hover:text-danger hover:bg-danger/5 rounded-md transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
