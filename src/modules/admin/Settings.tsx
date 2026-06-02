@@ -662,7 +662,52 @@ export const Settings: React.FC = () => {
                     type="text" 
                     required
                     value={newBankName}
-                    onChange={(e) => setNewBankName(e.target.value)}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setNewBankName(name);
+                      if (!name.trim()) {
+                        setNewBankCode('');
+                        return;
+                      }
+                      const normalized = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
+                      const BANK_CODES: { [key: string]: string } = {
+                        'BANCO DO BRASIL': '001',
+                        'BRADESCO': '237',
+                        'ITAU': '341',
+                        'SANTANDER': '033',
+                        'NUBANK': '260',
+                        'INTER': '077',
+                        'C6': '336',
+                        'C6 BANK': '336',
+                        'CAIXA': '104',
+                        'CAIXA ECONOMICA': '104',
+                        'MERCANTIL': '389',
+                        'SAFRA': '422',
+                        'SICREDI': '748',
+                        'SICOOB': '756',
+                        'ORIGINAL': '212',
+                        'BMG': '318',
+                        'BANRISUL': '041',
+                        'PAGBANK': '290',
+                        'PAGSEGURO': '290',
+                        'NEON': '655',
+                        'STONE': '197',
+                        'PICPAY': '380',
+                        'CREFISA': '069',
+                        'AGIBANK': '121',
+                        'AGIPLAN': '121',
+                        'MODAL': '746',
+                        'BTG': '208',
+                        'BTG PACTUAL': '208',
+                        'XP': '102'
+                      };
+                      const matchedKey = Object.keys(BANK_CODES).find(key => 
+                        normalized === key || normalized.startsWith(key) || (normalized.length >= 3 && key.startsWith(normalized))
+                      );
+                      if (matchedKey) {
+                        setNewBankCode(BANK_CODES[matchedKey]);
+                      }
+                    }}
                     placeholder="Nome do Banco"
                     className="w-full bg-white border-2 border-transparent focus:border-primary/20 rounded-lg py-2 px-3 text-[10px] font-black text-primary outline-none transition-all shadow-sm h-[42px] md:h-auto font-bold uppercase"
                   />
