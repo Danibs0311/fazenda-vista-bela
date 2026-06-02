@@ -4,6 +4,20 @@ const { Client } = pg;
 async function run() {
   const configs = [
     {
+      host: 'localhost',
+      port: 5432,
+      user: 'postgres',
+      password: 'VistaBela2026SecurePass',
+      database: 'postgres'
+    },
+    {
+      host: '127.0.0.1',
+      port: 5432,
+      user: 'postgres',
+      password: 'VistaBela2026SecurePass',
+      database: 'postgres'
+    },
+    {
       host: '147.15.114.255',
       port: 5432,
       user: 'postgres',
@@ -65,14 +79,14 @@ async function run() {
 
         RETURN QUERY
         SELECT 
-          p.id,
-          p.nome,
-          p.role,
-          p.status,
+          u.id,
+          COALESCE(p.nome, (u.raw_user_meta_data->>'nome'), UPPER(SPLIT_PART(u.email, '@', 1)))::text AS nome,
+          COALESCE(p.role, (u.raw_user_meta_data->>'role'), 'admin')::text AS role,
+          COALESCE(p.status, 'active')::text AS status,
           u.email::text,
-          (u.raw_user_meta_data->>'cpf')::text
-        FROM public.profiles p
-        JOIN auth.users u ON p.id = u.id;
+          (u.raw_user_meta_data->>'cpf')::text AS cpf
+        FROM auth.users u
+        LEFT JOIN public.profiles p ON p.id = u.id;
       END;
       $$;
     `);
