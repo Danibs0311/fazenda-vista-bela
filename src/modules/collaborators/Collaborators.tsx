@@ -1111,7 +1111,7 @@ export const Collaborators: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setPixModalOpen(true)}
-                            className="px-4 py-2 bg-success text-white hover:bg-success/90 rounded-xl font-black uppercase tracking-wider text-[10px] transition-all active:scale-95 cursor-pointer shadow-md shadow-success/20"
+                            className="px-4 py-2 !bg-success !text-white hover:!bg-success/90 rounded-xl font-black uppercase tracking-wider text-[10px] transition-all active:scale-95 cursor-pointer shadow-md shadow-success/20"
                           >
                             Configurar Chave
                           </button>
@@ -1306,7 +1306,7 @@ export const Collaborators: React.FC = () => {
                     // Clear bank fields automatically
                     setSelectedBank('');
                   }}
-                  className="flex-1 bg-primary hover:bg-dark text-white font-black uppercase text-[10px] py-2.5 rounded-lg tracking-wider"
+                  className="flex-1 !bg-success !text-white hover:!bg-success/90 font-black uppercase text-[10px] py-2.5 rounded-lg tracking-wider transition-all active:scale-95 shadow-md shadow-success/20 cursor-pointer"
                 >
                   Confirmar
                 </button>
