@@ -553,6 +553,7 @@
             </ul>
           </li>
           <li><strong>Sinalizador de Conexão Física (Botão de Status):</strong> Exibe o status da conexão atual: Verde (ONLINE / SINCRONIZAR) ou Preto (OFFLINE / LOCAL SEGURO). O fiscal de campo pode clicar fisicamente neste botão para forçar o sistema a testar a internet e processar o envio dos lançamentos locais.</li>
+          <li><strong>Restrição de Visualização (Recentes):</strong> Operadores com perfil Cabo de Turma/Fiscal visualizam exclusivamente os seus próprios lançamentos realizados no dia de hoje (dia de lançamento) no painel lateral de Recentes. Isso garante a privacidade e impede que um fiscal veja a produtividade de colheita apontada por outros cabos.</li>
           <li><strong>Relatório de Fechamento Diário em PDF:</strong> O botão de download gera uma folha de fechamento estruturada no formato A4 (PDFPortrait). O PDF gerado exibe o cabeçalho analítico com a data correspondente, ID, Nome em caixa alta, CPF normalizado, volumes parciais de latas do dia, valor unitário da lata e totalização de latas e despesa do dia selecionado.</li>
         </ul>
 
@@ -634,7 +635,7 @@
           <li><strong>Administrador (Admin):</strong> Nível total de leitura e escrita. Gerencia vigências operacionais de preços, perfis da equipe e executa backups encriptados locais.</li>
           <li><strong>Gerente:</strong> Coordenador das turmas de colheita. Acessa Dashboard de monitoramento, tabelas de colhedores (inserindo ou destravando dados no botão "Editar"), encerra ciclos contábeis no cafezal e emite relatórios analíticos, mas não edita acessos de equipe.</li>
           <li><strong>Financeiro:</strong> Focado no controle contábil e quitação. Audita a conferência das semanas, emite os PDFs de recibos em lote A4 e realiza a quitação final definindo o status como "paga" após transferências. Bloqueado para registrar latas e alterar tabelas de preço.</li>
-          <li><strong>Cabo / Fiscal (Cabo):</strong> Operador de balança no cafezal. Vê **exclusivamente a tela de Registrar Colheita** (mobile). Todos os outros módulos e rotas são ocultados no menu e bloqueados na camada lógica.</li>
+          <li><strong>Cabo / Fiscal (Cabo):</strong> Operador de balança no cafezal. Vê **exclusivamente a tela de Registrar Colheita** (mobile). Todos os outros módulos e rotas são ocultados no menu e bloqueados na camada lógica. Adicionalmente, possui limitação de visualização no painel lateral de Recentes, acessando apenas as suas próprias pesagens registradas no dia corrente (dia de lançamento).</li>
         </ul>
       </section>
 

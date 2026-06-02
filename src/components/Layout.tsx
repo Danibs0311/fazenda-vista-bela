@@ -4,7 +4,7 @@ import { motion, LayoutGroup } from 'framer-motion';
 import {
   LayoutDashboard, Users, Pickaxe, CalendarRange,
   ClipboardCheck, Wallet, Settings, Menu, X, Coffee,
-  ChevronRight, BarChart3, LogOut, FileText
+  ChevronRight, BarChart3, LogOut, FileText, BookOpen
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -138,6 +138,20 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 <NavItem to="/pagamentos" icon={<Wallet className="w-5 h-5" />} label="PAGAMENTO" onClick={() => setSidebarOpen(false)} />
                 <NavItem to="/relatorios" icon={<FileText className="w-5 h-5" />} label="HISTÓRICO" onClick={() => setSidebarOpen(false)} />
                 <NavItem to="/configuracoes" icon={<Settings className="w-5 h-5" />} label="AJUSTES" onClick={() => setSidebarOpen(false)} />
+                <a
+                  href="./manual_usuario.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-4 px-6 py-2 rounded-2xl transition-all duration-300 group relative text-secondary/50 hover:text-primary hover:bg-slate-50"
+                  onClick={() => setSidebarOpen(false)}
+                >
+                  <div className="relative z-10 transition-transform duration-300 group-hover:scale-110">
+                    <BookOpen className="w-5 h-5" />
+                  </div>
+                  <span className="relative z-10 flex-1 font-bold tracking-tight text-sm transition-all duration-300 group-hover:translate-x-1">
+                    MANUAL DO USUÁRIO
+                  </span>
+                </a>
               </>
             )}
           </LayoutGroup>
