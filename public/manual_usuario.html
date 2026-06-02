@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual do Usuário - Fazenda Vista Bela</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --dark: #0f172a;
+      --secondary: #475569;
+      --background: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --danger: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--background);
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    /* Container Layout */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Table of Contents */
+    .sidebar {
+      width: 320px;
+      background-color: #0b0f19;
+      color: #94a3b8;
+      border-right: 1px solid rgba(255,255,255,0.05);
+      padding: 2rem 1.5rem;
+      position: fixed;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .sidebar-logo {
+      height: 64px;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+    }
+
+    .sidebar-title {
+      color: #ffffff;
+      font-size: 1.1rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .sidebar-subtitle {
+      font-size: 0.75rem;
+      color: var(--primary);
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-top: 0.25rem;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .nav-item a {
+      display: block;
+      color: #94a3b8;
+      text-decoration: none;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item a:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+
+    .nav-item.active a {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+
+    .nav-sub-menu {
+      list-style: none;
+      padding-left: 1.5rem;
+      margin-top: 0.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .nav-sub-item a {
+      font-size: 0.8rem;
+      padding: 0.5rem 0.75rem;
+      color: #64748b;
+    }
+
+    .nav-sub-item a:hover {
+      color: #ffffff;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      flex: 1;
+      margin-left: 320px;
+      padding: 3rem 4rem;
+      max-width: 1000px;
+    }
+
+    /* Capa / Cover */
+    .cover-section {
+      text-align: center;
+      background: radial-gradient(circle at 10% 20%, rgb(15, 23, 42) 0%, rgb(21, 32, 54) 90%);
+      color: #ffffff;
+      padding: 4rem;
+      border-radius: 40px;
+      margin-bottom: 4rem;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .cover-logos {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .cover-logo-fazenda {
+      height: 90px;
+      background: #ffffff;
+      padding: 10px;
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .cover-logo-dg {
+      height: 90px;
+      background: #ffffff;
+      padding: 10px;
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .cover-title {
+      font-size: 2.25rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      letter-spacing: -0.03em;
+    }
+
+    .cover-subtitle {
+      font-size: 1.25rem;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 2.5rem;
+    }
+
+    .cover-meta {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      font-weight: 500;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 1.5rem;
+    }
+
+    /* Content Styling */
+    .section-block {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      color: var(--dark);
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--background);
+      padding-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title::before {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 28px;
+      background-color: var(--primary);
+      border-radius: 3px;
+    }
+
+    .section-subtitle {
+      font-size: 1.25rem;
+      color: var(--secondary);
+      margin: 1.5rem 0 1rem 0;
+      font-weight: 700;
+    }
+
+    p {
+      margin-bottom: 1.25rem;
+      color: var(--secondary);
+      font-size: 0.95rem;
+    }
+
+    ul, ol {
+      margin-bottom: 1.5rem;
+      padding-left: 1.5rem;
+      color: var(--secondary);
+      font-size: 0.95rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* Alerts */
+    .alert {
+      padding: 1.25rem 1.5rem;
+      border-radius: 20px;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      border-left: 6px solid;
+    }
+
+    .alert-important {
+      background-color: #ecfdf5;
+      color: #065f46;
+      border-color: var(--primary);
+    }
+
+    .alert-important .alert-title {
+      font-weight: bold;
+      font-family: 'Outfit', sans-serif;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    th {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      color: var(--dark);
+      background-color: var(--background);
+    }
+
+    /* Footer Copyright */
+    .footer {
+      text-align: center;
+      padding: 3rem 0;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      border-top: 1px solid var(--border);
+      margin-top: 4rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar {
+        display: none;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 2rem;
+      }
+      .cover-section {
+        padding: 2rem;
+      }
+      .cover-logos {
+        gap: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img class="sidebar-logo" src="./logo_fazenda.png" alt="Logo Vista Bela">
+        <div class="sidebar-title">Fazenda Vista Bela</div>
+        <div class="sidebar-subtitle">Manual do Sistema</div>
+      </div>
+      
+      <nav>
+        <ul class="nav-menu">
+          <li class="nav-item"><a href="#apresentacao">1. Apresentação</a></li>
+          <li class="nav-item"><a href="#arquitetura">2. Arquitetura Geral</a></li>
+          <li class="nav-item">
+            <a href="#menu-principal">3. Módulos do Menu</a>
+            <ul class="nav-sub-menu">
+              <li class="nav-sub-item"><a href="#dashboard">3.1. Dashboard</a></li>
+              <li class="nav-sub-item"><a href="#colhedores">3.2. Colhedores</a></li>
+              <li class="nav-sub-item"><a href="#registrar-colheita">3.3. Registrar Colheita</a></li>
+              <li class="nav-sub-item"><a href="#ciclos">3.4. Ciclos de Colheita</a></li>
+              <li class="nav-sub-item"><a href="#conferencia">3.5. Conferência</a></li>
+              <li class="nav-sub-item"><a href="#pagamentos">3.6. Pagamentos</a></li>
+              <li class="nav-sub-item"><a href="#relatorios">3.7. Relatórios</a></li>
+              <li class="nav-sub-item"><a href="#configuracoes">3.8. Configurações</a></li>
+            </ul>
+          </li>
+          <li class="nav-item"><a href="#offline">4. Operação Offline</a></li>
+          <li class="nav-item"><a href="#suporte">5. Suporte Técnico</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content Body -->
+    <main class="main-content">
+      
+      <!-- Cover Section -->
+      <section class="cover-section">
+        <div class="cover-logos">
+          <img class="cover-logo-fazenda" src="./logo_fazenda.png" alt="Logo Fazenda">
+          <img class="cover-logo-dg" src="./logo_dg_tech.jpg" alt="Logo DG Tech">
+        </div>
+        <h1 class="cover-title">Sistema Inteligente de Gestão de Colheita de Café</h1>
+        <div class="cover-subtitle">Manual de Operações & Tecnologia — v1.0.0</div>
+        
+        <div class="cover-meta">
+          <span><strong>Produtor:</strong> Fazenda Vista Bela</span>
+          <span><strong>Desenvolvedora:</strong> DG TECH</span>
+          <span><strong>Data:</strong> Junho 2026</span>
+        </div>
+      </section>
+
+      <!-- Important Copyright Alert -->
+      <div class="alert alert-important">
+        <span class="alert-title">Termo de Propriedade Intelectual</span>
+        <p>Este sistema e este manual do usuário são de propriedade intelectual exclusiva e protegidos por direitos autorais pertencentes à <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong>. Qualquer reprodução, modificação, engenharia reversa ou distribuição sem autorização formal da desenvolvedora é proibida.</p>
+      </div>
+
+      <!-- Introduction Section -->
+      <section id="apresentacao" class="section-block">
+        <h2 class="section-title">1. Apresentação do Sistema</h2>
+        <p>O <strong>Sistema Inteligente de Gestão de Colheita de Café — Fazenda Vista Bela</strong> é uma solução de software robusta criada pela <strong>DG TECH</strong> para modernizar os processos de pesagem e consolidação financeira do campo.</p>
+        <p>Substituindo controles manuais em papel por apontamentos web-mobile e sincronização inteligente, a ferramenta assegura o fim das fraudes, a mitigação de erros de preenchimento e a redução imediata em até 80% do tempo gasto para apuração de fechamentos de folhas de pagamentos semanais.</p>
+      </section>
+
+      <!-- Architecture Section -->
+      <section id="arquitetura" class="section-block">
+        <h2 class="section-title">2. Arquitetura Tecnológica e Infraestrutura</h2>
+        <p>Toda a estrutura foi pensada para oferecer robustez contra falhas de internet no cafezal e alta velocidade operacional. A stack tecnológica compreende:</p>
+        
+        <table>
+          <thead>
+            <tr>
+              <th>Camada</th>
+              <th>Tecnologias</th>
+              <th>Propósito</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Interface (Frontend)</strong></td>
+              <td>React v18, TypeScript, Vite</td>
+              <td>Plataforma de visualização moderna, interações em milissegundos e segurança no código.</td>
+            </tr>
+            <tr>
+              <td><strong>Estilização (CSS)</strong></td>
+              <td>Tailwind CSS, Lucide React</td>
+              <td>Layout limpo, otimizado para celulares dos fiscais de campo e telas de computadores.</td>
+            </tr>
+            <tr>
+              <td><strong>Banco de Dados Nuvem</strong></td>
+              <td>Supabase (PostgreSQL)</td>
+              <td>Armazenamento remoto seguro de dados, automações nativas e segurança avançada de acessos.</td>
+            </tr>
+            <tr>
+              <td><strong>Banco de Dados Local</strong></td>
+              <td>IndexedDB (LocalDB)</td>
+              <td>Armazenamento local que viabiliza o lançamento offline durante a jornada de trabalho.</td>
+            </tr>
+            <tr>
+              <td><strong>Geração de Arquivos</strong></td>
+              <td>jspdf, SheetJS (xlsx)</td>
+              <td>Geração e exportação direta de folhas de pagamento em PDF e arquivos estruturados para Excel.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Menu Navigation Section -->
+      <section id="menu-principal" class="section-block">
+        <h2 class="section-title">3. Detalhamento do Menu Principal</h2>
+        <p>Abaixo detalhamos todas as seções funcionais do sistema, em conformidade com o menu de navegação lateral:</p>
+
+        <!-- Dashboard Sub-section -->
+        <h3 id="dashboard" class="section-subtitle">3.1. Dashboard</h3>
+        <p>O centro administrativo do gestor da fazenda. Consolida visualmente as informações fundamentais.</p>
+        <ul>
+          <li><strong>Cartões Operacionais:</strong> Volume colhido no dia (em latas), despesas de mão de obra calculadas e total de funcionários do campo ativos.</li>
+          <li><strong>Gráfico Reativo:</strong> Exibição cronológica interativa demonstrando picos e quedas de produtividade da colheita.</li>
+          <li><strong>Tecnologia:</strong> Implementado com a biblioteca de gráficos vetoriais <code>Recharts</code> para visualizações responsivas em tempo real.</li>
+        </ul>
+
+        <!-- Collaborators Sub-section -->
+        <h3 id="colhedores" class="section-subtitle">3.2. Colhedores</h3>
+        <p>Gerenciamento completo das fichas cadastrais do time de colheita.</p>
+        <ul>
+          <li><strong>Cadastro e Manutenção (CRUD):</strong> Controle de nome completo, CPF, dados bancários (Banco, Agência, Conta, Tipo de Conta) e status de atividade.</li>
+          <li><strong>Filtros Avançados:</strong> Busca instantânea no navegador por nome do colhedor ou status.</li>
+          <li><strong>Tecnologia:</strong> Validações internas em TypeScript e restrições de integridade no Supabase para impedir a exclusão acidental de colaboradores vinculados a ciclos.</li>
+        </ul>
+
+        <!-- Harvest entry Sub-section -->
+        <h3 id="registrar-colheita" class="section-subtitle">3.3. Registrar Colheita</h3>
+        <p>Painel principal dos fiscais operacionais que atuam diretamente no campo.</p>
+        <ul>
+          <li><strong>Entrada Prática:</strong> Registro veloz da quantidade de latas obtida por colaborador.</li>
+          <li><strong>Cálculo Automático:</strong> O preço unitário pago pela lata é consultado na base de regras vigente no exato dia da colheita, computando o valor financeiro do colaborador.</li>
+          <li><strong>Tecnologia:</strong> Banco de dados local <code>IndexedDB</code> que suporta o funcionamento completo em modo offline sem sinal de celular.</li>
+        </ul>
+
+        <!-- Cycles Sub-section -->
+        <h3 id="ciclos" class="section-subtitle">3.4. Ciclos de Colheita</h3>
+        <p>Modulo de controle dos limites temporais operacionais da fazenda.</p>
+        <ul>
+          <li><strong>Ciclos Automatizados:</strong> Um ciclo compreende a sexta-feira (início) até a quinta-feira subsequente (término), gerenciado de forma transparente pela aplicação.</li>
+          <li><strong>Encerramento Manual:</strong> O botão "Encerrar Ciclo" permite ao administrador interromper e congelar a semana ativa a qualquer momento, forçando o envio dos dados de auditoria para folha de pagamentos.</li>
+          <li><strong>Tecnologia:</strong> Robô de controle <code>cycleManager.ts</code> que avalia a passagem dos limites do ciclo a cada 5 segundos.</li>
+        </ul>
+
+        <!-- Conference Sub-section -->
+        <h3 id="conferencia" class="section-subtitle">3.5. Conferência de Produção</h3>
+        <p>Tela de auditoria analítica destinada a validar os apontamentos do campo.</p>
+        <ul>
+          <li><strong>Consolidação:</strong> Agrupamento reativo do volume total e valores a pagar por colaborador na semana selecionada.</li>
+          <li><strong>Aprovação e Bloqueio:</strong> Ao clicar em "Aprovar", a semana é fixada na base de dados para processamento final, e o sistema impede edições posteriores das colheitas diárias pertencentes àquela semana.</li>
+          <li><strong>Tecnologia:</strong> Memorização de computação reativa (hooks <code>useMemo</code>) para otimização de processamento no dispositivo.</li>
+        </ul>
+
+        <!-- Payments Sub-section -->
+        <h3 id="pagamentos" class="section-subtitle">3.6. Pagamentos</h3>
+        <p>Fase final do processamento das remunerações da semana.</p>
+        <ul>
+          <li><strong>Divisão Bancária:</strong> Consolidação de depósitos totais necessários agrupados por banco (Banco do Brasil, Bradesco, Caixa, etc.), facilitando a emissão de remessas e transferências Pix.</li>
+          <li><strong>Recibos PDF:</strong> Emissão ágil de recibos de quitação e exportação de folhas de pagamento completas.</li>
+          <li><strong>Tecnologia:</strong> Integrações com as bibliotecas <code>jspdf</code> e <code>jspdf-autotable</code> para desenho e renderização direta de PDFs customizados.</li>
+        </ul>
+
+        <!-- Reports Sub-section -->
+        <h3 id="relatorios" class="section-subtitle">3.7. Relatórios</h3>
+        <p>Módulo de auditoria histórica e exportação para BI corporativo.</p>
+        <ul>
+          <li><strong>Consultas Flexíveis:</strong> Geração de dados de produção agregados ou individualizados por períodos de datas específicos e filtros por colhedor.</li>
+          <li><strong>Exportação:</strong> Download instantâneo de planilhas nativas em arquivos Microsoft Excel.</li>
+          <li><strong>Tecnologia:</strong> Parser binário <code>xlsx</code> da SheetJS integrado.</li>
+        </ul>
+
+        <!-- Settings Sub-section -->
+        <h3 id="configuracoes" class="section-subtitle">3.8. Configurações</h3>
+        <p>Ajustes de governança e precificação básica da fazenda.</p>
+        <ul>
+          <li><strong>Configurações Cadastrais:</strong> Registro do nome oficial da fazenda e dados cadastrais da empresa produtora.</li>
+          <li><strong>Tabela de Preço Dinâmico:</strong> Cadastro e histórico do valor pago por lata de café com especificação de data de vigência para os cálculos operacionais do campo.</li>
+        </ul>
+      </section>
+
+      <!-- Offline operations Section -->
+      <section id="offline" class="section-block">
+        <h2 class="section-title">4. Operação Offline e Sincronização</h2>
+        <p>Para assegurar a resiliência no trabalho diário no cafezal, o fiscal deve atentar-se às diretrizes operacionais de dados:</p>
+        <ol>
+          <li>Acesse a aplicação pela manhã sob conexão estável com a internet para atualizar as configurações de cadastro e preço de latas.</li>
+          <li>Realize os registros de volumes colhidos normalmente no campo ao longo de toda a jornada diária de colheita. Os dados são salvos localmente de forma segura.</li>
+          <li>Ao final do dia de trabalho, retorne à sede ou a uma área com cobertura de rede Wi-Fi/dados móveis. O sistema sincronizará os dados do dispositivo local automaticamente com o Supabase.</li>
+        </ol>
+      </section>
+
+      <!-- Technical support Section -->
+      <section id="suporte" class="section-block">
+        <h2 class="section-title">5. Contatos e Suporte Técnico</h2>
+        <p>A equipe da <strong>DG TECH — Soluções Tecnológicas</strong> está inteiramente à disposição para esclarecimentos, inclusão de novas melhorias ou customizações de relatórios:</p>
+        <ul>
+          <li><strong>E-mail de Suporte:</strong> suporte@dgtech.com.br</li>
+          <li><strong>WhatsApp de Suporte:</strong> (77) 99999-8888</li>
+          <li><strong>Horário de Atendimento:</strong> Segunda a Sábado — 07:00 às 18:00 (Período crítico de safra)</li>
+        </ul>
+      </section>
+
+      <!-- Copyright Footer -->
+      <footer class="footer">
+        <p>© 2026 DG TECH - Soluções Tecnológicas. Todos os direitos reservados. "Fazenda Vista Bela - Sistema Inteligente de Gestão de Colheita de Café" é marca exclusiva da DG TECH.</p>
+      </footer>
+
+    </main>
+
+  </div>
+
+</body>
+</html>
