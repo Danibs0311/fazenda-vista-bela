@@ -74,11 +74,10 @@ export const WeekManagement: React.FC = () => {
   };
 
   const updateStatus = async (week: HarvestWeek, newStatus: WeekStatus) => {
-    const today = new Date().toISOString().split('T')[0];
-    
-    if (newStatus === WeekStatus.IN_CONFERENCE && today < week.data_fim) {
-      showToast('Ciclo Vigente: Aguarde o fim do período para encerrar e exportar.', 'error');
-      return;
+    if (newStatus === WeekStatus.IN_CONFERENCE) {
+      if (!confirm('Deseja realmente encerrar este ciclo de colheita e exportar os dados para pagamentos?')) {
+        return;
+      }
     }
 
     try {
@@ -249,11 +248,7 @@ export const WeekManagement: React.FC = () => {
                   {(week.status === WeekStatus.OPEN || week.status === WeekStatus.CLOSED) && (
                     <button 
                       onClick={() => updateStatus(week, WeekStatus.IN_CONFERENCE)} 
-                      className={`flex-1 lg:w-[180px] px-4 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all shadow-lg ${
-                        new Date().toISOString().split('T')[0] < week.data_fim
-                        ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
-                        : '!bg-primary !text-white shadow-primary/20 hover:!bg-dark'
-                      }`}
+                      className="flex-1 lg:w-[180px] px-4 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all shadow-lg !bg-primary !text-white shadow-primary/20 hover:!bg-dark"
                     >
                       {week.status === WeekStatus.OPEN ? 'Encerrar Ciclo' : 'Exportar Dados'}
                     </button>
