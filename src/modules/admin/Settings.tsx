@@ -4,7 +4,7 @@ import { backupService } from '../../services/backupService';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { CanPriceConfig, Bank } from '../../types';
-import { formatDate, formatCurrency } from '../../utils/dateUtils';
+import { formatDate, formatCurrency, getLocalDateString } from '../../utils/dateUtils';
 import { Save, History, TrendingUp, AlertTriangle, Download, LogOut, Database, Building2, Plus, Trash2, Landmark, Upload, Users, UserPlus, Shield, Eye, Edit3, CheckCircle2, XCircle } from 'lucide-react';
 import { supabase } from '../../services/supabase';
 
@@ -16,7 +16,7 @@ export const Settings: React.FC = () => {
   const [prices, setPrices] = useState<CanPriceConfig[]>([]);
   const [banks, setBanks] = useState<Bank[]>([]);
   const [newValue, setNewValue] = useState<number>(0);
-  const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
+  const [newDate, setNewDate] = useState(getLocalDateString());
   const [newBankName, setNewBankName] = useState('');
   const [newBankCode, setNewBankCode] = useState('');
   const [isBackingUp, setIsBackingUp] = useState(false);

@@ -251,7 +251,7 @@ export const storage = {
     cache.lastFetch.prices = 0; // Invalidate cache
   },
 
-  getCurrentPrice: async (date: string): Promise<number> => {
+  getCurrentPrice: async (date?: string): Promise<number> => {
     // 1. Try to read from memory cache or load from localStorage fallback
     let prices = cache.prices;
     if (!prices) {
@@ -285,12 +285,10 @@ export const storage = {
       }
     }
 
-    // 3. Re-evaluate from our local prices array
+    // 3. Re-evaluate from our local prices array: ALWAYS return the latest price config
     if (prices && prices.length > 0) {
-      const match = prices
-        .filter(p => p.data_inicio_vigencia <= date)
-        .sort((a, b) => b.data_inicio_vigencia.localeCompare(a.data_inicio_vigencia))[0];
-      if (match) return match.valor_lata;
+      const sorted = [...prices].sort((a, b) => b.data_inicio_vigencia.localeCompare(a.data_inicio_vigencia));
+      return sorted[0].valor_lata;
     }
 
     // 4. Ultimate fallback query if everything else was empty
@@ -298,7 +296,6 @@ export const storage = {
       const { data } = await supabase
         .from('pricing_config')
         .select('*')
-        .lte('data_inicio_vigencia', date)
         .order('data_inicio_vigencia', { ascending: false })
         .limit(1);
 
