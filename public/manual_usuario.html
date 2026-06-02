@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manual do Usuário - Fazenda Vista Bela</title>
+  <link rel="icon" type="image/png" href="./logo_fazenda.png">
   
   <!-- Google Fonts: Inter & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -187,19 +188,11 @@
     }
 
     .cover-logo-fazenda {
-      height: 90px;
+      height: 160px;
       background: #ffffff;
-      padding: 10px;
-      border-radius: 20px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-
-    .cover-logo-dg {
-      height: 90px;
-      background: #ffffff;
-      padding: 10px;
-      border-radius: 20px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      padding: 16px;
+      border-radius: 28px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     }
 
     .cover-title {
@@ -384,6 +377,31 @@
       color: #94a3b8;
     }
 
+    .support-container {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      margin-top: 1.5rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    .support-logo {
+      width: 140px;
+      height: auto;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .support-info {
+      flex: 1;
+      min-width: 250px;
+    }
+
     /* Responsive */
     @media (max-width: 1024px) {
       .sidebar {
@@ -429,6 +447,7 @@
               <li class="nav-sub-item"><a href="#pagamentos">3.6. Pagamentos</a></li>
               <li class="nav-sub-item"><a href="#relatorios">3.7. Relatórios</a></li>
               <li class="nav-sub-item"><a href="#configuracoes">3.8. Configurações</a></li>
+              <li class="nav-sub-item"><a href="#rbac">3.9. Perfis de Acesso (RBAC)</a></li>
             </ul>
           </li>
           <li class="nav-item"><a href="#seguranca-offline">4. Segurança e Persistência</a></li>
@@ -445,7 +464,6 @@
       <section class="cover-section">
         <div class="cover-logos">
           <img class="cover-logo-fazenda" src="./logo_fazenda.png" alt="Logo Fazenda Vista Bela">
-          <img class="cover-logo-dg" src="./logo_dg_tech.jpg" alt="Logo DG TECH — SOLUÇÕES TECNOLÓGICAS">
         </div>
         <h1 class="cover-title">Manual Técnico e Operacional de Colheita</h1>
         <div class="cover-subtitle">Fazenda Vista Bela — Versão 1.0.0</div>
@@ -502,8 +520,8 @@
           <li><strong>Colaboradores Ativos:</strong> Contagem de trabalhadores únicos que possuem ao menos uma pesagem registrada dentro do ciclo selecionado.</li>
           <li><strong>Produtividade Média:</strong> Média matemática simples da produção individual dos colhedores ativos no período (<code>Total de Latas / Colaboradores Ativos</code>).</li>
           <li><strong>Gráfico de Produção Diária:</strong> Renderiza um gráfico de barras responsivo com base nos dias úteis que compõem o ciclo contábil (de Sexta-feira a Quinta-feira). As colunas interagem a eventos de toque e hover para exibição de valores pontuais.</li>
-          <li><strong>Seletor Cronológico (Setas &lt; e &gt;):</strong> Navega pelas semanas de colheita registradas. A seta de avanço (<code>&gt;</code>) é desativada por validação interna caso o ciclo selecionado seja o ciclo corrente, impedindo visualizações e cadastros de registros em períodos vazios do futuro.</li>
-          <li><strong>Auto-Refresh e Visibilidade da Página:</strong> O painel inicial realiza uma varredura automática a cada 5 segundos no IndexedDB e Supabase em segundo plano. Ele também implementa listeners de foco na página (VisibilityState) para disparar imediatamente uma recarga no momento exato em que o operador foca ou retorna à aba do sistema no navegador.</li>
+          <li><strong>Seletor Cronológico (Setas &lt; e &gt;):</strong> Navega pelas semanas de colheita registradas. A seta de avanço (<code>&gt;</code>) é desativa por validação interna caso o ciclo selecionado seja o ciclo corrente, impedindo visualizações e cadastros de registros em períodos vazios do futuro.</li>
+          <li><strong>Auto-Refresh e Visibilidade da Página:</strong> O painel inicial realiza uma varredura automática a cada 5 segundos no IndexedDB e Supabase em segundo plano. Ele também implementa listeners de foco na página (VisibilityState API) para disparar imediatamente uma recarga no momento exato em que o operador foca ou retorna à aba do sistema no navegador.</li>
         </ul>
 
         <!-- 3.2. Colhedores -->
@@ -516,6 +534,9 @@
           <li><strong>Dinâmica da Ficha de Conta PIX:</strong> Ao selecionar a categoria de recebimento como "PIX", os inputs destinados aos dados de Banco, Agência e Conta Corrente são ocultados da tela. O formulário passa a exibir o seletor com a tipologia da chave PIX (CPF, Telefone, E-mail ou Chave Aleatória) e o campo específico de entrada da chave.</li>
           <li><strong>Pesquisa Inteligente e Navegação Física:</strong> A barra de pesquisa atua por autocomplete síncrono sobre o Nome, CPF ou ID do colhedor. Ao digitar, uma sugestão translúcida é exibida em cinza à frente; pressionar <code>Tab</code> ou <code>Seta Direita</code> preenche a caixa por completo, e pressionar <code>Enter</code> abre a respectiva ficha. O operador também pode utilizar as setas físicas <code>Cima</code> e <code>Baixo</code> do teclado para percorrer a lista de colhedores filtrados diretamente de sua barra de busca.</li>
           <li><strong>Importação de Planilha Excel (Lote):</strong> O botão <strong>"Importar Planilha"</strong> permite que o administrador selecione no computador cliente um arquivo contendo dados estruturados em planilha (XLSX). O motor interno faz a leitura binária das linhas, executa validações cadastrais nos CPFs e contas de forma simultânea e insere/atualiza os registros na nuvem.</li>
+          <li><strong>Estrutura Padrão Obrigatória da Planilha:</strong> A planilha XLSX deve conter as seguintes colunas exatas na primeira linha (cabeçalho) para importação sem erros:
+            <br><code>ID</code>, <code>Nome</code>, <code>CPF</code>, <code>Banco</code>, <code>Agencia</code>, <code>Conta</code>, <code>TipoConta</code>, <code>ChavePix</code>, <code>TipoChavePix</code>.
+          </li>
         </ul>
 
         <!-- 3.3. Registrar Colheita -->
@@ -540,8 +561,8 @@
         <p>Este painel administra os períodos contábeis da colheita de café. As semanas operacionais da Fazenda Vista Bela seguem regras lógicas e contábeis estritas:</p>
         <ul>
           <li><strong>Regra do Calendário Contábil:</strong> As semanas de safra começam na Sexta-feira às 00:00:00 e terminam na Quinta-feira subsequente às 23:59:59.</li>
-          <li><strong>Automação cycleManager (Robô Temporal):</strong> Um serviço em segundo plano no sistema checa o horário local a cada 5 segundos. Nas quintas-feiras, no horário limite de 23:59:30, o robô encerra síncronamente a semana atual promovendo seu status para <code>fechada</code> e abre a semana de colheita correspondente à sexta-feira como <code>aberta</code> de forma autônoma.</li>
-          <li><strong>Encerramento Manual (Botão Nativo):</strong> Permite à administração encerrar a semana ativa no momento desejado (ex: na própria quinta-feira à tarde). O botão solicita uma caixa de dupla confirmação de segurança (alerta nativo) para evitar congelamento contábil por cliques acidentais. Ao ser encerrada, o status do período avança para <code>em_conferencia</code>.</li>
+          <li><strong>Automação cycleManager (Robô Temporal):</strong> Um serviço em segundo plano no sistema checa o horário local a cada 5 segundos. Nas quintas-feiras, no horário limite de **23:59:30**, o robô encerra síncronamente a semana atual promovendo seu status para <code>fechada</code> e abre a semana de colheita correspondente à sexta-feira como <code>aberta</code> de forma autônoma.</li>
+          <li><strong>Encerramento Manual (Botão Nativo):</strong> Permite à administração encerrar a semana ativa no momento desejado (ex: na própria quinta-feira à tarde). O botão solicita uma caixa de dupla confirmação de segurança (alerta nativo) para evitar cliques acidentais. Ao ser encerrada, o status do período avança para <code>em_conferencia</code>.</li>
           <li><strong>Auditoria Analítica e Reabertura:</strong> A partir do painel de visualização de ciclos, os operadores podem inspecionar cada pesagem registrada. Caso seja identificada uma divergência física e a folha de pagamento do ciclo contábil correspondente ainda não tenha sido paga definitivamente, o administrador pode clicar em <strong>"Reabrir Ciclo"</strong>, alterando o status contábil para <code>aberta</code> e liberando modificações.</li>
         </ul>
 
@@ -565,12 +586,12 @@
         </ul>
 
         <!-- 3.7. Relatórios -->
-        <h3 id="relatorios" class="section-subtitle">3.7. Relatórios (Históricos e Mineração de Dados)</h3>
+        <h3 id="relatorios" class="section-subtitle">3.7. Relatórios (Históricos e Exportação de Planilhas)</h3>
         <p>Motor analítico de exportação contendo filtros avançados para mineração de dados históricos e BI:</p>
         <ul>
           <li><strong>Parâmetros de Filtro:</strong> Busca inteligente por Nome ou ID do colaborador, intervalo de datas de pesagem (data inicial e final), instituição financeira de recebimento, e filtros de faixa de volume (latas mínimas e máximas registradas por dia).</li>
           <li><strong>Ordenação Dinâmica de Colunas:</strong> Permite ordenar os registros em ordem crescente ou decrescente de Data, Colhedor, Volume ou Valor simplesmente clicando sobre o cabeçalho correspondente da tabela.</li>
-          <li><strong>Exportação XLSX Cliente-side:</strong> O botão <strong>"Exportar Excel"</strong> aciona uma biblioteca cliente-side para gerar binariamente uma planilha Excel estruturada (com os mesmos filtros ativos na tela) e baixar o arquivo diretamente no dispositivo do operador de forma rápida.</li>
+          <li><strong>Exportação XLSX Cliente-side:</strong> O botão <strong>"Exportar Excel"</strong> aciona uma biblioteca cliente-side para gerar binariamente uma planilha Excel estruturada (com os mesmos filtros activos na tela) e baixar o arquivo diretamente no dispositivo do operador de forma rápida.</li>
         </ul>
 
         <!-- 3.8. Configurações -->
@@ -578,73 +599,97 @@
         <p>Módulo responsável pela governança geral do sistema, segurança operacional e parametrizações:</p>
         <ol>
           <li><strong>Vigência do Preço da Lata:</strong> Permite cadastrar o preço pago pela lata e sua respectiva data de início. O sistema impede vigências em datas futuras para garantir a integridade dos dados históricos. Ele mantém uma tabela histórica listando os preços ativos (vigentes) e preços expirados (antigos).</li>
-          <li><strong>Assistente de Compensação Bancária:</strong> Ao cadastrar um novo banco digitando o seu nome (ex: "nubank", "bradesco", "inter"), o assistente de preenchimento de código do sistema localiza o nome cadastrado e auto-preenche o número oficial do banco de compensação brasileiro (COMPE - ex: 260, 237, 077).</li>
-          <li><strong>Controle de Equipe de Acesso:</strong> Permite cadastrar contas para fiscais (Cabo) e administradores (Admin).
+          <li><strong>Assistente de Compensação Bancária (COMPE):</strong> Ao cadastrar um novo banco digitando o seu nome, o assistente preenche síncronamente o número oficial do banco de compensação brasileiro (COMPE):
             <ul>
-              <li><strong>Automação de Credenciais:</strong> O sistema gera de forma automática o e-mail de login com base no primeiro nome do usuário e os 5 primeiros dígitos do seu CPF cadastrado (ex: <code>joao-12345@fvb.com</code>). A senha padrão inicial de acesso é definida como o CPF completo do usuário, contendo formatação de pontos e traço.</li>
-              <li><strong>Gestão de Acessos:</strong> Permite inativar credenciais de usuários (desativando o status de login de forma lógica) ou removê-las permanentemente do sistema de forma segura.</li>
+              <li>Banco do Brasil &rarr; `001`</li>
+              <li>Caixa Econômica &rarr; `104`</li>
+              <li>Bradesco &rarr; `237`</li>
+              <li>Itaú Unibanco &rarr; `341`</li>
+              <li>Santander &rarr; `033`</li>
+              <li>Nubank &rarr; `260`</li>
+              <li>Banco Inter &rarr; `077`</li>
+              <li>C6 Bank &rarr; `290`</li>
             </ul>
           </li>
-          <li><strong>Mecanismo de Backup Criptografado (AES-GCM de 256 bits):</strong> Permite realizar backups das quatro tabelas da nuvem (colaboradores, semanas, preços e pesagens) em um arquivo JSON.
+          <li><strong>Controle de Equipe de Acesso:</strong> Permite cadastrar contas para fiscais (Cabo) e administradores (Admin).
             <ul>
-              <li><strong>Criptografia no Dispositivo:</strong> Se o administrador definir uma senha forte, o sistema executa criptografia cliente-side. O e-mail de login, CPFs e dados de contas bancárias são codificados no navegador utilizando o algoritmo simétrico <strong>AES-GCM de 256 bits</strong>, com derivação de chave simétrica baseada no algoritmo PBKDF2 contendo 100.000 iterações e salting randômico de 16 bytes.</li>
-              <li><strong>Importação e Restauração:</strong> Carrega o backup de volta para o banco de dados Supabase. Se o arquivo XML/JSON for detectado como criptografado, solicita a senha do operador. Ele é compatível com backups antigos e aceita arquivos sem senha se eles forem descriptografados de fábrica.</li>
+              <li><strong>Automação de Credenciais:</strong> O e-mail de login é gerado automaticamente: <code>primeironome-5primeirosdigitosdocpf@fvb.com</code>. A senha inicial é o CPF completo com pontos e traço.</li>
+              <li><strong>Gestão de Acessos:</strong> Permite inativar ou excluir credenciais de usuários em tempo real.</li>
+            </ul>
+          </li>
+          <li><strong>Mecanismo de Backup Criptografado (AES-GCM de 256 bits):</strong> Exporta as tabelas da nuvem (colaboradores, semanas, preços e pesagens) em um arquivo JSON.
+            <ul>
+              <li><strong>Criptografia no Dispositivo:</strong> Se o administrador definir uma senha forte, o sistema executa criptografia cliente-side. O e-mail de login, CPFs, nomes e dados de contas são codificados no navegador utilizando o algoritmo simétrico <strong>AES-GCM de 256 bits</strong>, com derivação de chave simétrica baseada no algoritmo PBKDF2 contendo 100.000 iterações de hash e salting de 16 bytes.</li>
+              <li><strong>Importação e Restauração:</strong> Se o backup for criptografado, solicita a senha do operador. Aceita arquivos sem senha se eles forem descriptografados de fábrica.</li>
             </ul>
           </li>
         </ol>
       </section>
 
-      <!-- 4. Segurança e Persistência -->
-      <section id="seguranca-offline" class="section-block">
-        <h2 class="section-title">4. Arquitetura de Resiliência Local e Nuvem</h2>
-        <p>A arquitetura de persistência e comunicação do sistema assegura que nenhuma informação de campo se perca por falhas de conectividade ou rede.</p>
-        
-        <p><strong>Bando de Dados Local (IndexedDB):</strong> O navegador reserva um banco de dados relacional transacional de armazenamento local (IndexedDB), gerenciado com chaves físicas (<code>harvest_logs_offline</code>). Quando o fiscal clica no botão de lançamento no meio da roça sem internet, os dados são gravados localmente. Isso protege as pesagens contra falhas no sistema operacional, celular desligado sem bateria ou limpezas automáticas de cache do navegador.</p>
-        
-        <p><strong>A Sincronização Assíncrona (syncOfflineLogs):</strong> O aplicativo monitora o estado da conexão à internet do dispositivo coletor. Ao detectar sinal de rede Wi-Fi ou 4G estável, o sistema lê no IndexedDB todas as pesagens cuja propriedade <code>synced</code> seja igual a <code>false</code> e as envia em lotes compactados de forma assíncrona ao Supabase. Após o retorno positivo do servidor, os registros locais são marcados como <code>synced = true</code> e o sinalizador (nuvem amarela) avança para nuvem verde.</p>
-        
-        <p><strong>Trava Contábil de Banco Remoto:</strong> Para impedir fraudes ou lançamentos indevidos após a auditoria do fechamento financeiro, o banco de dados Supabase rejeita qualquer sincronização de pesagem se o ciclo contábil associado já estiver com status de <code>fechada</code>, <code>em_conferencia</code> ou <code>paga</code>.</p>
+      <!-- 3.9. Perfis de Acesso (RBAC) -->
+      <section id="rbac" class="section-block">
+        <h2 class="section-title">3.9. Perfis de Acesso e Governança de Telas (RBAC)</h2>
+        <p>A governança e segurança das informações confidenciais de safra e folhas contábeis da Fazenda Vista Bela são regidas por controle de acessos (RBAC):</p>
+        <ul>
+          <li><strong>Administrador (Admin):</strong> Nível total de leitura e escrita. Gerencia vigências operacionais de preços, perfis da equipe e executa backups encriptados locais.</li>
+          <li><strong>Gerente:</strong> Coordenador das turmas de colheita. Acessa Dashboard de monitoramento, tabelas de colhedores (inserindo ou destravando dados no botão "Editar"), encerra ciclos contábeis no cafezal e emite relatórios analíticos, mas não edita acessos de equipe.</li>
+          <li><strong>Financeiro:</strong> Focado no controle contábil e quitação. Audita a conferência das semanas, emite os PDFs de recibos em lote A4 e realiza a quitação final definindo o status como "paga" após transferências. Bloqueado para registrar latas e alterar tabelas de preço.</li>
+          <li><strong>Cabo / Fiscal (Cabo):</strong> Operador de balança no cafezal. Vê **exclusivamente a tela de Registrar Colheita** (mobile). Todos os outros módulos e rotas são ocultados no menu e bloqueados na camada lógica.</li>
+        </ul>
       </section>
 
-      <!-- 5. Perguntas Frequentes (FAQ) -->
+      <!-- Offline operations Section -->
+      <section id="seguranca-offline" class="section-block">
+        <h2 class="section-title">4. Segurança e Arquitetura de Persistência Local</h2>
+        <p>O sistema adota uma arquitetura baseada no conceito <em>Offline-first</em> para garantir a resiliência no meio do cafezal:</p>
+        <ul>
+          <li><strong>Transacionalidade Local (IndexedDB):</strong> Lançamentos operacionais são persistidos de forma estruturada na memória interna do celular na tabela local `harvest_logs_offline` do IndexedDB, prevenindo perda de dados por falta de bateria ou desligamento do celular.</li>
+          <li><strong>Sincronização Assíncrona:</strong> Ao restabelecer internet estável, o robô `syncOfflineLogs` sincroniza em segundo plano de forma transparente.</li>
+          <li><strong>Imutabilidade Contábil:</strong> O banco remoto na nuvem rejeita sincronizações que pertençam a semanas já congeladas ou homologadas no escritório. Isso impede que lançamentos atrasados quebrem os saldos já aprovados na folha financeira.</li>
+        </ul>
+      </section>
+
+      <!-- FAQ Section -->
       <section id="faq" class="section-block">
         <h2 class="section-title">5. Perguntas Frequentes (FAQ)</h2>
+        <p><strong>1. Posso usar o sistema se a internet cair na roça?</strong><br>
+        Sim. Todas as pesagens de latas podem ser lançadas normalmente. O celular guardará tudo e enviará automaticamente ao servidor quando detectar internet.</p>
         
-        <p><strong>1. O que acontece com os dados gravados se o celular do fiscal descarregar antes da sincronização?</strong><br>
-        Todos os lançamentos confirmados são gravados imediatamente no IndexedDB do aparelho. Assim que o aparelho for ligado e recarregado, as pesagens estarão salvas normalmente. Elas serão sincronizadas assim que detectada uma rede Wi-Fi estável.</p>
+        <p><strong>2. O que fazer se o CPF de um trabalhador der inválido?</strong><br>
+        O sistema possui validações matemáticas reais de 11 dígitos da <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong> para impedir cadastros de CPFs fictícios ou digitados errados. Verifique o documento físico do trabalhador. Caso seja um caso emergencial sem documento ativo, use provisoriamente o CPF padrão <code>000.000.000-00</code>.</p>
         
-        <p><strong>2. O sistema acusa CPF inválido e impede a gravação do colaborador. Como resolver?</strong><br>
-        O formulário de colhedores realiza a checagem matemática dos dígitos de verificação oficiais de 11 números do CPF. Verifique se não houve digitação incorreta dos dígitos do documento. Para trabalhadores sem documento ativo ou em situações excepcionais, utilize o CPF genérico de exceção <code>000.000.000-00</code>.</p>
-        
-        <p><strong>3. É possível reverter ou corrigir uma quantidade de latas digitada de forma errada?</strong><br>
-        Se a semana contábil contendo o lançamento incorreto ainda estiver cadastrada como <strong>Aberta</strong>, o fiscal de campo pode localizar o registro na tabela da tela "Registrar Colheita" e clicar no ícone da lixeira (excluir) ou do lápis (editar) para corrigir o valor. Caso a semana já esteja fechada ou em conferência, apenas um operador Administrador poderá reabrir o ciclo.</p>
+        <p><strong>3. Como faço para corrigir um lançamento de latas que fiz errado?</strong><br>
+        Se a semana estiver aberta, localize o lançamento na tabela da tela "Registrar Colheita" e clique no ícone do lápis (editar) ou da lixeira (apagar). Se a semana já foi fechada, peça ao administrador para reabri-la.</p>
         
         <p><strong>4. Como funciona o encerramento manual do ciclo?</strong><br>
-        O botão "Encerrar Ciclo" no módulo de Ciclos de Colheita é um botão nativo do sistema que serve para fechar a contabilidade da semana ativamente (por exemplo, na quinta-feira à tarde após a pesagem final). Ele exibe uma janela pop-up de segurança exigindo dupla confirmação de fechamento para evitar erros, avançando o status para conferência.</p>
+        O botão "Encerrar Ciclo" permite que a administração encerre a semana contábil no momento desejado (por exemplo, na quinta-feira à tarde). O sistema apresenta uma tela de confirmação dupla de segurança para garantir a operação.</p>
 
-        <p><strong>5. Mudei o preço pago por lata de café retroativamente. Isso recalcula o valor bruto gerado das pesagens antigas de forma automática?</strong><br>
-        Por segurança e auditoria contábil, os lançamentos já existentes na nuvem ficam congelados. No entanto, se o administrador acessar o lançamento antigo correspondente àquela vigência, clicar no botão de edição e salvar novamente, o sistema recalculará o valor bruto daquele dia aplicando a tabela de preços retroativa de forma automática.</p>
+        <p><strong>5. Mudei o preço da lata no passado. Isso recalcula o valor das colheitas passadas?</strong><br>
+        Os registros já salvos na nuvem ficam congelados por segurança. Porém, se o administrador abrir um registro de colheita correspondente, clicar em "Editar" e salvar novamente, o sistema recalculará o valor do dia aplicando o preço retroativo de forma automática.</p>
       </section>
 
-      <!-- 6. Contatos e Suporte Técnico -->
+      <!-- Technical support Section -->
       <section id="suporte" class="section-block">
-        <h2 class="section-title">6. Contatos e Canais de Suporte Técnico</h2>
-        <p>Se você precisar de suporte emergencial diário, tirar dúvidas operacionais, solicitar alterações no sistema ou cadastrar novos acessos administrativos, contate o suporte oficial da <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong> pelos seguintes canais:</p>
-        <ul>
-          <li><strong>WhatsApp de Suporte:</strong> (75) 98848-1160</li>
-          <li><strong>E-mail de Suporte:</strong> danibs2109@gmail.com</li>
-          <li><strong>Horário de Funcionamento do Suporte:</strong> 
-            <ul>
-              <li>Segunda a Sexta — das 08h às 17h</li>
-              <li>Sábado — das 08h às 12h</li>
-            </ul>
-          </li>
-        </ul>
+        <h2 class="section-title">6. Contatos e Suporte Técnico</h2>
+        <p>Caso precise de suporte técnico diário, relatórios adicionais ou tirar dúvidas sobre o uso, contate a equipe da <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong>:</p>
+        <div class="support-container">
+          <img src="./logo_dg_tech.jpg" alt="DG TECH — SOLUÇÕES TECNOLÓGICAS" class="support-logo">
+          <div class="support-info">
+            <p style="margin: 0; font-size: 1.1rem; color: var(--dark);"><strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong></p>
+            <p style="margin: 0.5rem 0 0 0;"><strong>WhatsApp de Suporte:</strong> (75) 98848-1160</p>
+            <p style="margin: 0.25rem 0 0 0;"><strong>E-mail de Suporte:</strong> danibs2109@gmail.com</p>
+            <p style="margin: 0.5rem 0 0 0; line-height: 1.4;">
+              <strong>Horário de Atendimento:</strong><br>
+              Segunda a Sexta — das 08h às 17h<br>
+              Sábado — das 08h às 12h
+            </p>
+          </div>
+        </div>
       </section>
 
       <!-- Copyright Footer -->
       <footer class="footer">
-        <p>© 2026 <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong>. Todos os direitos reservados. "Fazenda Vista Bela - Sistema Inteligente de Gestão de Colheita de Café" é uma marca de propriedade intelectual exclusiva pertencente à <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong>.</p>
+        <p>© 2026 <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong>. Todos os direitos reservados. "Fazenda Vista Bela - Sistema Inteligente de Gestão de Colheita de Café" é marca exclusiva da <strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong>.</p>
       </footer>
 
     </main>

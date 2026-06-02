@@ -135,13 +135,14 @@ export const HarvestEntry: React.FC = () => {
     ]);
     setCollaborators(collabs);
     
-    // Filtra para que o cabo de turma veja apenas lançamentos do dia feitos por ele
+    // Filtra para que o cabo de turma veja apenas seus próprios lançamentos criados no dia de hoje (dia de lançamento)
     let filteredRecent = recent;
     if (profile?.role === 'cabo') {
-      filteredRecent = recent.filter(h => 
-        h.data_colheita === date && 
-        h.criado_por_id === profile.id
-      );
+      const todayStr = getLocalDateString();
+      filteredRecent = recent.filter(h => {
+        const launchDate = h.created_at ? getLocalDateString(new Date(h.created_at)) : h.data_colheita;
+        return launchDate === todayStr && h.criado_por_id === profile.id;
+      });
     }
     setRecentHarvests(filteredRecent);
     
