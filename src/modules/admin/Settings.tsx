@@ -151,6 +151,12 @@ export const Settings: React.FC = () => {
       return;
     }
 
+    const today = getLocalDateString();
+    if (newDate > today) {
+      showToast('Não é permitido configurar preço com data de vigência futura.', 'error');
+      return;
+    }
+
     const config: CanPriceConfig = {
       id: Math.random().toString(36).substr(2, 9),
       valor_lata: newValue,
@@ -558,6 +564,7 @@ export const Settings: React.FC = () => {
                     required
                     value={newDate}
                     onChange={(e) => setNewDate(e.target.value)}
+                    max={getLocalDateString()}
                     className="w-full bg-slate-50 border-2 border-transparent focus:border-primary/20 rounded-lg py-2 px-2 text-primary outline-none transition-all font-black text-[10px] shadow-inner h-[42px]"
                   />
                 </div>
