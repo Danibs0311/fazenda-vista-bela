@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { CanPriceConfig, Bank } from '../../types';
 import { formatDate, formatCurrency, getLocalDateString } from '../../utils/dateUtils';
-import { Save, History, TrendingUp, AlertTriangle, Download, LogOut, Database, Building2, Plus, Trash2, Landmark, Upload, Users, UserPlus, Shield, Eye, Edit3, CheckCircle2, XCircle } from 'lucide-react';
+import { Save, History, TrendingUp, AlertTriangle, Download, LogOut, Database, Building2, Plus, Trash2, Landmark, Upload, Users, UserPlus, Shield, Eye, Edit3, CheckCircle2, XCircle, X } from 'lucide-react';
 import { supabase } from '../../services/supabase';
 
 export const Settings: React.FC = () => {
