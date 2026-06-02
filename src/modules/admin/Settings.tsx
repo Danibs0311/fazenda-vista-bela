@@ -100,8 +100,12 @@ export const Settings: React.FC = () => {
         storage.getPrices(),
         storage.getBanks()
       ]);
-      setPrices(priceData.sort((a, b) => b.data_inicio_vigencia.localeCompare(a.data_inicio_vigencia)));
+      const sortedPrices = priceData.sort((a, b) => b.data_inicio_vigencia.localeCompare(a.data_inicio_vigencia));
+      setPrices(sortedPrices);
       setBanks(bankData);
+      if (sortedPrices.length > 0) {
+        setNewValue(sortedPrices[0].valor_lata);
+      }
     } catch (error) {
       showToast('Falha ao carregar dados operacionais.', 'error');
     }
@@ -156,7 +160,6 @@ export const Settings: React.FC = () => {
     try {
       await storage.savePrice(config);
       await loadData();
-      setNewValue(0);
       showToast('Configuração atualizada com sucesso!', 'success');
     } catch (error) {
       showToast('Erro ao persistir novo valor.', 'error');
