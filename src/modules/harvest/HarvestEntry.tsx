@@ -37,7 +37,7 @@ export const HarvestEntry: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, [date]);
+  }, [date, profile]);
 
   // Connectivity and Sync listeners
   useEffect(() => {
@@ -134,7 +134,17 @@ export const HarvestEntry: React.FC = () => {
       storage.getBanks()
     ]);
     setCollaborators(collabs);
-    setRecentHarvests(recent);
+    
+    // Filtra para que o cabo de turma veja apenas lançamentos do dia feitos por ele
+    let filteredRecent = recent;
+    if (profile?.role === 'cabo') {
+      filteredRecent = recent.filter(h => 
+        h.data_colheita === date && 
+        h.criado_por_id === profile.id
+      );
+    }
+    setRecentHarvests(filteredRecent);
+    
     setCurrentPrice(price);
     setBanks(bankData);
   };
