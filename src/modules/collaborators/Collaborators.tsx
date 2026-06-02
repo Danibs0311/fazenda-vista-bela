@@ -893,7 +893,7 @@ export const Collaborators: React.FC = () => {
                   </button>
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete(c); }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 !bg-success !text-white hover:!bg-success/90 rounded-lg transition-all active:scale-90 shadow-lg shadow-success/20 animate-in fade-in"
+                    className="flex items-center gap-1.5 px-3 py-1.5 !bg-primary !text-white hover:!bg-dark rounded-lg transition-all active:scale-90 shadow-lg shadow-primary/20 animate-in fade-in"
                   >
                     <Trash2 className="w-3.5 h-3.5 !text-white" />
                     <span className="text-[10px] font-black uppercase tracking-tighter !text-white">Excluir</span>
@@ -1111,7 +1111,7 @@ export const Collaborators: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => setPixModalOpen(true)}
-                            className="px-4 py-2 !bg-success !text-white hover:!bg-success/90 rounded-xl font-black uppercase tracking-wider text-[10px] transition-all active:scale-95 cursor-pointer shadow-md shadow-success/20"
+                            className="px-4 py-2 !bg-primary !text-white hover:!bg-dark rounded-xl font-black uppercase tracking-wider text-[10px] transition-all active:scale-95 cursor-pointer shadow-md shadow-primary/20"
                           >
                             Configurar Chave
                           </button>
@@ -1306,7 +1306,7 @@ export const Collaborators: React.FC = () => {
                     // Clear bank fields automatically
                     setSelectedBank('');
                   }}
-                  className="flex-1 !bg-success !text-white hover:!bg-success/90 font-black uppercase text-[10px] py-2.5 rounded-lg tracking-wider transition-all active:scale-95 shadow-md shadow-success/20 cursor-pointer"
+                  className="flex-1 !bg-primary !text-white hover:!bg-dark font-black uppercase text-[10px] py-2.5 rounded-lg tracking-wider transition-all active:scale-95 shadow-md shadow-primary/20 cursor-pointer"
                 >
                   Confirmar
                 </button>
