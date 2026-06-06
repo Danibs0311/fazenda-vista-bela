@@ -43,32 +43,22 @@ export const HarvestEntry: React.FC = () => {
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
-      showToast('Conexão estabelecida! Sincronizando dados salvos localmente...', 'success');
-      setTimeout(async () => {
-        try {
-          await storage.syncOfflineLogs();
-          await loadData();
-        } catch (err: any) {
-          console.warn('Background online transition sync failed:', err.message);
-        }
-      }, 1500);
     };
     const handleOffline = () => {
       setIsOnline(false);
-      showToast('Modo Offline Ativo. Seus lançamentos estão seguros no dispositivo.', 'info');
     };
-    const handleSyncError = () => {
-      showToast('Erro ao sincronizar dados: Sessão expirada ou não autorizada.', 'error');
+    const handleSyncCompleted = () => {
+      loadData();
     };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    window.addEventListener('auth_sync_error', handleSyncError);
+    window.addEventListener('offline-sync-completed', handleSyncCompleted);
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('auth_sync_error', handleSyncError);
+      window.removeEventListener('offline-sync-completed', handleSyncCompleted);
     };
   }, []);
 

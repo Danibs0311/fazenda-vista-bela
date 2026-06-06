@@ -586,6 +586,7 @@ export const storage = {
       if (unsynced.length === 0) return;
 
       console.log(`Syncing ${unsynced.length} offline logs...`);
+      let syncedAny = false;
 
       for (const log of unsynced) {
         // 1. Get week and verify it's open (check local/cache/db)
@@ -613,7 +614,12 @@ export const storage = {
           }
         } else {
           await localDb.markAsSynced(log.id);
+          syncedAny = true;
         }
+      }
+
+      if (syncedAny) {
+        window.dispatchEvent(new Event('offline-sync-completed'));
       }
     } catch (err) {
       console.error('Error in syncOfflineLogs:', err);

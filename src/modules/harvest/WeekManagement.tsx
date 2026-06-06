@@ -30,6 +30,7 @@ export const WeekManagement: React.FC = () => {
     };
 
     window.addEventListener('cycle-status-change', handleStatusChange);
+    window.addEventListener('offline-sync-completed', handleStatusChange);
     
     const handleKeyDown = (e: KeyboardEvent) => {
       // If modal is open, scroll the modal list
@@ -50,6 +51,7 @@ export const WeekManagement: React.FC = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('cycle-status-change', handleStatusChange);
+      window.removeEventListener('offline-sync-completed', handleStatusChange);
     };
   }, [isModalOpen]);
 

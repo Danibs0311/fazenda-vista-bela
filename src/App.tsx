@@ -15,25 +15,64 @@ import { ToastContext } from './context/ToastContext';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { checkAndManageCycles } from './services/cycleManager';
+import { storage } from './services/storageService';
 
 const App: React.FC = () => {
   const [toast, setToast] = useState<{ msg: string, type: ToastType } | null>(null);
 
+  const showToast = useCallback((msg: string, type: ToastType) => {
+    setToast({ msg, type });
+  }, []);
+
   useEffect(() => {
     // Run immediately on load
     checkAndManageCycles();
+    if (navigator.onLine) {
+      storage.syncOfflineLogs().catch(err => {
+        console.warn('Initial sync failed:', err);
+      });
+    }
+
+    const handleOnline = () => {
+      showToast('Conexão estabelecida! Sincronizando dados salvos localmente...', 'success');
+      setTimeout(async () => {
+        try {
+          await storage.syncOfflineLogs();
+        } catch (err: any) {
+          console.warn('Background online transition sync failed:', err.message);
+        }
+      }, 1500);
+    };
+
+    const handleOffline = () => {
+      showToast('Modo Offline Ativo. Seus lançamentos estão seguros no dispositivo.', 'info');
+    };
+
+    const handleSyncError = () => {
+      showToast('Erro ao sincronizar dados: Sessão expirada ou não autorizada.', 'error');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('auth_sync_error', handleSyncError);
 
     // Setup periodic polling every 5 seconds (5000ms)
     const interval = setInterval(() => {
       checkAndManageCycles();
+      if (navigator.onLine) {
+        storage.syncOfflineLogs().catch(err => {
+          console.warn('Periodic sync failed:', err);
+        });
+      }
     }, 5000);
 
-    return () => clearInterval(interval);
-  }, []);
-
-  const showToast = useCallback((msg: string, type: ToastType) => {
-    setToast({ msg, type });
-  }, []);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('auth_sync_error', handleSyncError);
+    };
+  }, [showToast]);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
