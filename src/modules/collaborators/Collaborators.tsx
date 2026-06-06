@@ -189,34 +189,40 @@ export const Collaborators: React.FC = () => {
         headerIndex = 0;
       }
 
-      const headers = rows[headerIndex].map(h => String(h || '').trim());
+      const headers = Array.from(rows[headerIndex] || []).map(h => String(h || '').trim());
       
       let idCol = headers.findIndex(h => {
+        if (!h) return false;
         const s = h.toLowerCase().trim();
         return s === 'id' || s === 'código' || s === 'codigo' || s === 'nº' || s === 'no' || s === 'cadastro' || s === 'cod' || s.startsWith('id ') || s.startsWith('id.');
       });
 
       let nameCol = headers.findIndex(h => {
+        if (!h) return false;
         const s = h.toLowerCase().trim();
         return s.includes('benefici') || s.includes('nome') || s.includes('colaborador') || s === 'nome completo';
       });
 
       let cpfCol = headers.findIndex(h => {
+        if (!h) return false;
         const s = h.toLowerCase().trim();
         return s === 'cpf' || s === 'documento' || s.includes('cpf');
       });
 
       let bankCol = headers.findIndex(h => {
+        if (!h) return false;
         const s = h.toLowerCase().trim();
         return s.includes('banco') || s.includes('institu');
       });
 
       let agCol = headers.findIndex(h => {
+        if (!h) return false;
         const s = h.toLowerCase().trim();
         return s.startsWith('ag') || s.includes('agencia') || s.includes('agência');
       });
 
       let opCol = headers.findIndex(h => {
+        if (!h) return false;
         const s = h.toLowerCase().trim();
         return (
           s === 'op' || 
@@ -235,6 +241,7 @@ export const Collaborators: React.FC = () => {
       });
 
       let accCol = headers.findIndex(h => {
+        if (!h) return false;
         const s = h.toLowerCase().trim();
         return s.includes('conta') && !s.includes('tipo') && !s.includes('op');
       });
@@ -622,7 +629,7 @@ export const Collaborators: React.FC = () => {
     setEditingCollab(c);
     setIsReadOnly(readOnly);
     setCpfValue(c.cpf || '');
-    setSelectedBank(c.banco || '');
+    setSelectedBank((c.banco || '').trim().toUpperCase());
     setAgenciaValue(c.agencia || '');
     setContaValue(c.conta || '');
 
@@ -1019,7 +1026,7 @@ export const Collaborators: React.FC = () => {
                       >
                         <option value="">Selecione</option>
                         {banks.map(b => (
-                          <option key={b.id} value={b.nome}>{b.nome}</option>
+                          <option key={b.id} value={b.nome.trim().toUpperCase()}>{b.nome.trim().toUpperCase()}</option>
                         ))}
                         <option value="OUTRO" className="font-black text-accent bg-slate-50">+ OUTRO (CADASTRAR NOVO)</option>
                       </select>

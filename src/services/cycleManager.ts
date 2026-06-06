@@ -35,35 +35,7 @@ export const checkAndManageCycles = async (): Promise<boolean> => {
     }
 
     // 2. Open new cycle if it is Friday or later and does not exist in the database yet
-    const currentRange = getWeekRange();
-    
-    // We are in the transition window on Thursday if it is Thursday and time is >= 23:59:30.
-    // In this window, getWeekRange() still returns the current Thursday's week (which we just closed).
-    // Outside of this 30-second window (or once it's Friday), getWeekRange() shifts or is ready.
-    const isTransitionWindow = now.getDay() === 4 && (
-      now.getHours() > 23 || (
-        now.getHours() === 23 && (
-          now.getMinutes() > 59 || (
-            now.getMinutes() === 59 && now.getSeconds() >= 30
-          )
-        )
-      )
-    );
-
-    if (!isTransitionWindow) {
-      const hasCurrentWeek = weeks.some(w => w.id === currentRange.id);
-      if (!hasCurrentWeek) {
-        console.log(`[CycleManager] Auto-opening new week ${currentRange.id}`);
-        const newWeek: HarvestWeek = {
-          id: currentRange.id,
-          data_inicio: currentRange.start,
-          data_fim: currentRange.end,
-          status: WeekStatus.OPEN
-        };
-        await storage.saveWeek(newWeek);
-        updated = true;
-      }
-    }
+    // REMOVED: Weeks are now created dynamically when the first harvest is recorded.
 
     if (updated) {
       // Broadcast event so active views know to reload data

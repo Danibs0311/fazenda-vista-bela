@@ -131,7 +131,8 @@ export const HarvestEntry: React.FC = () => {
       storage.getCollaborators(),
       storage.getHarvests(),
       storage.getCurrentPrice(date),
-      storage.getBanks()
+      storage.getBanks(),
+      storage.getWeeks()
     ]);
     setCollaborators(collabs);
     
@@ -910,7 +911,7 @@ export const HarvestEntry: React.FC = () => {
                   >
                     <option value="">Selecione</option>
                     {banks.map(b => (
-                      <option key={b.id} value={b.nome}>{b.nome}</option>
+                      <option key={b.id} value={b.nome.trim().toUpperCase()}>{b.nome.trim().toUpperCase()}</option>
                     ))}
                   </select>
                 </div>

@@ -147,10 +147,14 @@ export const WeekManagement: React.FC = () => {
 
   const handleDeleteHarvest = async (id: string) => {
     if (confirm('Deseja excluir este lançamento?')) {
-      await storage.deleteHarvest(id);
-      await loadData();
-      setEditModalOpen(false);
-      showToast('Lançamento excluído', 'success');
+      try {
+        await storage.deleteHarvest(id);
+        await loadData();
+        setEditModalOpen(false);
+        showToast('Lançamento excluído com sucesso!', 'success');
+      } catch (err: any) {
+        showToast(err.message || 'Erro ao excluir lançamento', 'error');
+      }
     }
   };
 

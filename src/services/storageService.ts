@@ -342,50 +342,147 @@ export const storage = {
   },
 
   getHarvestsByWeek: async (weekId: string): Promise<HarvestLog[]> => {
-    const { data } = await supabase
-      .from('harvest_logs')
-      .select('*')
-      .eq('semana_id', weekId);
-    return data || [];
+    let remoteLogs: HarvestLog[] = [];
+    if (navigator.onLine) {
+      try {
+        const { data } = await supabase
+          .from('harvest_logs')
+          .select('*')
+          .eq('semana_id', weekId);
+        remoteLogs = data || [];
+      } catch (err) {
+        console.warn('Failed to fetch harvests by week from remote:', err);
+      }
+    }
+    
+    const localLogs = await localDb.getAllLogs();
+    const mergedMap = new Map<string, OfflineHarvestLog>();
+    
+    remoteLogs.forEach(log => {
+      mergedMap.set(log.id, { ...log, synced: true });
+    });
+    
+    localLogs.forEach(log => {
+      if (!log.synced || !mergedMap.has(log.id)) {
+        mergedMap.set(log.id, log);
+      }
+    });
+    
+    const mergedList = Array.from(mergedMap.values());
+    return mergedList.filter(log => log.semana_id === weekId);
   },
 
   getWeek: async (weekId: string): Promise<HarvestWeek> => {
-    const { data } = await supabase.from('harvest_weeks').select('*').eq('id', weekId).single();
+    if (navigator.onLine) {
+      try {
+        const { data, error } = await supabase.from('harvest_weeks').select('*').eq('id', weekId).single();
+        if (error) throw error;
+        if (data) {
+          // Cache it
+          const saved = localStorage.getItem('fvb_weeks');
+          let weeks: HarvestWeek[] = [];
+          if (saved) {
+            try {
+              weeks = JSON.parse(saved);
+            } catch (e) {}
+          }
+          const index = weeks.findIndex(w => w.id === weekId);
+          if (index > -1) {
+            weeks[index] = data;
+          } else {
+            weeks.push(data);
+          }
+          localStorage.setItem('fvb_weeks', JSON.stringify(weeks));
+          return data;
+        }
+      } catch (err) {
+        console.warn(`Failed to fetch week ${weekId} from network, checking cache:`, err);
+      }
+    }
 
-    if (data) return data;
+    // Fallback: search in cached weeks
+    const saved = localStorage.getItem('fvb_weeks');
+    if (saved) {
+      try {
+        const weeks: HarvestWeek[] = JSON.parse(saved);
+        const cached = weeks.find(w => w.id === weekId);
+        if (cached) return cached;
+      } catch (e) {}
+    }
 
+    // If still not found, return a virtual open week WITHOUT saving to database/cache
     const range = getWeekRange(weekId);
-    const newWeek: HarvestWeek = {
+    return {
       id: range.id,
       data_inicio: range.start,
       data_fim: range.end,
       status: WeekStatus.OPEN
     };
-
-    await storage.saveWeek(newWeek);
-    return newWeek;
   },
 
   saveWeek: async (week: HarvestWeek) => {
-    const { error } = await supabase.from('harvest_weeks').upsert(week);
-    if (error) throw new Error('Erro ao salvar semana: ' + error.message);
+    // 1. Update local cache
+    const saved = localStorage.getItem('fvb_weeks');
+    let weeks: HarvestWeek[] = [];
+    if (saved) {
+      try {
+        weeks = JSON.parse(saved);
+      } catch (e) {}
+    }
+    const index = weeks.findIndex(w => w.id === week.id);
+    if (index > -1) {
+      weeks[index] = week;
+    } else {
+      weeks.push(week);
+    }
+    localStorage.setItem('fvb_weeks', JSON.stringify(weeks));
+
+    // 2. Try online
+    if (navigator.onLine) {
+      const { error } = await supabase.from('harvest_weeks').upsert(week);
+      if (error) throw new Error('Erro ao salvar semana: ' + error.message);
+    }
   },
 
   saveHarvest: async (harvest: OfflineHarvestLog) => {
-    // Save locally first to guarantee data persistence instantly
+    // 1. Get week info (virtual, cached, or remote)
+    const week = await storage.getWeek(harvest.semana_id);
+    
+    // 2. Validate week status
+    if (week.status !== WeekStatus.OPEN) {
+      let statusStr = 'FECHADA';
+      if (week.status === WeekStatus.CLOSED) statusStr = 'FECHADA';
+      else if (week.status === WeekStatus.IN_CONFERENCE) statusStr = 'EM CONFERÊNCIA';
+      else if (week.status === WeekStatus.PAID) statusStr = 'PAGA';
+      throw new Error(`SEMANA COM STATUS '${statusStr}'. OPERAÇÃO BLOQUEADA.`);
+    }
+
+    // 3. Track old week ID if this is an edit and the week is changing
+    let oldWeekId: string | null = null;
+    const localLogs = await localDb.getAllLogs();
+    const existing = localLogs.find(l => l.id === harvest.id);
+    if (existing) {
+      oldWeekId = existing.semana_id;
+    } else if (navigator.onLine) {
+      try {
+        const { data } = await supabase.from('harvest_logs').select('semana_id').eq('id', harvest.id).single();
+        if (data) oldWeekId = data.semana_id;
+      } catch (e) {}
+    }
+
+    // 4. Ensure week record is saved in database and local cache now that it has a harvest
+    await storage.saveWeek(week);
+
+    // 5. Save the harvest log locally
     const offlineLog: OfflineHarvestLog = {
       ...harvest,
       synced: false
     };
     await localDb.saveLog(offlineLog);
 
+    // 6. Try saving to Supabase if online
     if (navigator.onLine) {
       try {
-        const week = await storage.getWeek(harvest.semana_id);
-        if (week.status !== WeekStatus.OPEN) {
-          throw new Error(`Semana ${week.status}. Operação bloqueada.`);
-        }
-
         const { synced, ...payload } = offlineLog;
         const { error } = await supabase.from('harvest_logs').upsert(payload);
         
@@ -396,6 +493,30 @@ export const storage = {
         }
       } catch (err: any) {
         console.warn('Network or database error while saving to server, keeping local offline backup:', err.message);
+      }
+    }
+
+    // 7. Cleanup old week if it's now empty due to this update
+    if (oldWeekId && oldWeekId !== harvest.semana_id) {
+      const remaining = await storage.getHarvestsByWeek(oldWeekId);
+      if (remaining.length === 0) {
+        // Delete week from local cache
+        const saved = localStorage.getItem('fvb_weeks');
+        if (saved) {
+          try {
+            let weeks: HarvestWeek[] = JSON.parse(saved);
+            weeks = weeks.filter(w => w.id !== oldWeekId);
+            localStorage.setItem('fvb_weeks', JSON.stringify(weeks));
+          } catch (e) {}
+        }
+        // Delete week from remote
+        if (navigator.onLine) {
+          try {
+            await supabase.from('harvest_weeks').delete().eq('id', oldWeekId);
+          } catch (e) {
+            console.warn('Failed to delete old week from remote after moving harvest:', e);
+          }
+        }
       }
     }
   },
@@ -414,20 +535,46 @@ export const storage = {
     
     if (!harvest) return;
 
-    // Check week status if online
-    if (navigator.onLine) {
-      const week = await storage.getWeek(harvest.semana_id);
-      if (week.status !== WeekStatus.OPEN) {
-        throw new Error(`Semana ${week.status}. Não é possível excluir lançamentos.`);
-      }
+    // Check week status using getWeek (falls back to local cache when offline)
+    const week = await storage.getWeek(harvest.semana_id);
+    if (week.status !== WeekStatus.OPEN) {
+      let statusStr = 'FECHADA';
+      if (week.status === WeekStatus.CLOSED) statusStr = 'FECHADA';
+      else if (week.status === WeekStatus.IN_CONFERENCE) statusStr = 'EM CONFERÊNCIA';
+      else if (week.status === WeekStatus.PAID) statusStr = 'PAGA';
+      throw new Error(`SEMANA COM STATUS '${statusStr}'. NÃO É POSSÍVEL EXCLUIR LANÇAMENTOS.`);
     }
 
-    // Delete locally and remotely
+    // Delete locally
     await localDb.deleteLog(id);
 
+    // Try deleting remote if online
     if (navigator.onLine) {
       const { error } = await supabase.from('harvest_logs').delete().eq('id', id);
       if (error) throw new Error('Erro ao excluir no servidor: ' + error.message);
+    }
+
+    // Check if week is now empty
+    const remaining = await storage.getHarvestsByWeek(harvest.semana_id);
+    if (remaining.length === 0) {
+      // Delete from local cache
+      const saved = localStorage.getItem('fvb_weeks');
+      if (saved) {
+        try {
+          let weeks: HarvestWeek[] = JSON.parse(saved);
+          weeks = weeks.filter(w => w.id !== harvest!.semana_id);
+          localStorage.setItem('fvb_weeks', JSON.stringify(weeks));
+        } catch (e) {}
+      }
+
+      // Delete from remote if online
+      if (navigator.onLine) {
+        try {
+          await supabase.from('harvest_weeks').delete().eq('id', harvest.semana_id);
+        } catch (e) {
+          console.warn('Failed to delete week from remote after deleting last harvest:', e);
+        }
+      }
     }
   },
 
@@ -441,6 +588,21 @@ export const storage = {
       console.log(`Syncing ${unsynced.length} offline logs...`);
 
       for (const log of unsynced) {
+        // 1. Get week and verify it's open (check local/cache/db)
+        const week = await storage.getWeek(log.semana_id);
+        if (week.status !== WeekStatus.OPEN) {
+          console.warn(`Skipping sync for log ${log.id} because week ${log.semana_id} is ${week.status}`);
+          continue;
+        }
+
+        // 2. Ensure the week record exists on the remote Supabase DB
+        const { error: weekErr } = await supabase.from('harvest_weeks').upsert(week);
+        if (weekErr) {
+          console.error(`Error syncing week ${week.id} for log ${log.id}:`, weekErr.message);
+          continue;
+        }
+
+        // 3. Sync harvest log
         const { synced, ...payload } = log;
         const { error } = await supabase.from('harvest_logs').upsert(payload);
         
@@ -459,8 +621,25 @@ export const storage = {
   },
 
   getWeeks: async (): Promise<HarvestWeek[]> => {
-    const { data } = await supabase.from('harvest_weeks').select('*').order('id', { ascending: false });
-    return data || [];
+    try {
+      const { data, error } = await supabase.from('harvest_weeks').select('*').order('id', { ascending: false });
+      if (error) throw error;
+      
+      const weeks = data || [];
+      localStorage.setItem('fvb_weeks', JSON.stringify(weeks));
+      return weeks;
+    } catch (err) {
+      console.warn('Failed to fetch weeks from remote, loading from localStorage fallback:', err);
+      const saved = localStorage.getItem('fvb_weeks');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error('Failed to parse cached weeks:', e);
+        }
+      }
+      return [];
+    }
   },
 
   getBanks: async (forceRefresh = false): Promise<Bank[]> => {
