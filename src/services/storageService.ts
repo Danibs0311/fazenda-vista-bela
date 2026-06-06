@@ -74,9 +74,29 @@ const shouldFetch = (key: keyof typeof cache.lastFetch) => {
 
 export const storage = {
   getCollaborators: async (forceRefresh = false): Promise<Collaborator[]> => {
-    if (!forceRefresh && !shouldFetch('collaborators') && cache.collaborators) return cache.collaborators;
+    const getMergedCollaborators = (baseList: Collaborator[]): Collaborator[] => {
+      const unsyncedRaw = localStorage.getItem('fvb_unsynced_collaborators');
+      if (!unsyncedRaw) return baseList;
+      try {
+        const unsynced: Collaborator[] = JSON.parse(unsyncedRaw);
+        const mergedMap = new Map<string, Collaborator>();
+        baseList.forEach(c => mergedMap.set(c.id, c));
+        unsynced.forEach(c => mergedMap.set(c.id, c));
+        return Array.from(mergedMap.values()).sort((a, b) => (a.id || "").localeCompare(b.id || "", undefined, { numeric: true }));
+      } catch (e) {
+        return baseList;
+      }
+    };
+
+    if (!forceRefresh && !shouldFetch('collaborators') && cache.collaborators) {
+      return getMergedCollaborators(cache.collaborators);
+    }
 
     try {
+      if (!navigator.onLine) {
+        throw new Error('Device is offline');
+      }
+
       // 1. Get the exact count of rows first with a fast HEAD query
       const { count, error: countErr } = await supabase
         .from('collaborators')
@@ -117,43 +137,21 @@ export const storage = {
 
       cache.collaborators = allCollaborators;
       cache.lastFetch.collaborators = Date.now();
-      return cache.collaborators;
+      localStorage.setItem('fvb_collaborators', JSON.stringify(allCollaborators));
+      return getMergedCollaborators(allCollaborators);
     } catch (err) {
-      console.error('Error fetching collaborators concurrently, falling back to sequential batching:', err);
-      
-      // Fallback: Sequential batching
-      let allCollaborators: Collaborator[] = [];
-      let from = 0;
-      const limit = 1000;
-      let hasMore = true;
-
-      while (hasMore) {
-        const { data, error } = await supabase
-          .from('collaborators')
-          .select('*')
-          .order('nome')
-          .range(from, from + limit - 1);
-
-        if (error) {
-          console.error('Error fetching collaborators batch:', error);
-          return cache.collaborators || [];
-        }
-
-        if (data) {
-          allCollaborators = allCollaborators.concat(data);
-          if (data.length < limit) {
-            hasMore = false;
-          } else {
-            from += limit;
-          }
-        } else {
-          hasMore = false;
+      console.error('Error fetching collaborators concurrently, loading from localStorage fallback:', err);
+      const saved = localStorage.getItem('fvb_collaborators');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved) as Collaborator[];
+          cache.collaborators = parsed;
+          return getMergedCollaborators(parsed);
+        } catch (e) {
+          console.error('Failed to parse cached collaborators:', e);
         }
       }
-
-      cache.collaborators = allCollaborators;
-      cache.lastFetch.collaborators = Date.now();
-      return cache.collaborators;
+      return getMergedCollaborators(cache.collaborators || []);
     }
   },
 
@@ -168,25 +166,147 @@ export const storage = {
       tipo_conta: normalizeOperation(col.tipo_conta)
     };
 
-    const { error } = await supabase
-      .from('collaborators')
-      .upsert(uppercaseCol);
+    // 1. Update the local fvb_collaborators cache immediately
+    const saved = localStorage.getItem('fvb_collaborators');
+    let localCollabs: Collaborator[] = [];
+    if (saved) {
+      try {
+        localCollabs = JSON.parse(saved);
+      } catch (e) {}
+    }
+    const idx = localCollabs.findIndex(c => c.id === col.id);
+    if (idx > -1) {
+      localCollabs[idx] = uppercaseCol;
+    } else {
+      localCollabs.push(uppercaseCol);
+    }
+    localStorage.setItem('fvb_collaborators', JSON.stringify(localCollabs));
+    if (cache.collaborators) {
+      const cIdx = cache.collaborators.findIndex(c => c.id === col.id);
+      if (cIdx > -1) cache.collaborators[cIdx] = uppercaseCol;
+      else cache.collaborators.push(uppercaseCol);
+    }
 
-    if (error) throw new Error('Erro ao salvar colaborador: ' + error.message);
+    // 2. Queue for syncing if offline, or if remote upsert fails
+    const queueForSync = () => {
+      const unsyncedRaw = localStorage.getItem('fvb_unsynced_collaborators');
+      let unsynced: Collaborator[] = [];
+      if (unsyncedRaw) {
+        try {
+          unsynced = JSON.parse(unsyncedRaw);
+        } catch (e) {}
+      }
+      const uIdx = unsynced.findIndex(c => c.id === col.id);
+      if (uIdx > -1) {
+        unsynced[uIdx] = uppercaseCol;
+      } else {
+        unsynced.push(uppercaseCol);
+      }
+      localStorage.setItem('fvb_unsynced_collaborators', JSON.stringify(unsynced));
+      console.log('Collaborator saved offline / queued for sync:', uppercaseCol.nome);
+    };
+
+    if (navigator.onLine) {
+      try {
+        const { error } = await supabase
+          .from('collaborators')
+          .upsert(uppercaseCol);
+
+        if (error) {
+          console.warn('Database error while saving collaborator, queuing offline:', error.message);
+          queueForSync();
+        } else {
+          // If was unsynced, remove it
+          const unsyncedRaw = localStorage.getItem('fvb_unsynced_collaborators');
+          if (unsyncedRaw) {
+            try {
+              let unsynced: Collaborator[] = JSON.parse(unsyncedRaw);
+              unsynced = unsynced.filter(c => c.id !== col.id);
+              localStorage.setItem('fvb_unsynced_collaborators', JSON.stringify(unsynced));
+            } catch (e) {}
+          }
+        }
+      } catch (err) {
+        console.warn('Network error while saving collaborator, queuing offline:', err);
+        queueForSync();
+      }
+    } else {
+      queueForSync();
+    }
+
     cache.lastFetch.collaborators = 0; // Invalidate cache
   },
 
   deleteCollaborator: async (id: string) => {
-    const { error } = await supabase.rpc('delete_collaborator_by_id', {
-      target_id: id
-    });
-
-    if (error) {
-      if (error.message.includes('violates foreign key constraint') || error.message.includes('colheitas lançadas')) {
-        throw new Error('Este colaborador possui colheitas lançadas e não pode ser excluído.');
-      }
-      throw new Error('Erro ao excluir colaborador: ' + error.message);
+    // 1. Remove from local cache
+    const saved = localStorage.getItem('fvb_collaborators');
+    if (saved) {
+      try {
+        let localCollabs: Collaborator[] = JSON.parse(saved);
+        localCollabs = localCollabs.filter(c => c.id !== id);
+        localStorage.setItem('fvb_collaborators', JSON.stringify(localCollabs));
+      } catch (e) {}
     }
+    if (cache.collaborators) {
+      cache.collaborators = cache.collaborators.filter(c => c.id !== id);
+    }
+
+    // 2. Remove from unsynced queue if it was created offline and not synced yet
+    const unsyncedRaw = localStorage.getItem('fvb_unsynced_collaborators');
+    let wasUnsynced = false;
+    if (unsyncedRaw) {
+      try {
+        let unsynced: Collaborator[] = JSON.parse(unsyncedRaw);
+        const originalLength = unsynced.length;
+        unsynced = unsynced.filter(c => c.id !== id);
+        if (unsynced.length < originalLength) {
+          wasUnsynced = true;
+          localStorage.setItem('fvb_unsynced_collaborators', JSON.stringify(unsynced));
+        }
+      } catch (e) {}
+    }
+
+    // 3. Queue deletion if already synced and offline
+    if (!wasUnsynced) {
+      const queueDeletion = () => {
+        const pendingRaw = localStorage.getItem('fvb_pending_collab_deletions');
+        let pending: string[] = [];
+        if (pendingRaw) {
+          try {
+            pending = JSON.parse(pendingRaw);
+          } catch (e) {}
+        }
+        if (!pending.includes(id)) {
+          pending.push(id);
+          localStorage.setItem('fvb_pending_collab_deletions', JSON.stringify(pending));
+        }
+      };
+
+      if (navigator.onLine) {
+        try {
+          const { error } = await supabase.rpc('delete_collaborator_by_id', {
+            target_id: id
+          });
+
+          if (error) {
+            if (error.message.includes('violates foreign key constraint') || error.message.includes('colheitas lançadas')) {
+              throw new Error('Este colaborador possui colheitas lançadas e não pode ser excluído.');
+            }
+            console.warn('Database error while deleting collaborator, queuing deletion:', error.message);
+            queueDeletion();
+          }
+        } catch (err: any) {
+          if (err.message?.includes('colheitas lançadas')) {
+            throw err;
+          }
+          console.warn('Network error while deleting collaborator, queuing deletion:', err);
+          queueDeletion();
+        }
+      } else {
+        queueDeletion();
+      }
+    }
+
     cache.lastFetch.collaborators = 0; // Invalidate cache
   },
 
@@ -548,10 +668,35 @@ export const storage = {
     // Delete locally
     await localDb.deleteLog(id);
 
-    // Try deleting remote if online
+    // Queue remote deletion if offline or connection fails
+    const queueDeletion = () => {
+      const pendingRaw = localStorage.getItem('fvb_pending_deletions');
+      let pending: string[] = [];
+      if (pendingRaw) {
+        try {
+          pending = JSON.parse(pendingRaw);
+        } catch (e) {}
+      }
+      if (!pending.includes(id)) {
+        pending.push(id);
+        localStorage.setItem('fvb_pending_deletions', JSON.stringify(pending));
+      }
+      console.log('Harvest deletion queued offline:', id);
+    };
+
     if (navigator.onLine) {
-      const { error } = await supabase.from('harvest_logs').delete().eq('id', id);
-      if (error) throw new Error('Erro ao excluir no servidor: ' + error.message);
+      try {
+        const { error } = await supabase.from('harvest_logs').delete().eq('id', id);
+        if (error) {
+          console.warn('Failed to delete on server, queuing deletion:', error.message);
+          queueDeletion();
+        }
+      } catch (err) {
+        console.warn('Network error while deleting, queuing deletion:', err);
+        queueDeletion();
+      }
+    } else {
+      queueDeletion();
     }
 
     // Check if week is now empty
@@ -582,39 +727,115 @@ export const storage = {
     if (!navigator.onLine) return;
 
     try {
-      const unsynced = await localDb.getUnsyncedLogs();
-      if (unsynced.length === 0) return;
-
-      console.log(`Syncing ${unsynced.length} offline logs...`);
       let syncedAny = false;
 
-      for (const log of unsynced) {
-        // 1. Get week and verify it's open (check local/cache/db)
-        const week = await storage.getWeek(log.semana_id);
-        if (week.status !== WeekStatus.OPEN) {
-          console.warn(`Skipping sync for log ${log.id} because week ${log.semana_id} is ${week.status}`);
-          continue;
-        }
-
-        // 2. Ensure the week record exists on the remote Supabase DB
-        const { error: weekErr } = await supabase.from('harvest_weeks').upsert(week);
-        if (weekErr) {
-          console.error(`Error syncing week ${week.id} for log ${log.id}:`, weekErr.message);
-          continue;
-        }
-
-        // 3. Sync harvest log
-        const { synced, ...payload } = log;
-        const { error } = await supabase.from('harvest_logs').upsert(payload);
-        
-        if (error) {
-          console.error(`Error syncing log ${log.id}:`, error.message);
-          if (error.message.includes('not found') || error.message.includes('unauthorized') || error.message.includes('JWT')) {
-            window.dispatchEvent(new CustomEvent('auth_sync_error', { detail: log }));
+      // 1. Sync Pending Harvest Deletions
+      const pendingDeletionsRaw = localStorage.getItem('fvb_pending_deletions');
+      if (pendingDeletionsRaw) {
+        try {
+          const pendingDeletions: string[] = JSON.parse(pendingDeletionsRaw);
+          if (pendingDeletions.length > 0) {
+            console.log(`Syncing ${pendingDeletions.length} pending harvest deletions...`);
+            const successfulDeletions: string[] = [];
+            for (const id of pendingDeletions) {
+              const { error } = await supabase.from('harvest_logs').delete().eq('id', id);
+              if (!error) {
+                successfulDeletions.push(id);
+                syncedAny = true;
+              } else {
+                console.error(`Error deleting harvest log ${id} on server during sync:`, error.message);
+              }
+            }
+            const remaining = pendingDeletions.filter(id => !successfulDeletions.includes(id));
+            localStorage.setItem('fvb_pending_deletions', JSON.stringify(remaining));
           }
-        } else {
-          await localDb.markAsSynced(log.id);
-          syncedAny = true;
+        } catch (e) {
+          console.error('Error processing pending deletions queue:', e);
+        }
+      }
+
+      // 2. Sync Pending Collaborator Deletions
+      const pendingCollabDeletionsRaw = localStorage.getItem('fvb_pending_collab_deletions');
+      if (pendingCollabDeletionsRaw) {
+        try {
+          const pendingCollabDeletions: string[] = JSON.parse(pendingCollabDeletionsRaw);
+          if (pendingCollabDeletions.length > 0) {
+            console.log(`Syncing ${pendingCollabDeletions.length} pending collaborator deletions...`);
+            const successfulDeletions: string[] = [];
+            for (const id of pendingCollabDeletions) {
+              const { error } = await supabase.rpc('delete_collaborator_by_id', { target_id: id });
+              if (!error) {
+                successfulDeletions.push(id);
+                syncedAny = true;
+              } else {
+                console.error(`Error deleting collaborator ${id} on server during sync:`, error.message);
+              }
+            }
+            const remaining = pendingCollabDeletions.filter(id => !successfulDeletions.includes(id));
+            localStorage.setItem('fvb_pending_collab_deletions', JSON.stringify(remaining));
+          }
+        } catch (e) {
+          console.error('Error processing pending collaborator deletions queue:', e);
+        }
+      }
+
+      // 3. Sync Unsynced Collaborators
+      const unsyncedCollabsRaw = localStorage.getItem('fvb_unsynced_collaborators');
+      if (unsyncedCollabsRaw) {
+        try {
+          const unsyncedCollabs: Collaborator[] = JSON.parse(unsyncedCollabsRaw);
+          if (unsyncedCollabs.length > 0) {
+            console.log(`Syncing ${unsyncedCollabs.length} unsynced collaborators...`);
+            const successfulCollabs: string[] = [];
+            for (const col of unsyncedCollabs) {
+              const { error } = await supabase.from('collaborators').upsert(col);
+              if (!error) {
+                successfulCollabs.push(col.id);
+                syncedAny = true;
+              } else {
+                console.error(`Error syncing collaborator ${col.id} (${col.nome}):`, error.message);
+              }
+            }
+            const remaining = unsyncedCollabs.filter(col => !successfulCollabs.includes(col.id));
+            localStorage.setItem('fvb_unsynced_collaborators', JSON.stringify(remaining));
+          }
+        } catch (e) {
+          console.error('Error processing unsynced collaborators queue:', e);
+        }
+      }
+
+      // 4. Sync Unsynced Harvest Logs (IndexedDB)
+      const unsyncedLogs = await localDb.getUnsyncedLogs();
+      if (unsyncedLogs.length > 0) {
+        console.log(`Syncing ${unsyncedLogs.length} unsynced harvest logs...`);
+        for (const log of unsyncedLogs) {
+          // Get week and verify it's open (check local/cache/db)
+          const week = await storage.getWeek(log.semana_id);
+          if (week.status !== WeekStatus.OPEN) {
+            console.warn(`Skipping sync for log ${log.id} because week ${log.semana_id} is ${week.status}`);
+            continue;
+          }
+
+          // Ensure the week record exists on the remote Supabase DB
+          const { error: weekErr } = await supabase.from('harvest_weeks').upsert(week);
+          if (weekErr) {
+            console.error(`Error syncing week ${week.id} for log ${log.id}:`, weekErr.message);
+            continue;
+          }
+
+          // Sync harvest log
+          const { synced, ...payload } = log;
+          const { error } = await supabase.from('harvest_logs').upsert(payload);
+          
+          if (error) {
+            console.error(`Error syncing log ${log.id}:`, error.message);
+            if (error.message.includes('not found') || error.message.includes('unauthorized') || error.message.includes('JWT')) {
+              window.dispatchEvent(new CustomEvent('auth_sync_error', { detail: log }));
+            }
+          } else {
+            await localDb.markAsSynced(log.id);
+            syncedAny = true;
+          }
         }
       }
 
@@ -649,13 +870,32 @@ export const storage = {
   },
 
   getBanks: async (forceRefresh = false): Promise<Bank[]> => {
-    if (!forceRefresh && !shouldFetch('banks')) return cache.banks!;
+    if (!forceRefresh && !shouldFetch('banks') && cache.banks) return cache.banks;
 
-    const { data } = await supabase.from('banks').select('*').order('nome');
-    
-    cache.banks = data || [];
-    cache.lastFetch.banks = Date.now();
-    return cache.banks;
+    try {
+      if (!navigator.onLine) {
+        throw new Error('Device is offline');
+      }
+      const { data, error } = await supabase.from('banks').select('*').order('nome');
+      if (error) throw error;
+      
+      cache.banks = data || [];
+      cache.lastFetch.banks = Date.now();
+      localStorage.setItem('fvb_banks', JSON.stringify(cache.banks));
+      return cache.banks;
+    } catch (err) {
+      console.warn('Failed to fetch banks, loading from localStorage fallback:', err);
+      const saved = localStorage.getItem('fvb_banks');
+      if (saved) {
+        try {
+          cache.banks = JSON.parse(saved);
+          return cache.banks!;
+        } catch (e) {
+          console.error('Failed to parse cached banks:', e);
+        }
+      }
+      return cache.banks || [];
+    }
   },
 
   saveBank: async (bank: Partial<Bank>) => {
