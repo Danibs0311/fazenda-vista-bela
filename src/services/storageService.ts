@@ -426,7 +426,7 @@ export const storage = {
     }
   },
 
-  getHarvests: async (limit = 100): Promise<OfflineHarvestLog[]> => {
+  getHarvests: async (limit = 5000): Promise<OfflineHarvestLog[]> => {
     let remoteLogs: HarvestLog[] = [];
     
     if (navigator.onLine) {
@@ -813,12 +813,8 @@ export const storage = {
       if (unsyncedLogs.length > 0) {
         console.log(`Syncing ${unsyncedLogs.length} unsynced harvest logs...`);
         for (const log of unsyncedLogs) {
-          // Get week and verify it's open (check local/cache/db)
+          // Get week (check local/cache/db)
           const week = await storage.getWeek(log.semana_id);
-          if (week.status !== WeekStatus.OPEN) {
-            console.warn(`Skipping sync for log ${log.id} because week ${log.semana_id} is ${week.status}`);
-            continue;
-          }
 
           // Ensure the week record exists on the remote Supabase DB
           const { error: weekErr } = await supabase.from('harvest_weeks').upsert(week);

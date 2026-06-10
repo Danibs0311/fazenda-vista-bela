@@ -34,7 +34,7 @@ self.addEventListener('activate', (e) => {
 
 // Fetch Event (Network-first falling back to cache)
 self.addEventListener('fetch', (e) => {
-  if (!e.request.url.startsWith(self.location.origin)) {
+  if (e.request.method !== 'GET' || !e.request.url.startsWith(self.location.origin)) {
     return;
   }
 

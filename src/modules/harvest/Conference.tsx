@@ -28,25 +28,38 @@ export const Conference: React.FC = () => {
 
     setWeeks(readyWeeks);
 
+    let activeWeek = selectedWeek;
     if (readyWeeks.length > 0) {
       if (!selectedWeek || !readyWeeks.find(w => w.id === selectedWeek.id)) {
-        setSelectedWeek(readyWeeks[0]);
+        activeWeek = readyWeeks[0];
+        setSelectedWeek(activeWeek);
       } else {
-        setSelectedWeek(readyWeeks.find(w => w.id === selectedWeek.id) || null);
+        activeWeek = readyWeeks.find(w => w.id === selectedWeek.id) || null;
+        setSelectedWeek(activeWeek);
       }
     }
 
-    const [h, c] = await Promise.all([
-      storage.getHarvests(),
-      storage.getCollaborators()
+    const [c, h] = await Promise.all([
+      storage.getCollaborators(),
+      activeWeek ? storage.getHarvestsByWeek(activeWeek.id) : Promise.resolve([])
     ]);
-    setHarvests(h);
     setCollaborators(c);
+    setHarvests(h);
   };
 
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (selectedWeek) {
+      storage.getHarvestsByWeek(selectedWeek.id)
+        .then(setHarvests)
+        .catch(err => showToast('Erro ao carregar colheitas: ' + err.message, 'error'));
+    } else {
+      setHarvests([]);
+    }
+  }, [selectedWeek?.id]);
 
   const weekHarvests = useMemo(() => {
     if (!selectedWeek) return [];

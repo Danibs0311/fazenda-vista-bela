@@ -43,7 +43,7 @@ export const Dashboard: React.FC = () => {
     const load = async () => {
       try {
         const [h, c] = await Promise.all([
-          storage.getHarvests(),
+          storage.getHarvestsByWeek(currentWeek.id),
           storage.getCollaborators(true) // Force fresh fetch to bypass memory cache
         ]);
         setHarvests(h);
@@ -72,7 +72,7 @@ export const Dashboard: React.FC = () => {
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleFocus);
     };
-  }, []);
+  }, [currentWeek.id]);
 
 
 

@@ -16,6 +16,7 @@ export const WeekManagement: React.FC = () => {
   const [editingHarvest, setEditingHarvest] = useState<HarvestLog | null>(null);
   const [isHarvestEditModalOpen, setEditModalOpen] = useState(false);
   const [isHarvestReadOnly, setIsHarvestReadOnly] = useState(true);
+  const [modalHarvests, setModalHarvests] = useState<HarvestLog[]>([]);
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const modalScrollRef = useRef<HTMLDivElement>(null);
@@ -122,8 +123,12 @@ export const WeekManagement: React.FC = () => {
 
       await storage.saveHarvest(updated);
       await loadData();
+      if (selectedWeekForModal) {
+        const h = await storage.getHarvestsByWeek(selectedWeekForModal.id);
+        setModalHarvests(h);
+      }
       setEditModalOpen(false);
-      showToast('Lançamento atualizado!', 'success');
+      showToast('Lançamento updated!', 'success');
     } catch (err: any) {
       showToast(err.message, 'error');
     }
@@ -152,6 +157,10 @@ export const WeekManagement: React.FC = () => {
       try {
         await storage.deleteHarvest(id);
         await loadData();
+        if (selectedWeekForModal) {
+          const h = await storage.getHarvestsByWeek(selectedWeekForModal.id);
+          setModalHarvests(h);
+        }
         setEditModalOpen(false);
         showToast('Lançamento excluído com sucesso!', 'success');
       } catch (err: any) {
@@ -160,16 +169,20 @@ export const WeekManagement: React.FC = () => {
     }
   };
 
-  const openConferenceModal = (week: HarvestWeek) => {
+  const openConferenceModal = async (week: HarvestWeek) => {
     setSelectedWeekForModal(week);
     setIsModalOpen(true);
+    setModalHarvests([]);
+    try {
+      const h = await storage.getHarvestsByWeek(week.id);
+      setModalHarvests(h);
+    } catch (err: any) {
+      showToast('Erro ao carregar colheitas da semana: ' + err.message, 'error');
+    }
   };
 
   const getConferenceData = () => {
-    if (!selectedWeekForModal) return [];
-    const weekHarvests = harvests.filter(h => h.semana_id === selectedWeekForModal.id);
-    
-    return weekHarvests.map(h => {
+    return modalHarvests.map(h => {
       const collab = collaborators.find(c => c.id === h.colaborador_id);
       return {
         ...h,

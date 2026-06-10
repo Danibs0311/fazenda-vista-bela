@@ -44,6 +44,9 @@ export const HarvestEntry: React.FC = () => {
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
+      storage.syncOfflineLogs().catch(err => {
+        console.error('Online event listener sync failed:', err);
+      });
     };
     const handleOffline = () => {
       setIsOnline(false);
@@ -51,15 +54,27 @@ export const HarvestEntry: React.FC = () => {
     const handleSyncCompleted = () => {
       loadData();
     };
+    const handleFocus = () => {
+      if (navigator.onLine) {
+        storage.syncOfflineLogs().catch(err => {
+          console.error('Focus event listener sync failed:', err);
+        });
+      }
+      loadData();
+    };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     window.addEventListener('offline-sync-completed', handleSyncCompleted);
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('offline-sync-completed', handleSyncCompleted);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
     };
   }, []);
 

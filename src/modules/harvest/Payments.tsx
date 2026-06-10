@@ -18,25 +18,45 @@ export const Payments: React.FC = () => {
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = async () => {
     const allWeeks = await storage.getWeeks();
     const paymentWeeks = allWeeks.filter(w => [WeekStatus.IN_CONFERENCE, WeekStatus.PAID].includes(w.status))
       .sort((a, b) => b.id.localeCompare(a.id));
 
     setWeeks(paymentWeeks);
-    if (paymentWeeks.length > 0 && !selectedWeek) setSelectedWeek(paymentWeeks[0]);
+    
+    let activeWeek = selectedWeek;
+    if (paymentWeeks.length > 0) {
+      if (!selectedWeek || !paymentWeeks.find(w => w.id === selectedWeek.id)) {
+        activeWeek = paymentWeeks[0];
+        setSelectedWeek(activeWeek);
+      } else {
+        activeWeek = paymentWeeks.find(w => w.id === selectedWeek.id) || null;
+        setSelectedWeek(activeWeek);
+      }
+    }
 
-    const [h, c] = await Promise.all([
-      storage.getHarvests(),
-      storage.getCollaborators()
+    const [c, h] = await Promise.all([
+      storage.getCollaborators(),
+      activeWeek ? storage.getHarvestsByWeek(activeWeek.id) : Promise.resolve([])
     ]);
-    setHarvests(h);
     setCollaborators(c);
+    setHarvests(h);
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (selectedWeek) {
+      storage.getHarvestsByWeek(selectedWeek.id)
+        .then(setHarvests)
+        .catch(err => showToast('Erro ao carregar colheitas: ' + err.message, 'error'));
+    } else {
+      setHarvests([]);
+    }
+  }, [selectedWeek?.id]);
 
   const weekData = useMemo(() => {
     if (!selectedWeek) return [];
