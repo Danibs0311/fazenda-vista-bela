@@ -6,6 +6,7 @@ import { formatDate, formatCurrency } from '../../utils/dateUtils';
 import { Lock, Unlock, ClipboardCheck, CheckCircle2, Eye, Calendar, TrendingUp, X, Edit2, Trash2, Save } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
+import { supabase } from '../../services/supabase';
 
 export const WeekManagement: React.FC = () => {
   const [weeks, setWeeks] = useState<HarvestWeek[]>([]);
@@ -55,6 +56,38 @@ export const WeekManagement: React.FC = () => {
       window.removeEventListener('offline-sync-completed', handleStatusChange);
     };
   }, [isModalOpen]);
+
+  useEffect(() => {
+    const handleRealtimeChange = async () => {
+      await loadData();
+      if (selectedWeekForModal) {
+        try {
+          const h = await storage.getHarvestsByWeek(selectedWeekForModal.id);
+          setModalHarvests(h);
+        } catch (err) {
+          console.error('Failed to reload modal harvests via realtime:', err);
+        }
+      }
+    };
+
+    const channel = supabase
+      .channel('week-management-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'harvest_logs' },
+        handleRealtimeChange
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'harvest_weeks' },
+        handleRealtimeChange
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedWeekForModal?.id]);
 
   const loadData = async () => {
     const [w, h, c] = await Promise.all([

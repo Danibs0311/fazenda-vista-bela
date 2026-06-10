@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { storage } from '../../services/storageService';
 import { getWeekRange, formatCurrency, formatDate } from '../../utils/dateUtils';
 import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../services/supabase';
 import {
   TrendingUp, Users, Package, Wallet, CalendarCheck,
   Pickaxe, Sparkles, ArrowUpRight, ChevronRight, ChevronLeft, Coffee, Database
@@ -56,8 +57,8 @@ export const Dashboard: React.FC = () => {
     // Initial load
     load();
 
-    // Auto-refresh every 5 seconds
-    const interval = setInterval(load, 5000);
+    // Auto-refresh every 20 seconds as fail-safe fallback
+    const interval = setInterval(load, 20000);
 
     // Event listener for tab active/focus (unlock mobile, switch tab, etc.)
     const handleFocus = () => {
@@ -67,10 +68,30 @@ export const Dashboard: React.FC = () => {
     window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleFocus);
 
+    // Realtime subscriptions
+    const channel = supabase
+      .channel('dashboard-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'harvest_logs' },
+        () => {
+          load();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'harvest_weeks' },
+        () => {
+          load();
+        }
+      )
+      .subscribe();
+
     return () => {
       clearInterval(interval);
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleFocus);
+      supabase.removeChannel(channel);
     };
   }, [currentWeek.id]);
 

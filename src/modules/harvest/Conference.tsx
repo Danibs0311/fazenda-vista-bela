@@ -6,6 +6,7 @@ import { HarvestWeek, WeekStatus, HarvestLog, Collaborator } from '../../types';
 import { formatDate, formatCurrency } from '../../utils/dateUtils';
 import { ClipboardCheck, CheckCircle, AlertTriangle, Printer, ChevronDown, ChevronUp, Clock, User, Coffee, X, CheckSquare, Layers } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { supabase } from '../../services/supabase';
 
 interface SummaryGroup {
   latas: number;
@@ -59,6 +60,30 @@ export const Conference: React.FC = () => {
     } else {
       setHarvests([]);
     }
+  }, [selectedWeek?.id]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('conference-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'harvest_logs' },
+        () => {
+          loadData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'harvest_weeks' },
+        () => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [selectedWeek?.id]);
 
   const weekHarvests = useMemo(() => {

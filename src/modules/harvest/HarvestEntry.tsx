@@ -10,10 +10,11 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useAuth } from '../../context/AuthContext';
 import { OfflineHarvestLog } from '../../services/localDb';
+import { supabase } from '../../services/supabase';
 
 export const HarvestEntry: React.FC = () => {
   const { showToast } = useToast();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCollab, setSelectedCollab] = useState<Collaborator | null>(null);
@@ -38,7 +39,24 @@ export const HarvestEntry: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  }, [date, profile]);
+  }, [date, profile, user]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('harvest-entry-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'harvest_logs' },
+        () => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [profile, user, date]);
 
   // Connectivity and Sync listeners
   useEffect(() => {
@@ -142,16 +160,13 @@ export const HarvestEntry: React.FC = () => {
     ]);
     setCollaborators(collabs);
     
-    // Filtra para que o cabo de turma veja apenas seus próprios lançamentos criados no dia de hoje (dia de lançamento)
+    // Filtra para que o cabo de turma veja apenas seus próprios lançamentos
     let filteredRecent = recent;
-    if (profile?.role === 'cabo') {
-      const todayStr = getLocalDateString();
-      filteredRecent = recent.filter(h => {
-        const launchDate = h.created_at ? getLocalDateString(new Date(h.created_at)) : h.data_colheita;
-        return launchDate === todayStr && h.criado_por_id === profile.id;
-      });
+    const currentUserId = profile?.id || user?.id;
+    if (profile?.role === 'cabo' && currentUserId) {
+      filteredRecent = recent.filter(h => h.criado_por_id === currentUserId);
     }
-    setRecentHarvests(filteredRecent);
+    setRecentHarvests(filteredRecent.slice(0, 100));
     
     setCurrentPrice(price);
     setBanks(bankData);
@@ -205,8 +220,8 @@ export const HarvestEntry: React.FC = () => {
         valor_por_lata: currentPrice,
         valor_total_dia: quantity * currentPrice,
         semana_id: weekInfo.id,
-        criado_por_id: profile?.id,
-        criado_por_nome: profile?.nome,
+        criado_por_id: profile?.id || user?.id,
+        criado_por_nome: profile?.nome || user?.user_metadata?.nome || user?.email?.split('@')[0].toUpperCase() || 'COLABORADOR',
         created_at: new Date().toISOString()
       };
 

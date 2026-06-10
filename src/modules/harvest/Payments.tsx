@@ -5,6 +5,7 @@ import { HarvestWeek, WeekStatus, HarvestLog, Collaborator } from '../../types';
 import { formatDate, formatCurrency } from '../../utils/dateUtils';
 import { Wallet, CheckCircle, FileText, Download, Building2, Search, ArrowLeftRight, CreditCard, PiggyBank, Receipt, ChevronRight, ChevronLeft, Filter, User } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
+import { supabase } from '../../services/supabase';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -56,6 +57,30 @@ export const Payments: React.FC = () => {
     } else {
       setHarvests([]);
     }
+  }, [selectedWeek?.id]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('payments-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'harvest_logs' },
+        () => {
+          loadData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'harvest_weeks' },
+        () => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [selectedWeek?.id]);
 
   const weekData = useMemo(() => {
