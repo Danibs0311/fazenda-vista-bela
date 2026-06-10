@@ -177,7 +177,18 @@ export const backupService = {
 
       // 4. Restaurar logs de colheitas (upsert)
       if (harvestLogs && harvestLogs.length > 0) {
-        const { error } = await supabase.from('harvest_logs').upsert(harvestLogs);
+        let { error } = await supabase.from('harvest_logs').upsert(harvestLogs);
+        if (error && (
+          error.message?.includes('criado_por_id') || 
+          error.message?.includes('criado_por_nome') || 
+          error.message?.includes('column') || 
+          error.message?.includes('schema cache')
+        )) {
+          console.warn('Server schema lacks created_by metadata columns during backup restore. Retrying without them...');
+          const cleanedLogs = harvestLogs.map(({ criado_por_id, criado_por_nome, ...rest }: any) => rest);
+          const fallbackRes = await supabase.from('harvest_logs').upsert(cleanedLogs);
+          error = fallbackRes.error;
+        }
         if (error) throw new Error('Erro ao restaurar colheitas: ' + error.message);
       }
 

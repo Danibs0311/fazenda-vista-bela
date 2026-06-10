@@ -605,8 +605,20 @@ export const storage = {
     if (navigator.onLine) {
       try {
         const { synced, ...payload } = offlineLog;
-        const { error } = await supabase.from('harvest_logs').upsert(payload);
+        let { error } = await supabase.from('harvest_logs').upsert(payload);
         
+        if (error && (
+          error.message?.includes('criado_por_id') || 
+          error.message?.includes('criado_por_nome') || 
+          error.message?.includes('column') || 
+          error.message?.includes('schema cache')
+        )) {
+          console.warn('Server schema lacks created_by metadata columns. Retrying with fallback payload...');
+          const { criado_por_id, criado_por_nome, ...fallbackPayload } = payload;
+          const fallbackRes = await supabase.from('harvest_logs').upsert(fallbackPayload);
+          error = fallbackRes.error;
+        }
+
         if (error) {
           console.warn('Network error while saving to server, keeping local offline backup:', error.message);
         } else {
@@ -825,8 +837,20 @@ export const storage = {
 
           // Sync harvest log
           const { synced, ...payload } = log;
-          const { error } = await supabase.from('harvest_logs').upsert(payload);
+          let { error } = await supabase.from('harvest_logs').upsert(payload);
           
+          if (error && (
+            error.message?.includes('criado_por_id') || 
+            error.message?.includes('criado_por_nome') || 
+            error.message?.includes('column') || 
+            error.message?.includes('schema cache')
+          )) {
+            console.warn('Server schema lacks created_by metadata columns. Retrying fallback sync...');
+            const { criado_por_id, criado_por_nome, ...fallbackPayload } = payload;
+            const fallbackRes = await supabase.from('harvest_logs').upsert(fallbackPayload);
+            error = fallbackRes.error;
+          }
+
           if (error) {
             console.error(`Error syncing log ${log.id}:`, error.message);
             if (error.message.includes('not found') || error.message.includes('unauthorized') || error.message.includes('JWT')) {
