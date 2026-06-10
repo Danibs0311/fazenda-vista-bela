@@ -848,7 +848,7 @@ export const Settings: React.FC = () => {
                             ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-700' 
                             : 'bg-slate-200/50 border-slate-300/30 text-slate-700'
                         }`}>
-                          {u.role === 'admin' ? 'AD' : 'CB'}
+                          {u.role === 'admin' ? 'AD' : 'AP'}
                         </div>
                         <div>
                           <div className="flex items-center gap-2 leading-none">

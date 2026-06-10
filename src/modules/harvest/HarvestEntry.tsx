@@ -164,7 +164,7 @@ export const HarvestEntry: React.FC = () => {
     let filteredRecent = recent;
     const currentUserId = profile?.id || user?.id;
     if (profile?.role === 'cabo' && currentUserId) {
-      filteredRecent = recent.filter(h => h.criado_por_id === currentUserId);
+      filteredRecent = recent.filter(h => h.criado_por_id === currentUserId || !h.criado_por_id);
     }
     setRecentHarvests(filteredRecent.slice(0, 100));
     

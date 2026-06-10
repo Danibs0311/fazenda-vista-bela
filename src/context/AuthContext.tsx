@@ -173,31 +173,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }, 4000);
 
+    let isInitialLoad = true;
+
     // Get initial session with robust error handling for offline/network failure
     supabase.auth.getSession()
-      .then(({ data: { session } }) => {
+      .then(async ({ data: { session } }) => {
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
-          fetchProfile(session.user.id, session.user)
-            .catch(err => console.error('Failed to load profile in getSession:', err))
-            .finally(() => {
-              clearTimeout(safetyTimeout);
-              setLoading(false);
-            });
-        } else {
-          clearTimeout(safetyTimeout);
-          setLoading(false);
+          try {
+            await fetchProfile(session.user.id, session.user);
+          } catch (err) {
+            console.error('Failed to load profile in getSession:', err);
+          }
         }
       })
       .catch(err => {
         console.error('Failed to get initial session on mount (offline fallback active):', err);
+      })
+      .finally(() => {
+        isInitialLoad = false;
         clearTimeout(safetyTimeout);
         setLoading(false);
       });
 
     // Listen for auth state changes with robust error handling
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       try {
         setSession(session);
         setUser(session?.user ?? null);
@@ -209,8 +210,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (err) {
         console.error('Failed to process auth state change:', err);
       } finally {
-        clearTimeout(safetyTimeout);
-        setLoading(false);
+        if (!isInitialLoad || event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+          clearTimeout(safetyTimeout);
+          setLoading(false);
+        }
       }
     });
 
