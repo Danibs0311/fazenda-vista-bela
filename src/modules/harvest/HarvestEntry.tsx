@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { storage } from '../../services/storageService';
 import { Collaborator, HarvestLog, CollaboratorStatus, Bank } from '../../types';
 import { getWeekRange, formatCurrency, formatDate, getLocalDateString } from '../../utils/dateUtils';
-import { Search, Save, History, Trash2, Calendar, UserPlus, Pickaxe, ChevronRight, X, ArrowUpRight, Plus, Landmark, User, AlertCircle, Edit2, Download, Cloud, CloudOff, Wifi, WifiOff, Fingerprint } from 'lucide-react';
+import { Search, Save, History, Trash2, Calendar, UserPlus, Pickaxe, ChevronRight, X, ArrowUpRight, Plus, Landmark, User, AlertCircle, Edit2, Download, Cloud, CloudOff, Wifi, WifiOff, Fingerprint, Loader2 } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 import { Link } from 'react-router-dom';
 import { jsPDF } from 'jspdf';
@@ -33,6 +33,7 @@ export const HarvestEntry: React.FC = () => {
   const [productionReportDate, setProductionReportDate] = useState(getLocalDateString());
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isSaving, setIsSaving] = useState(false);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -173,11 +174,13 @@ export const HarvestEntry: React.FC = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving) return;
     if (!selectedCollab || quantity <= 0) {
         showToast('Selecione um colhedor e informe a quantidade', 'error');
         return;
     }
 
+    setIsSaving(true);
     try {
       const harvest: HarvestLog = {
         id: Math.random().toString(36).substr(2, 9).toUpperCase(),
@@ -201,6 +204,8 @@ export const HarvestEntry: React.FC = () => {
       showToast('Colheita registrada com sucesso!', 'success');
     } catch (err: any) {
       showToast(err.message, 'error');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -720,15 +725,19 @@ export const HarvestEntry: React.FC = () => {
                 </div>
                 <button
                   type="submit"
-                  disabled={!selectedCollab || quantity <= 0}
+                  disabled={!selectedCollab || quantity <= 0 || isSaving}
                   className={`w-full sm:w-auto px-6 py-3.5 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 border ${
-                    !selectedCollab || quantity <= 0 
+                    !selectedCollab || quantity <= 0 || isSaving
                     ? 'bg-white/5 border-white/5 cursor-not-allowed text-white/50' 
                     : '!bg-primary !text-white border-white/20 hover:!bg-dark'
                   }`}
                 >
-                  <span className="!text-white !opacity-100">Confirmar</span>
-                  <Save className="w-4 h-4 !text-white !opacity-100" />
+                  <span className="!text-white !opacity-100">{isSaving ? 'Gravando...' : 'Confirmar'}</span>
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 animate-spin !text-white" />
+                  ) : (
+                    <Save className="w-4 h-4 !text-white !opacity-100" />
+                  )}
                 </button>
               </div>
             </form>
