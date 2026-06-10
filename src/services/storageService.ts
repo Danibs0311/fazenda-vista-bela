@@ -448,7 +448,18 @@ export const storage = {
     });
     
     localLogs.forEach(log => {
-      if (!log.synced || !mergedMap.has(log.id)) {
+      if (!log.synced) {
+        mergedMap.set(log.id, log);
+      } else if (navigator.onLine) {
+        // If we are online, and a local log is marked as synced: true
+        // but it is NOT present in the remote logs, it means it was deleted on the server!
+        // We should delete it from local IndexedDB so it doesn't reappear on refresh.
+        if (!mergedMap.has(log.id)) {
+          localDb.deleteLog(log.id).catch(err => {
+            console.warn(`Failed to delete ghost log ${log.id} from localDb:`, err);
+          });
+        }
+      } else {
         mergedMap.set(log.id, log);
       }
     });
@@ -484,7 +495,16 @@ export const storage = {
     });
     
     localLogs.forEach(log => {
-      if (!log.synced || !mergedMap.has(log.id)) {
+      if (!log.synced) {
+        mergedMap.set(log.id, log);
+      } else if (navigator.onLine) {
+        // Sync local cache with remote deletions
+        if (!mergedMap.has(log.id) && log.semana_id === weekId) {
+          localDb.deleteLog(log.id).catch(err => {
+            console.warn(`Failed to delete ghost log ${log.id} from localDb:`, err);
+          });
+        }
+      } else {
         mergedMap.set(log.id, log);
       }
     });
