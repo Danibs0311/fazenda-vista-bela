@@ -622,7 +622,7 @@
       <!-- 2. Rotina Operacional e Fluxo de Dados -->
       <section id="rotina" class="section-block">
         <h2 class="section-title">2. Rotina Operacional e Fluxo de Dados</h2>
-        <p>A sincronia e a segurança contábil do sistema baseiam-se em uma rotina operacional contínua executada pelos fiscais de campo (cabos) e pelos operadores administrativos. O fluxo operacional padrão é detalhado a seguir:</p>
+        <p>A sincronia e a segurança contábil do sistema baseiam-se em uma rotina operacional contínua executada pelos fiscais de campo (apontadores) e pelos operadores administrativos. O fluxo operacional padrão é detalhado a seguir:</p>
         
         <div class="alert alert-warning">
           <span class="alert-title">Atenção Fiscal de Campo</span>
@@ -684,7 +684,7 @@
             </ul>
           </li>
           <li><strong>Sinalizador de Conexão Física (Botão de Status):</strong> Exibe o status da conexão atual: Verde (ONLINE / SINCRONIZAR) ou Preto (OFFLINE / LOCAL SEGURO). O fiscal de campo pode clicar fisicamente neste botão para forçar o sistema a testar a internet e processar o envio dos lançamentos locais.</li>
-          <li><strong>Restrição de Visualização (Recentes):</strong> Operadores com perfil Cabo de Turma/Fiscal visualizam exclusivamente os seus próprios lançamentos realizados no dia de hoje (dia de lançamento) no painel lateral de Recentes. Isso garante a privacidade e impede que um fiscal veja a produtividade de colheita apontada por outros cabos.</li>
+          <li><strong>Restrição de Visualização (Recentes):</strong> Operadores com perfil Apontador/Fiscal visualizam exclusivamente os seus próprios lançamentos realizados no dia de hoje (dia de lançamento) no painel lateral de Recentes. Isso garante a privacidade e impede que um fiscal veja a produtividade de colheita apontada por outros apontadores.</li>
           <li><strong>Relatório de Fechamento Diário em PDF:</strong> O botão de download gera uma folha de fechamento estruturada no formato A4 (PDFPortrait). O PDF gerado exibe o cabeçalho analítico com a data correspondente, ID, Nome em caixa alta, CPF normalizado, volumes parciais de latas do dia, valor unitário da lata e totalização de latas e despesa do dia selecionado.</li>
         </ul>
 
@@ -704,7 +704,7 @@
         <ul>
           <li><strong>Painel de Auditoria Detalhado:</strong> Apresenta uma tabela unificada listando todos os colhedores que trabalharam no ciclo contábil selecionado, seus respectivos CPFs, total de latas acumuladas e o saldo bruto previsto de pagamento.</li>
           <li><strong>Detalhes em Sanfona (Accordion):</strong> Clicar sobre o nome de qualquer colaborador na planilha expande uma área interna que exibe as datas exatas das pesagens, quantidades parciais inseridas e os valores unitários das latas aplicados.</li>
-          <li><strong>Aprovação Contábil e Bloqueio de Escrita:</strong> Ao concluir a conferência de dados, o operador aciona o botão <strong>"Aprovar"</strong>. O sistema altera o status contábil da semana de colheita para <code>em_conferencia</code> e ativa um bloqueio lógico. Fiscais e cabos de campo são impedidos de fazer novos lançamentos de latas, edições ou exclusões físicas sobre as pesagens do ciclo aprovado.</li>
+          <li><strong>Aprovação Contábil e Bloqueio de Escrita:</strong> Ao concluir a conferência de dados, o operador aciona o botão <strong>"Aprovar"</strong>. O sistema altera o status contábil da semana de colheita para <code>em_conferencia</code> e ativa um bloqueio lógico. Fiscais e apontadores de campo são impedidos de fazer novos lançamentos de latas, edições ou exclusões físicas sobre as pesagens do ciclo aprovado.</li>
         </ul>
 
         <!-- 3.6. Pagamentos -->
@@ -743,7 +743,7 @@
               <li>C6 Bank &rarr; `290`</li>
             </ul>
           </li>
-          <li><strong>Controle de Equipe de Acesso:</strong> Permite cadastrar contas para fiscais (Cabo) e administradores (Admin).
+          <li><strong>Controle de Equipe de Acesso:</strong> Permite cadastrar contas para apontadores (Apontador) e administradores (Admin).
             <ul>
               <li><strong>Automação de Credenciais:</strong> O e-mail de login é gerado automaticamente: <code>primeironome-5primeirosdigitosdocpf@fvb.com</code>. A senha inicial é o CPF completo com pontos e traço.</li>
               <li><strong>Gestão de Acessos:</strong> Permite inativar ou excluir credenciais de usuários em tempo real.</li>
@@ -766,7 +766,7 @@
           <li><strong>Administrador (Admin):</strong> Nível total de leitura e escrita. Gerencia vigências operacionais de preços, perfis da equipe e executa backups encriptados locais.</li>
           <li><strong>Gerente:</strong> Coordenador das turmas de colheita. Acessa Dashboard de monitoramento, tabelas de colhedores (inserindo ou destravando dados no botão "Editar"), encerra ciclos contábeis no cafezal e emite relatórios analíticos, mas não edita acessos de equipe.</li>
           <li><strong>Financeiro:</strong> Focado no controle contábil e quitação. Audita a conferência das semanas, emite os PDFs de recibos em lote A4 e realiza a quitação final definindo o status como "paga" após transferências. Bloqueado para registrar latas e alterar tabelas de preço.</li>
-          <li><strong>Cabo / Fiscal (Cabo):</strong> Operador de balança no cafezal. Vê **exclusivamente a tela de Registrar Colheita** (mobile). Todos os outros módulos e rotas são ocultados no menu e bloqueados na camada lógica. Adicionalmente, possui limitação de visualização no painel lateral de Recentes, acessando apenas as suas próprias pesagens registradas no dia corrente (dia de lançamento).</li>
+          <li><strong>Apontador / Fiscal (Apontador):</strong> Operador de balança no cafezal. Vê **exclusivamente a tela de Registrar Colheita** (mobile). Todos os outros módulos e rotas são ocultados no menu e bloqueados na camada lógica. Adicionalmente, possui limitação de visualização no painel lateral de Recentes, acessando apenas as suas próprias pesagens registradas no dia corrente (dia de lançamento).</li>
         </ul>
       </section>
 
@@ -809,7 +809,7 @@
           <div class="support-info">
             <p style="margin: 0; font-size: 1.1rem; color: var(--dark);"><strong>DG TECH — SOLUÇÕES TECNOLÓGICAS</strong></p>
             <p style="margin: 0.5rem 0 0 0;"><strong>WhatsApp de Suporte:</strong> (75) 98848-1160</p>
-            <p style="margin: 0.25rem 0 0 0;"><strong>E-mail de Suporte:</strong> danibs2109@gmail.com</p>
+            <p style="margin: 0.25rem 0 0 0;"><strong>E-mail de Suporte:</strong> dgtech.st@gmail.com</p>
             <p style="margin: 0.5rem 0 0 0; line-height: 1.4;">
               <strong>Horário de Atendimento:</strong><br>
               Segunda a Sexta — das 08h às 17h<br>

@@ -22,7 +22,7 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Se o usuário for Cabo de Turma, ele SÓ pode acessar a tela de colheita (/colheita)
+  // Se o usuário for Apontador, ele SÓ pode acessar a tela de colheita (/colheita)
   if (profile?.role === 'cabo' && location.pathname !== '/colheita') {
     return <Navigate to="/colheita" replace />;
   }

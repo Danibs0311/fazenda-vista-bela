@@ -6,7 +6,7 @@
 -- Habilitar extensão para geração de UUIDs
 create extension if not exists "uuid-ossp";
 
--- 1. TABELA: public.profiles (Perfis de Usuários Administrativos/Cabos)
+-- 1. TABELA: public.profiles (Perfis de Usuários Administrativos/Apontadores)
 create table if not exists public.profiles (
   id uuid references auth.users(id) on delete cascade primary key,
   nome text not null,

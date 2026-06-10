@@ -787,7 +787,7 @@ export const Settings: React.FC = () => {
                     onChange={(e) => setNewUserRole(e.target.value as any)}
                     className="w-full bg-slate-50 border-2 border-transparent focus:border-primary/20 rounded-lg py-2 px-3 text-xs font-black text-primary outline-none transition-all cursor-pointer shadow-inner"
                   >
-                    <option value="cabo">Cabo de Turma (Lançamentos de Colheita)</option>
+                    <option value="cabo">Apontador (Lançamentos de Colheita)</option>
                     <option value="admin">Administrador (Acesso Total)</option>
                   </select>
                 </div>
@@ -949,7 +949,7 @@ export const Settings: React.FC = () => {
                     readOnly
                     value={editingUser.cpf || ''}
                     className="w-full bg-slate-100 border-2 border-transparent rounded-lg py-2.5 px-4 text-sm font-black text-secondary/50 outline-none font-mono cursor-not-allowed select-all"
-                    title="A senha de acesso do cabo de turma é o CPF sem pontuação."
+                    title="A senha de acesso do apontador é o CPF sem pontuação."
                   />
                 </div>
               ) : (
@@ -972,7 +972,7 @@ export const Settings: React.FC = () => {
                   onChange={(e) => setEditingUserRole(e.target.value as any)}
                   className="w-full bg-slate-50 border-2 border-transparent focus:border-primary/20 rounded-lg py-2.5 px-4 text-sm font-black text-primary outline-none transition-all cursor-pointer"
                 >
-                  <option value="cabo">Cabo de Turma (Lançamentos)</option>
+                  <option value="cabo">Apontador (Lançamentos)</option>
                   <option value="admin">Administrador (Acesso Total)</option>
                 </select>
               </div>

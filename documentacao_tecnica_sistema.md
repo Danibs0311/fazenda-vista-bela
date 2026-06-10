@@ -21,7 +21,7 @@
 O *Sistema Inteligente de Gestão de Colheita de Café* é uma solução integrada de hardware lógico e software desenvolvida pela **DG TECH — SOLUÇÕES TECNOLÓGICAS** para digitalizar a coleta física de safras, automatizar a contabilidade agrícola e otimizar folhas de pagamento de colaboradores rurais da Fazenda Vista Bela. 
 
 ### O Problema Resolvido
-A gestão tradicional da colheita de café depende de anotações físicas feitas por cabos de turma (fiscais de balança) em blocos de papel sob condições climáticas adversas. Essa prática acarreta:
+A gestão tradicional da colheita de café depende de anotações físicas feitas por apontadores (fiscais de balança) em blocos de papel sob condições climáticas adversas. Essa prática acarreta:
 1. **Erros de Transcrição:** Divergências entre o anotado no campo e o digitado na planilha administrativa.
 2. **Fraudes Operacionais:** Lançamentos de latas inexistentes ou duplicadas devido à falta de rastreabilidade.
 3. **Morosidade Contábil:** O fechamento semanal da folha de pagamento exige conferência manual demorada de centenas de fichas de papel.
@@ -31,14 +31,14 @@ A gestão tradicional da colheita de café depende de anotações físicas feita
 * **Resiliência Mobile (Offline-first):** O sistema opera em áreas remotas do cafezal sem conexão com a internet. Os registros são guardados localmente e sincronizados de forma assíncrona ao reaver rede.
 * **Validação Cadastral Rígida:** Elimina o cadastro de trabalhadores com dados bancários inconsistentes ou CPFs inválidos através de verificação matemática.
 * **Automação Contábil e Redução de Erros:** O processamento da folha salarial semanal ocorre de forma automática com base nas pesagens aprovadas, reduzindo o tempo de fechamento administrativo de dias para poucos minutos.
-* **Rastreabilidade e Segurança:** Todo lançamento possui autoria (ID do Cabo), registro geográfico lógico e imutabilidade após a aprovação da semana contábil.
+* **Rastreabilidade e Segurança:** Todo lançamento possui autoria (ID do Apontador), registro geográfico lógico e imutabilidade após a aprovação da semana contábil.
 
 ---
 
 ## 3. Escopo do Projeto
 
 ### 3.1. Escopo Incluído
-* **Controle de Acesso (RBAC):** Login com níveis de privilégio segregados para Administradores, Gerentes, Fiscais/Cabos e Financeiro.
+* **Controle de Acesso (RBAC):** Login com níveis de privilégio segregados para Administradores, Gerentes, Fiscais/Apontadores e Financeiro.
 * **Cadastro e Importação:** Formulários com normalização e máscara de CPF, conta PIX dinâmica e importador em lote de planilhas Excel (XLSX).
 * **Pesagem de Campo:** Lançamento rápido de volumes de latas colhidas (com incrementos de 0.5 lata) e cálculo de valores em tempo real.
 * **Governança Temporal (Ciclos):** Criação e automação de semanas operacionais (Sexta-feira a Quinta-feira) com transições automáticas ou encerramentos manuais nativos.
@@ -95,16 +95,16 @@ A tabela a seguir consolida os **50 requisitos funcionais** obrigatórios para o
 | **RF-014** | Cálculo em Tempo Real | Projetar o valor acumulado da pesagem conforme a digitação da lata ocorre. | Alta | Aplica o preço do dia: `quantidade * preco_lata_vigente`. |
 | **RF-015** | Data Retroativa | Permitir registro de pesagens com datas anteriores à data de hoje. | Média | Data deve pertencer a uma semana de colheita com status "Aberta". |
 | **RF-016** | Preço Vigente Reativo | Carregar reativamente o valor operacional da lata para a data selecionada. | Alta | Altera o preço projetado assim que o fiscal muda a data no input. |
-| **RF-017** | Filtro de Recentes do Cabo | Exibir apenas pesagens criadas pelo cabo logado no dia atual para perfil cabo. | Alta | Filtro dinâmico: `criado_por_id == cabo.id AND data == hoje`. |
-| **RF-018** | Visualização Geral de Recentes | Exibir lançamentos diários de todos os cabos para administradores. | Alta | Admins visualizam o montante consolidado de todos os fiscais. |
+| **RF-017** | Filtro de Recentes do Apontador | Exibir apenas pesagens criadas pelo apontador logado no dia atual para perfil apontador. | Alta | Filtro dinâmico: `criado_por_id == apontador.id AND data == hoje`. |
+| **RF-018** | Visualização Geral de Recentes | Exibir lançamentos diários de todos os apontadores para administradores. | Alta | Admins visualizam o montante consolidado de todos os fiscais. |
 | **RF-019** | Sincronização Manual | Permitir forçar o reenvio de logs salvos no IndexedDB local para a nuvem. | Alta | Disparado pelo clique no botão de status de conexão no topo da tela. |
 | **RF-020** | Relatório Diário PDF | Exportar relatório de produção diária de colheita no formato Portrait A4. | Média | Consolida volumes, preços e totais financeiros do dia em PDF. |
 | **RF-021** | Abertura Automática de Ciclo | Iniciar novo ciclo semanal na sexta-feira às 00:00:00 automaticamente. | Alta | Gerenciado pelo robô cron background checker (cycleManager). |
 | **RF-022** | Encerramento Automático | Fechar semana ativa na quinta-feira às 23:59:30 automaticamente. | Alta | Status avança para "fechada", bloqueando novas inserções de campo. |
 | **RF-023** | Encerramento Manual | Forçar o encerramento do ciclo ativo por meio de botão administrative. | Alta | Exige confirmação em caixa pop-up de segurança antes de fechar. |
 | **RF-024** | Reabertura de Ciclo | Permitir reabrir uma semana fechada retornando o status para "aberta". | Alta | Apenas se o status da semana for diferente de "paga". |
-| **RF-025** | Resumos Semanais | Exibir resumos consolidados de latas e valores a pagar na conferência. | Alta | Agrupado por colaborador dentro da semana operacional ativa. |
-| **RF-026** | Detalhamento Sanfona | Expandir linha de colaborador na conferência para visualizar lançamentos. | Média | Exibe a lista analítica diária (pesos, datas e cabo que pesou). |
+| **RF-025** | Resumos Semanais | Exibir resumos consolidados de latas e valores a pagar na conferência. | Alta | Agrupado por colaborador dentro da semana operacional activa. |
+| **RF-026** | Detalhamento Sanfona | Expandir linha de colaborador na conferência para visualizar lançamentos. | Média | Exibe a lista analítica diária (pesos, datas e apontador que pesou). |
 | **RF-027** | Aprovação de Ciclo | Homologar semana na conferência avançando status para "em_conferencia". | Alta | Trava de escrita definitiva para fiscais de campo. |
 | **RF-028** | Filtro Bancário de Pagamentos | Segregar planilha de pagamentos em abas por instituição financeira. | Alta | Abas: Pix, Banco do Brasil, Itaú, Bradesco, Santander, etc. |
 | **RF-029** | Recibos em Lote | Exportar PDFs individuais de recibos bancários no formato Landscape A4. | Média | Gera e baixa de forma sequencial arquivos separados por instituição. |
@@ -225,7 +225,7 @@ Abaixo são detalhados **20 casos de uso** do sistema que mapeiam as interaçõe
 
 ### UC-003: Registrar Pesagem de Campo
 * **Objetivo:** Registrar o volume de latas de café colhido por um trabalhador.
-* **Atores:** Encarregado (Cabo), Gerente, Administrador.
+* **Atores:** Encarregado (Apontador), Gerente, Administrador.
 * **Fluxo Principal:**
   1. O fiscal acessa a tela "Registrar Colheita".
   2. O fiscal seleciona a data e busca o colaborador por ID, Nome ou CPF.
@@ -241,7 +241,7 @@ Abaixo são detalhados **20 casos de uso** do sistema que mapeiam as interaçõe
 
 ### UC-004: Cadastrar Colhedor On-The-Fly
 * **Objetivo:** Cadastrar um trabalhador diretamente no cafezal sem interromper a pesagem.
-* **Atores:** Encarregado (Cabo).
+* **Atores:** Encarregado (Apontador).
 * **Fluxo Principal:**
   1. O fiscal está na tela de pesagem de campo e digita um colaborador inexistente.
   2. O sistema exibe o botão "Cadastrar Rápido".
@@ -293,7 +293,7 @@ Abaixo são detalhados **20 casos de uso** do sistema que mapeiam as interaçõe
 * **Atores:** Administrador.
 * **Fluxo Principal:**
   1. O administrador acessa a aba "Equipe" em Configurações.
-  2. O administrador preenche Nome, CPF, nível de acesso (Admin ou Cabo) do usuário.
+  2. O administrador preenche Nome, CPF, nível de acesso (Admin ou Apontador) do usuário.
   3. O sistema gera automaticamente o login de e-mail e a senha inicial baseados no CPF.
   4. O administrador clica em "Cadastrar Usuário".
   5. O sistema persiste a conta na nuvem.
@@ -312,7 +312,7 @@ A governança do sistema é protegida por controle de acesso baseado em perfis (
     │
 [ FINANCEIRO ] ──► Exportação de Lotes Bancários e Quitação de Ciclos
     │
-[ CABO/FISCAL ] ─► Apenas Registrar Colheita e Cadastro On-the-fly (Mobile)
+[ APONTADOR/FISCAL ] ─► Apenas Registrar Colheita e Cadastro On-the-fly (Mobile)
 ```
 
 ### 9.1. Administrador (AD)
@@ -327,7 +327,7 @@ A governança do sistema é protegida por controle de acesso baseado em perfis (
 * **Restrições:** Não acessa a aba "Equipe" (usuários) nem a seção de backup/restauro em configurações.
 * **Módulos Acessados:** Dashboard, Colhedores, Registrar Colheita, Ciclos de Colheita, Conferência, Pagamentos e Relatórios.
 
-### 9.3. Encarregado / Cabo de Turma (CB)
+### 9.3. Encarregado / Apontador (CB)
 * **Responsabilidades:** Apontamento diário e pesagem física de latas de café no cafezal de forma rápida e segura.
 * **Permissões:** Registro de coletas (pesagens) e cadastro rápido *on-the-fly* de colhedores.
 * **Restrições:** Não visualiza Dashboard analítico, não visualiza abas de dados bancários de colaboradores, não acessa relatórios financeiros nem telas de parametrização de preço.
@@ -508,7 +508,7 @@ Corrigir Campos                      Gravar Banco e Gerar ID ──► [ Fim ]
 
 ### 14.2. Fluxo de Registro de Produção (Campo)
 ```
-[ Início ] ──► Cabo busca Colhedor por ID ──► Digita Latas (ex: 12.5)
+[ Início ] ──► Apontador busca Colhedor por ID ──► Digita Latas (ex: 12.5)
                                                      │
          ┌─────────────────── Não ───────────────────┤
          ▼                                           ▼ Sim
@@ -551,7 +551,7 @@ O painel administrativo apresenta métricas analíticas em tempo real:
 ## 16. Telas do Sistema
 
 ### 16.1. Tela de Login
-* **Objetivo:** Autenticar operadores e cabos.
+* **Objetivo:** Autenticar operadores e apontadores.
 * **Componentes:** Input e-mail, input senha com botão de visibilidade (ícone de olho), botão de login, mensagem de erro de credenciais.
 * **Validações:** Campos obrigatórios. E-mail com formato válido.
 

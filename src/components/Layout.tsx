@@ -162,7 +162,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
           {profile && (
             <div className="px-4 py-0.5 text-center">
               <p className="text-[8px] font-black text-secondary/30 uppercase tracking-widest leading-none mb-0.5">
-                {profile.role === 'admin' ? 'Coordenador Administrador' : 'Cabo de Turma'}
+                {profile.role === 'admin' ? 'Coordenador Administrador' : 'Apontador'}
               </p>
               <p className="text-[10px] font-black text-primary truncate leading-normal uppercase">{profile.nome}</p>
               <p className="text-[8px] text-secondary/40 truncate leading-none mt-0.5">{user?.email}</p>

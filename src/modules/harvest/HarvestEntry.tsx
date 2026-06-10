@@ -160,7 +160,7 @@ export const HarvestEntry: React.FC = () => {
     ]);
     setCollaborators(collabs);
     
-    // Filtra para que o cabo de turma veja apenas seus próprios lançamentos
+    // Filtra para que o apontador veja apenas seus próprios lançamentos
     let filteredRecent = recent;
     const currentUserId = profile?.id || user?.id;
     if (profile?.role === 'cabo' && currentUserId) {
