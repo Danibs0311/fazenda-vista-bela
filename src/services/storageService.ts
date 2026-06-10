@@ -284,19 +284,20 @@ export const storage = {
 
       if (navigator.onLine) {
         try {
-          const { error } = await supabase.rpc('delete_collaborator_by_id', {
-            target_id: id
-          });
+          const { error } = await supabase
+            .from('collaborators')
+            .delete()
+            .eq('id', id);
 
           if (error) {
-            if (error.message.includes('violates foreign key constraint') || error.message.includes('colheitas lançadas')) {
+            if (error.code === '23503' || error.message?.includes('violates foreign key constraint') || error.message?.includes('colheitas lançadas')) {
               throw new Error('Este colaborador possui colheitas lançadas e não pode ser excluído.');
             }
             console.warn('Database error while deleting collaborator, queuing deletion:', error.message);
             queueDeletion();
           }
         } catch (err: any) {
-          if (err.message?.includes('colheitas lançadas')) {
+          if (err.message?.includes('colheitas lançadas') || err.message?.includes('violates foreign key constraint')) {
             throw err;
           }
           console.warn('Network error while deleting collaborator, queuing deletion:', err);
@@ -763,7 +764,10 @@ export const storage = {
             console.log(`Syncing ${pendingCollabDeletions.length} pending collaborator deletions...`);
             const successfulDeletions: string[] = [];
             for (const id of pendingCollabDeletions) {
-              const { error } = await supabase.rpc('delete_collaborator_by_id', { target_id: id });
+              const { error } = await supabase
+                .from('collaborators')
+                .delete()
+                .eq('id', id);
               if (!error) {
                 successfulDeletions.push(id);
                 syncedAny = true;
