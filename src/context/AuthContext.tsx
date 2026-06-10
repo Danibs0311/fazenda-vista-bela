@@ -51,8 +51,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // PGRST116 means no rows were returned for .single()
         if (error.code === 'PGRST116' && authUser) {
           console.log('Profile not found for user. Creating on-the-fly...');
-          const isCaboEmail = authUser.email?.toLowerCase().endsWith('@fvb.com');
-          const determinedRole = authUser.user_metadata?.role || (isCaboEmail ? 'cabo' : 'admin');
+          const determinedRole = authUser.user_metadata?.role || 'admin';
           const newProfile: UserProfile = {
             id: userId,
             nome: authUser.user_metadata?.nome || authUser.email?.split('@')[0].toUpperCase() || 'COLABORADOR',
@@ -94,12 +93,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Fallback: Reconstruct profile from the cached Auth User metadata
       const fallbackUser = authUser || user;
       if (fallbackUser) {
-        const isCaboEmail = fallbackUser.email?.toLowerCase().endsWith('@fvb.com');
-        const defaultRole = isCaboEmail ? 'cabo' : 'admin';
         const fallbackProfile: UserProfile = {
           id: fallbackUser.id,
           nome: fallbackUser.user_metadata?.nome || fallbackUser.email?.split('@')[0].toUpperCase() || 'COLABORADOR',
-          role: (fallbackUser.user_metadata?.role as any) || defaultRole,
+          role: (fallbackUser.user_metadata?.role as any) || 'admin',
           status: 'active'
         };
         console.log('Successfully reconstructed fallback profile:', fallbackProfile);

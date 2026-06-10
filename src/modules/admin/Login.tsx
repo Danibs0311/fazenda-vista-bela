@@ -47,6 +47,12 @@ export const Login: React.FC = () => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              role: 'admin',
+              nome: email.split('@')[0].toUpperCase()
+            }
+          }
         });
 
         if (error) throw error;
